@@ -3,7 +3,6 @@ package org.inexas.notable.gui;
 import javafx.scene.canvas.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.*;
-import org.jetbrains.annotations.*;
 
 import java.io.*;
 
@@ -45,7 +44,7 @@ public class Sheet extends VBox {
 	}
 
 	private Font loadFont(
-			@NotNull final String pathname,
+			final String pathname,
 			final int size) {
 		final Font returnValue;
 

@@ -12,10 +12,11 @@
 
 	<artifactId>gui</artifactId>
 	<version>0.1</version>
+	<name>gui</name>
+
+	<packaging>jar</packaging>
 
 	<properties>
-		<maven.compiler.source>15</maven.compiler.source>
-		<maven.compiler.target>15</maven.compiler.target>
 		<javafx.version>15.0.1</javafx.version>
 	</properties>
 
@@ -34,7 +35,7 @@
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<version>RELEASE</version>
+			<version>20.1.0</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
