@@ -1,0 +1,165 @@
+{
+	"fontName": "Bravura",
+	"fontVersion": 1.39,
+	"engravingDefaults": {
+		"arrowShaftThickness": 0.16,
+		"barlineSeparation": 0.4,
+		"beamSpacing": 0.25,
+		"beamThickness": 0.5,
+		"bracketThickness": 0.5,
+		"dashedBarlineDashLength": 0.5,
+		"dashedBarlineGapLength": 0.25,
+		"dashedBarlineThickness": 0.16,
+		"hairpinThickness": 0.16,
+		"legerLineExtension": 0.4,
+		"legerLineThickness": 0.16,
+		"lyricLineThickness": 0.16,
+		"octaveLineThickness": 0.16,
+		"pedalLineThickness": 0.16,
+		"repeatBarlineDotSeparation": 0.16,
+		"repeatEndingLineThickness": 0.16,
+		"slurEndpointThickness": 0.1,
+		"slurMidpointThickness": 0.22,
+		"staffLineThickness": 0.13,
+		"stemThickness": 0.12,
+		"subBracketThickness": 0.16,
+		"textEnclosureThickness": 0.16,
+		"thickBarlineThickness": 0.5,
+		"thinBarlineThickness": 0.16,
+		"tieEndpointThickness": 0.1,
+		"tieMidpointThickness": 0.22,
+		"tupletBracketThickness": 0.16
+	},
+	"glyphBBoxes": {
+		"4stringTabClef": {
+			"bBoxNE": [
+				1.088,
+				2.016
+			],
+			"bBoxSW": [
+				-0.012,
+				-2.032
+			]
+		}
+	},
+	"glyphsWithAlternates": {
+		"4stringTabClef": {
+			"alternates": [
+				{
+					"codepoint": "U+F40C",
+					"name": "4stringTabClefTall"
+				},
+				{
+					"codepoint": "U+F40D",
+					"name": "4stringTabClefSerif"
+				}
+			]
+		},
+		"6stringTabClef": {
+			"alternates": [
+				{
+					"codepoint": "U+F40A",
+					"name": "6stringTabClefTall"
+				},
+				{
+					"codepoint": "U+F40B",
+					"name": "6stringTabClefSerif"
+				}
+			]
+		}
+	},
+	"glyphsWithAnchors": {
+		"accidental1CommaFlat": {
+			"cutOutSE": [
+				0.708,
+				-0.38
+			]
+		},
+		"accidental1CommaSharp": {
+			"cutOutNW": [
+				0.896,
+				1.512
+			],
+			"cutOutSW": [
+				0.112,
+				-0.928
+			]
+		}
+	},
+	"ligatures": {
+		"accidentalDoubleFlatParens": {
+			"codepoint": "U+F5D9",
+			"componentGlyphs": [
+				"accidentalParensLeft",
+				"accidentalDoubleFlat",
+				"accidentalParensRight"
+			],
+			"description": "Parenthesised double flat"
+		},
+		"accidentalDoubleSharpParens": {
+			"codepoint": "U+F5D8",
+			"componentGlyphs": [
+				"accidentalParensLeft",
+				"accidentalDoubleSharp",
+				"accidentalParensRight"
+			],
+			"description": "Parenthesised double sharp"
+		}
+	},
+	"optionalGlyphs": {
+		"4stringTabClefSerif": {
+			"classes": [
+				"clefs"
+			],
+			"codepoint": "U+F40D",
+			"description": "4-string tab clef (serif)"
+		},
+		"4stringTabClefTall": {
+			"classes": [
+				"clefs"
+			],
+			"codepoint": "U+F40C",
+			"description": "4-string tab clef (tall)"
+		}
+	},
+	"sets": {
+		"ss01": {
+			"description": "Smaller optical size for small staves",
+			"glyphs": [
+				{
+					"alternateFor": "accidentalFlat",
+					"codepoint": "U+F427",
+					"description": "Flat (for small staves)",
+					"name": "accidentalFlatSmall"
+				},
+				{
+					"alternateFor": "accidentalNatural",
+					"codepoint": "U+F428",
+					"description": "Natural (for small staves)",
+					"name": "accidentalNaturalSmall"
+				}
+			],
+			"type": "timeSigsLarge"
+		},
+		"ss10": {
+			"description": "Accidentals for figured bass with longer stems",
+			"glyphs": [
+				{
+					"alternateFor": "figbassDoubleFlat",
+					"codepoint": "U+F52B",
+					"description": "Figured bass double flat (longer stem)",
+					"name": "figbassDoubleFlatLongerStem"
+				},
+				{
+					"alternateFor": "figbassTripleSharp",
+					"codepoint": "U+F531",
+					"description": "Figured bass triple sharp (longer stem)",
+					"name": "figbassTripleSharpLongerStem"
+				}
+			],
+			"type": "figbassAccidentalsLongerStems"
+		}
+	}
+}
+
+

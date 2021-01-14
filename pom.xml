@@ -20,6 +20,8 @@ Root POM for Notable
 
 		<jdk.version>15</jdk.version>
 		<junit.version>5.7.0</junit.version>
+		<javafx.version>15.0.1</javafx.version>
+		<antlr.version>4.9.1</antlr.version>
 
 		<maven.compiler.source>${jdk.version}</maven.compiler.source>
 		<maven.compiler.target>${jdk.version}</maven.compiler.target>

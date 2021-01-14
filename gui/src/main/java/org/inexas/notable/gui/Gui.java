@@ -6,6 +6,7 @@ package org.inexas.notable.gui;
 import javafx.application.*;
 import javafx.scene.*;
 import javafx.stage.*;
+import org.inexas.notable.notation.render.*;
 
 public class Gui extends Application {
 
@@ -27,5 +28,4 @@ public class Gui extends Application {
 
 		sheet.draw();
 	}
-
 }

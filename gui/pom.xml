@@ -16,13 +16,9 @@
 
 	<packaging>jar</packaging>
 
-	<properties>
-		<javafx.version>15.0.1</javafx.version>
-	</properties>
-
 	<dependencies>
+		<!-- JavaFX-->
 		<dependency>
-			<!-- JavaFX-->
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
 			<version>${javafx.version}</version>
@@ -30,13 +26,13 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
-			<version>15.0.1</version>
+			<version>${javafx.version}</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.jetbrains</groupId>
-			<artifactId>annotations</artifactId>
-			<version>20.1.0</version>
+			<groupId>org.inexas.notable</groupId>
+			<artifactId>notation</artifactId>
+			<version>0.1</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
