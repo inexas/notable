@@ -9,7 +9,7 @@
           <option name="outputDir" value="$PROJECT_DIR$/notation/src/gen/java" />
           <option name="libDir" value="" />
           <option name="encoding" value="" />
-          <option name="pkg" value="org.inexas.notable.notation" />
+          <option name="pkg" value="org.inexas.notable.notation.parser" />
           <option name="language" value="" />
           <option name="generateVisitor" value="true" />
         </PerGrammarGenerationSettings>
