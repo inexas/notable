@@ -10,34 +10,30 @@
 		<version>0.1</version>
 	</parent>
 
-	<artifactId>gui</artifactId>
+	<artifactId>notation</artifactId>
 	<version>0.1</version>
-	<name>gui</name>
+	<name>notation</name>
 
 	<packaging>jar</packaging>
 
 	<properties>
-		<javafx.version>15.0.1</javafx.version>
+		<antlr4.visitor>true</antlr4.visitor>
+		<antlr4.listener>true</antlr4.listener>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<!-- JavaFX-->
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-fxml</artifactId>
-			<version>15.0.1</version>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4-runtime</artifactId>
+			<version>4.9.1</version>
 		</dependency>
 
 		<dependency>
-			<groupId>org.jetbrains</groupId>
-			<artifactId>annotations</artifactId>
-			<version>20.1.0</version>
+			<groupId>org.inexas.notable</groupId>
+			<artifactId>util</artifactId>
+			<version>0.1</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
+
 </project>
