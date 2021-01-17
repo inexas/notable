@@ -15,6 +15,9 @@ import java.util.*;
  * not.
  */
 public class Articulation extends Miki implements Annotation {
+	private final static Map<String, Articulation> lookupName = new HashMap<>();
+	private final static Map<String, Articulation> lookupMiki = new HashMap<>();
+
 	@SuppressWarnings("unused")
 	final static Articulation fermata = new Articulation(
 			"fermata",
@@ -57,8 +60,6 @@ public class Articulation extends Miki implements Annotation {
 			"Hold the note in question its full length (or longer, " +
 					"with slight rubato), or play the note slightly louder",
 			"_");
-	private final static Map<String, Articulation> lookupName = new HashMap<>();
-	private final static Map<String, Articulation> lookupMiki = new HashMap<>();
 	final String name;
 	final String description;
 	public final String miki;

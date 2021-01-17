@@ -9,6 +9,8 @@ import org.inexas.notable.notation.parser.*;
 import java.util.*;
 
 public class Dynamic extends Miki implements Annotation {
+	private final static Map<String, Dynamic> lookup = new HashMap<>();
+
 	@SuppressWarnings("unused")
 	final static Dynamic fff = new Dynamic("fff");
 	@SuppressWarnings("unused")
@@ -25,7 +27,6 @@ public class Dynamic extends Miki implements Annotation {
 	final static Dynamic pp = new Dynamic("pp");
 	@SuppressWarnings("unused")
 	final static Dynamic ppp = new Dynamic("ppp");
-	private final static Map<String, Dynamic> lookup = new HashMap<>();
 	public final String name;
 
 	private Dynamic(final String name) {
