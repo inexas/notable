@@ -1,8 +1,8 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import org.inexas.notable.notation.parser.*;
+import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
@@ -11,9 +11,14 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicParserTest {
+	private String process(final String string) {
+		final Score score = Score.fromString(string);
+		return score.toString();
+	}
+
 	@Test
 	void quickTest() {
-		assertEquals("", process("title\"\""));
+		assertEquals("C C C C", process("C C C C"));
 	}
 
 	@Test
@@ -49,7 +54,7 @@ public class BasicParserTest {
 		assertEquals("time 4/4\n", score.timeSignature.toString());
 		assertNull(score.pickupMeasure);
 		assertEquals("tempo \"Andante\"\n", score.tempo.toString());
-		assertEquals("key C", score.keySignature.toString());
+		assertEquals("", score.keySignature.toString());
 		assertEquals("staff grand\n", score.staff.toString());
 	}
 
@@ -189,7 +194,7 @@ public class BasicParserTest {
 
 	@SuppressWarnings("unused")
 	private void processFile(final String filename) throws Exception {
-		final InputStream stream = this.getClass().getResourceAsStream(filename);
+		final InputStream stream = getClass().getResourceAsStream(filename);
 		final CharStream cs = CharStreams.fromStream(stream);
 		final MusicLexer lexer = new MusicLexer(cs);
 		final CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -202,11 +207,6 @@ public class BasicParserTest {
 		if(messages.size() > 0) {
 			System.out.println(messages);
 		}
-	}
-
-	private String process(final String string) {
-		final Score score = Score.fromString(string);
-		return score.toString();
 	}
 
 	@Test
@@ -233,7 +233,7 @@ public class BasicParserTest {
 		assertEquals("\"Text\" C r r2 ||\n", process("\"Text\"C"));
 	}
 
-	void expectMessage(final String string, final String excerpt) {
+	private void expectMessage(final String string, final String excerpt) {
 		final Score score = Score.fromString(string);
 		assertTrue(score.messages.size() > 0);
 		assertTrue(score.messages.get(0).contains(excerpt));
@@ -257,5 +257,4 @@ public class BasicParserTest {
 	void testOverflow() {
 		expectMessage("A B C [t A B C]2", "reduced");
 	}
-
 }

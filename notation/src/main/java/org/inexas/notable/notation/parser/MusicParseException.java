@@ -2,7 +2,7 @@
  * Copyright (C) 2020 Inexas. All rights reserved
  */
 
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
 import org.antlr.v4.runtime.*;
 

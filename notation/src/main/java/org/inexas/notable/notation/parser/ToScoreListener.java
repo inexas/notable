@@ -12,7 +12,8 @@ import java.util.*;
 import java.util.regex.*;
 
 public class ToScoreListener extends MusicBaseListener {
-	private final static int noteCount = 12;
+	@SuppressWarnings("FieldCanBeLocal")
+	private final boolean DEBUG = false;
 	private final static Pattern keySignaturePattern = Pattern.compile("" +
 			"([A-G])" +         // Tonic
 			"([b#n])?" +        // Accidental
@@ -26,14 +27,16 @@ public class ToScoreListener extends MusicBaseListener {
 			"]" +               // Closing ]
 			"([0-9]+,*\\*?)?" + // Duration
 			"([._!fg]+)?");     // Articulation
+	// To collect Annotations for the current or next Event
 	private final Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
 	private final String filename;
 	private Phrase currentPhrase;
-	private Duration defaultDuration;
-	private int absoluteOctave;
+	/**
+	 * Set by an o8 command
+	 */
+	private int absoluteOctave = -1;
 	private int relativeOctave;
-	private int lastNoteIndex;
-	private int lastNoteOctave;
+	private int lastNote;
 	private Part currentPart;
 	private boolean settingDefaults = true;
 	/**
@@ -52,8 +55,7 @@ public class ToScoreListener extends MusicBaseListener {
 	private TimeSignature timeSignature;
 	private List<Event> events;
 	private boolean inNoteGroup;
-	@SuppressWarnings("FieldCanBeLocal")
-	private final boolean debug = false;
+	private Duration currentDuration;
 	/**
 	 * This is used to save the state of the duration when a Note group is being
 	 * processed. For example, in the miki "C4* [t C E G]8 A" the duration is defaulted
@@ -63,7 +65,7 @@ public class ToScoreListener extends MusicBaseListener {
 	 */
 	private Duration saveDuration;
 	public final Score score = new Score();
-	public final List<String> messages = score.messages;
+	final List<String> messages = score.messages;
 
 	public ToScoreListener(final String filename) {
 		this.filename = filename;
@@ -76,9 +78,8 @@ public class ToScoreListener extends MusicBaseListener {
 		events = currentPhrase.events;
 		// Set the defaults...
 		setTimeSignature(TimeSignature.DEFAULT);
-		defaultDuration = Duration.quarter;
-		lastNoteIndex = 0;
-		lastNoteOctave = 4;
+		currentDuration = Duration.quarter;
+		lastNote = Note.C4;
 	}
 
 	@Override
@@ -178,7 +179,7 @@ public class ToScoreListener extends MusicBaseListener {
 		// time: TIME ( COUNT SLASH COUNT | COMMON | CUT ) ;
 		final int count = ctx.getChildCount();
 		final TimeSignature timeSignature;
-		if (count == 4) {
+		if(count == 4) {
 			timeSignature = new TimeSignature(
 					Integer.parseInt(ctx.getChild(1).getText()),
 					Integer.parseInt(ctx.getChild(3).getText()));
@@ -186,7 +187,7 @@ public class ToScoreListener extends MusicBaseListener {
 			timeSignature = ctx.getStop().getType() == MusicParser.CUT ?
 					TimeSignature.CUT : TimeSignature.COMMON;
 		}
-		if (settingDefaults) {
+		if(settingDefaults) {
 			score.timeSignature = timeSignature;
 		} else {
 			annotate(timeSignature);
@@ -219,19 +220,28 @@ public class ToScoreListener extends MusicBaseListener {
 
 	@Override
 	public void enterOctave(final MusicParser.OctaveContext ctx) {
-		// E.g. o[1-8] or > on <
+		// E.g. o[1-8] or + or -
 		final String text = ctx.getStop().getText();
 		if(ctx.children.size() == 1) {
-			// Relative modifier
-			relativeOctave = text.charAt(0) == '>' ? 1 : -1;
-			if(absoluteOctave > 0) {
-				messages.add("Possibly some confusion over octaves");
-				absoluteOctave = 0;
+			// Relative octaves
+			// We have ('+'+ | '-'+), may also be "+ + +"
+			final int direction = text.charAt(0) == '+' ? 1 : -1;
+			if(direction > 0) {
+				if(absoluteOctave >= 0 || relativeOctave < 0) {
+					messages.add("Possible confusion over octaves?");
+				}
+				relativeOctave += text.length();
+			} else { // direction < 0;
+				if(absoluteOctave >= 0 || relativeOctave > 0) {
+					messages.add("Possible confusion over octaves?");
+				}
+				relativeOctave -= text.length();
 			}
 		} else {
+			// Absolute octave
 			absoluteOctave = Integer.parseInt(text);
 			if(relativeOctave != 0) {
-				messages.add("Possibly some confusion over octaves");
+				messages.add("Possible confusion over octaves?");
 				relativeOctave = 0;
 			}
 		}
@@ -305,14 +315,14 @@ public class ToScoreListener extends MusicBaseListener {
 
 	@Override
 	public void enterTuplet(final MusicParser.TupletContext ctx) {
-		saveDuration = defaultDuration;
+		saveDuration = currentDuration;
 		events = new ArrayList<>();
 		inNoteGroup = true;
 	}
 
 	@Override
 	public void exitTuplet(final MusicParser.TupletContext ctx) {
-		defaultDuration = saveDuration;
+		currentDuration = saveDuration;
 		final String text = ctx.getStop().getText();
 		Duration duration;
 		if(text.length() > 1) {
@@ -329,15 +339,15 @@ public class ToScoreListener extends MusicBaseListener {
 			if(group1 != null) {
 				duration = Duration.getByMiki(group1);
 				if(!duration.setDefault) {
-					saveDuration = defaultDuration;
+					saveDuration = currentDuration;
 				}
-				defaultDuration = duration;
+				currentDuration = duration;
 			} else {
 				// No duration but an erroneous articulation
-				duration = defaultDuration;
+				duration = currentDuration;
 			}
 		} else {
-			duration = defaultDuration;
+			duration = currentDuration;
 		}
 		final int total = clicksSoFar + duration.clicks;
 		if(total > measureSize) {
@@ -355,17 +365,17 @@ public class ToScoreListener extends MusicBaseListener {
 	@Override
 	public void enterNamedChord(final MusicParser.NamedChordContext ctx) {
 		final String text = ctx.getStop().getText();
-		final NamedChord namedChord = NamedChord.parse(text, defaultDuration, annotationMap);
+		final NamedChord namedChord = NamedChord.parse(text, currentDuration, annotationMap);
 		final Event event = account(namedChord, ctx);
 		events.add(event);
 		if(namedChord.duration.setDefault) {
-			defaultDuration = namedChord.duration;
+			currentDuration = namedChord.duration;
 		}
 	}
 
 	@Override
 	public void enterEveryRule(final ParserRuleContext ctx) {
-		if(debug) {
+		if(DEBUG) {
 			String name = ctx.getClass().getSimpleName();
 			name = name.substring(0, name.length() - 7);
 			if(!"Command".contains(name)) {
@@ -392,11 +402,11 @@ public class ToScoreListener extends MusicBaseListener {
 		// Group 1: Duration...
 		final String group1 = matcher.group(1);
 		if(group1 == null) {
-			duration = defaultDuration;
+			duration = currentDuration;
 		} else {
 			duration = Duration.getByMiki(group1);
 			if(duration.setDefault) {
-				defaultDuration = duration;
+				currentDuration = duration;
 			}
 		}
 		// todo Take care of duration overflow
@@ -409,7 +419,7 @@ public class ToScoreListener extends MusicBaseListener {
 		}
 
 		result = new Chord(duration, events, annotationMap);
-		result = (Chord)account(result, ctx);
+		result = (Chord) account(result, ctx);
 
 		return result;
 	}
@@ -418,6 +428,7 @@ public class ToScoreListener extends MusicBaseListener {
 		final Event event;
 
 		final String input = ctx.stop.getText();
+		// Split up the Event into its parts..
 		final Matcher matcher = notePattern.matcher(input);
 		if(!matcher.matches()) {
 			throw new RuntimeException("Recognizer/event parser mismatch");
@@ -447,11 +458,11 @@ public class ToScoreListener extends MusicBaseListener {
 		final Duration duration;
 		final String group3 = matcher.group(3);
 		if(group3 == null) {
-			duration = defaultDuration;
+			duration = currentDuration;
 		} else {
 			duration = Duration.getByMiki(group3);
 			if(duration.setDefault) {
-				defaultDuration = duration;
+				currentDuration = duration;
 			}
 		}
 
@@ -468,15 +479,15 @@ public class ToScoreListener extends MusicBaseListener {
 		} else if(c == 'X') {
 			event = new Ghost(duration, annotationMap);
 		} else {
-			final int octave = calculateOctave();
-			event = new Note(tonic, octave, duration, annotationMap);
+			final int number = Note.next(
+					lastNote,
+					absoluteOctave, relativeOctave,
+					tonic);
+			event = new Note(tonic, number, duration, annotationMap);
 		}
 
 		if(event instanceof Note) {
-			// It's a note so remember the index and octave
-			final Note note = (Note)event;
-			lastNoteIndex = note.index;
-			lastNoteOctave = note.octave;
+			lastNote = ((Note) event).number;
 		}
 
 		// Have we reached the end of a measure?
@@ -575,6 +586,7 @@ public class ToScoreListener extends MusicBaseListener {
 
 		final Matcher matcher = keySignaturePattern.matcher(input);
 		String tonic;
+		@SuppressWarnings("unused")
 		String mode = null;
 		if(!matcher.matches()) {
 			throw new RuntimeException("Recognizer/event parser mismatch");
@@ -597,10 +609,11 @@ public class ToScoreListener extends MusicBaseListener {
 		// Group 3: Mode...
 		final String group3 = matcher.group(3);
 		if(group3 != null) {
+			//noinspection UnusedAssignment
 			mode = group3;
 		}
 
-		result = KeySignature.getKeySignature(tonic, mode);
+		result = KeySignature.map.get(tonic);
 
 		return result;
 	}
@@ -614,49 +627,6 @@ public class ToScoreListener extends MusicBaseListener {
 		if(result.length() == 0) {
 			result = null;
 		}
-
-		return result;
-	}
-
-	private int calculateOctave() {
-		int result;
-
-		if(lastNoteOctave > 0) {
-			// The octave was explicitly set in the tonic, e.g. "B3"
-			result = lastNoteOctave;
-		} else if(absoluteOctave > 0) {
-			// The octave was explicitly set as an annotation, e.g. "o3"
-			result = absoluteOctave;
-		} else {
-			// Else calculateOctave it
-			result = lastNoteOctave;
-			// Find nearest note to last...
-			int difference = (lastNoteIndex + noteCount - lastNoteIndex) % noteCount;
-			if(difference > 5) {
-				difference -= noteCount;
-			}
-
-			// Have we crossed an octave...
-			final int offset = lastNoteIndex + difference;
-			if(offset > 11) {
-				result++;
-			} else if(offset < 0) {
-				result--;
-			}
-
-			// Add any relativeOctave adjustments to apply, e.g. ">A"
-			result += relativeOctave;
-		}
-
-		// Check in bounds
-		if(result < 1) {
-			result = 1;
-		} else if(result > 8) {
-			result = 8;
-		}
-
-		// Reset
-		absoluteOctave = relativeOctave = 0;
 
 		return result;
 	}

@@ -18,13 +18,13 @@ public class Score extends Miki implements Visited {
 	public final static String defaultTitle = "Untitled";
 	public final static String defaultComposer = "Unknown composer";
 	public final List<String> messages = new ArrayList<>();
-	final LinkedHashMap<String, Part> partMap = new LinkedHashMap<>();
+	public final LinkedHashMap<String, Part> partMap = new LinkedHashMap<>();
 	public String title = defaultTitle;
 	public String composer = defaultComposer;
 	public String header;
 	public PickupMeasure pickupMeasure;
-	public Staff staff = Staff.grand;
-	public KeySignature keySignature = KeySignature.DEFAULT;
+	public Staff staff = Staff.treble;
+	public KeySignature keySignature = KeySignature.C;
 	/**
 	 * The default and time signature for the Score. This also controls the
 	 * default Duration, so a time signature of 1/4 will set the starting
@@ -32,6 +32,7 @@ public class Score extends Miki implements Visited {
 	 */
 	public TimeSignature timeSignature = TimeSignature.DEFAULT;
 	public Tempo tempo = Tempo.DEFAULT;
+
 	public Score() {
 		// Set up implicit Parts and Phrases which will be replaced
 		// if explicit parts/phrases are defined afterwards

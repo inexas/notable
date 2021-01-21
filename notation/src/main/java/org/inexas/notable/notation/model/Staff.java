@@ -10,25 +10,26 @@ import java.util.*;
 
 public class Staff extends Miki {
 	private final static Map<String, Staff> lookup = new HashMap<>();
-	public static Staff treble = new Staff("treble");
-	public static Staff alto = new Staff("alto");
-	public static Staff tenor = new Staff("tenor");
-	public static Staff bass = new Staff("bass");
-	public static Staff grand = new Staff("grand");
-	public final static Staff DEFAULT = grand;
+	public static Staff treble = new Staff("treble", Note.E4);
+	public static Staff bass = new Staff("bass", Note.G2);
+	public static Staff alto = new Staff("alto", Note.F3);
+	public static Staff tenor = new Staff("tenor", Note.D3);
+	public static Staff grand = new Staff("grand", Note.G2);
 
 	static {
 		lookup.put("treble", treble);
+		lookup.put("bass", bass);
 		lookup.put("alto", alto);
 		lookup.put("tenor", tenor);
-		lookup.put("bass", bass);
 		lookup.put("grand", grand);
 	}
 
 	public final String name;
+	final int baseNote;
 
-	private Staff(final String name) {
+	public Staff(final String name, final int baseNote) {
 		this.name = name;
+		this.baseNote = baseNote;
 	}
 
 	/**
@@ -46,7 +47,7 @@ public class Staff extends Miki {
 	}
 
 	@Override
-	public void accept(final Visitor visitor) {
+	public void accept(@SuppressWarnings("ClassEscapesDefinedScope") final Visitor visitor) {
 		visitor.visit(this);
 	}
 }

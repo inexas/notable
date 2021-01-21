@@ -4,6 +4,7 @@ package org.inexas.notable.notation.render;
 import javafx.scene.text.*;
 
 import java.io.*;
+import java.util.*;
 
 /**
  * Metrics stores the engraving defaults used for rendering.
@@ -13,62 +14,46 @@ import java.io.*;
 @SuppressWarnings("unused")
 public class Metrics {
 
-	// Page dimensions
+	// Load engraving defaults...
 
-	/**
-	 * Width of paper in pixels
-	 */
-	final double paperWidth = 1000;
-	/**
-	 * Side margin width of paper in pixels
-	 */
-	final double sideMargins = 50;      // Left and right
-	/**
-	 * The height of space between staff lines. Staff lines don't occupy
-	 * extra space on the staff, they just overlay the line that joins two
-	 * spaces.
-	 */
-	final double staffSpaceHeight = 10;
 	/**
 	 * The thickness of the line used for the shaft of an arrow
 	 */
-	final double arrowShaftThickness = 0.16;
+	final double arrowShaftThickness;
 	/**
 	 * The default distance between multiple thin barlines when locked
 	 * together, e.g. between two thin barlines making a double barline,
 	 * measured from the right-hand edge of the left barline to the
 	 * left-hand edge of the right barline.
 	 */
-	final double barlineSeparation = 0.4;
+	private final double barlineSeparation;
 	/**
 	 * The distance between the inner edge of the primary and outer
 	 * edge of subsequent secondary beams e.g. between beams on 16th notes
 	 */
-	final double beamSpacing = 0.25;
+	private final double beamSpacing;
 
-
-	// Font defaults
 	/**
 	 * The thickness of a beam
 	 */
-	final double beamThickness = 0.5;
+	private final double beamThickness;
 	/**
 	 * The thickness of the vertical line of a bracket grouping
 	 * staves together
 	 */
-	final double bracketThickness = 0.5;
+	private final double bracketThickness;
 	/**
 	 * The length of the dashes to be used in a dashed barline
 	 */
-	final double dashedBarlineDashLength = 0.5;
+	private final double dashedBarlineDashLength;
 	/**
 	 * The length of the gap between dashes in a dashed barline
 	 */
-	final double dashedBarlineGapLength = 0.25;
+	private final double dashedBarlineGapLength;
 	/**
 	 * The thickness of a dashed barline
 	 */
-	final double dashedBarlineThickness = 0.16;
+	private final double dashedBarlineThickness;
 	/**
 	 * The thickness of the horizontal line drawn between two
 	 * vertical lines, known as the H-bar, in a
@@ -82,78 +67,78 @@ public class Metrics {
 	/**
 	 * The thickness of a crescendo/diminuendo hairpin
 	 */
-	final double hairpinThickness = 0.16;
+	private final double hairpinThickness;
 	/**
 	 * The amount by which a leger line should extend either side
 	 * of a notehead, scaled proportionally with the notehead's
 	 * size, e.g. when scaled down as a grace note - notes may
 	 * vary in width so how much wider than the note
 	 */
-	final double legerLineExtension = 0.4;
+	private final double legerLineExtension;
 	/**
 	 * The thickness of a leger line (normally somewhat thicker
 	 * than a staff line)
 	 */
-	final double legerLineThickness = 0.16;
+	private final double legerLineThickness;
 	/**
 	 * The thickness of the lyric extension line to indicate a
 	 * melisma in vocal music
 	 */
-	final double lyricLineThickness = 0.16;
+	private final double lyricLineThickness;
 	/**
 	 * The thickness of the dashed line used for an octave line
 	 */
-	final double octaveLineThickness = 0.16;
+	private final double octaveLineThickness;
 	/**
 	 * The thickness of the line used for piano pedaling
 	 */
-	final double pedalLineThickness = 0.16;
+	private final double pedalLineThickness;
 	/**
 	 * The default horizontal distance between the dots and the inner
 	 * barline of a repeat barline, measured from the edge of the dots
 	 * to the edge of the barline.
 	 */
-	final double repeatBarlineDotSeparation = 0.16;
+	private final double repeatBarlineDotSeparation;
 	/**
 	 * The thickness of the brackets drawn to indicate repeat endings
 	 */
-	final double repeatEndingLineThickness = 0.16;
+	private final double repeatEndingLineThickness;
 	/**
 	 * The thickness of the end of a slur
 	 */
-	final double slurEndpointThickness = 0.1;
+	private final double slurEndpointThickness;
 	/**
 	 * The thickness of the mid-point of a slur (i.e. its thickest point)
 	 */
-	final double slurMidpointThickness = 0.22;
+	private final double slurMidpointThickness;
 	/**
 	 * The thickness of each staff line
 	 */
-	final double staffLineThickness = 0.13;
+	final double staffLineThickness;
 	/**
 	 * The thickness of a stem
 	 */
-	final double stemThickness = 0.12;
+	private final double stemThickness;
 	/**
 	 * The thickness of the vertical line of a sub-bracket grouping
 	 * staves belonging to the same instrument together
 	 */
-	final double subBracketThickness = 0.16;
+	private final double subBracketThickness;
 	/**
 	 * The thickness of a box drawn around text instructions (e.g.
 	 * rehearsal marks)
 	 */
-	final double textEnclosureThickness = 0.16;
+	private final double textEnclosureThickness;
 	/**
 	 * The thickness of a thick barline, e.g. in a final barline
 	 * or a repeat barline
 	 */
-	final double thickBarlineThickness = 0.5;
+	private final double thickBarlineThickness;
 	/**
 	 * The thickness of a thin barline, e.g. a normal barline, or
 	 * each of the lines of a double barline
 	 */
-	final double thinBarlineThickness = 0.16;
+	private final double thinBarlineThickness;
 	/**
 	 * The default distance between a pair of thin and thick
 	 * barlines when locked together, e.g. between the thin and
@@ -167,32 +152,87 @@ public class Metrics {
 	/**
 	 * The thickness of the end of a tie
 	 */
-	final double tieEndpointThickness = 0.1;
+	private final double tieEndpointThickness;
 	/**
 	 * The thickness of the mid-point of a tie
 	 */
-	final double tieMidpointThickness = 0.22;
+	private final double tieMidpointThickness;
 	/**
 	 * The thickness of the brackets drawn either side of tuplet
 	 * numbers
 	 */
-	final double tupletBracketThickness = 0.16;
-	final Font bravura;
-	final Font bravuraText;
+	private final double tupletBracketThickness;
+
+
+	// Page dimensions...
+
 	private final double aspectRatio = 1.414;   // A4 aspect ratio
+	/**
+	 * Width of paper in pixels
+	 */
+	final double paperWidth = 1000;
 	/**
 	 * Height of paper in pixels
 	 */
 	final double paperHeight = paperWidth * aspectRatio;
 	/**
+	 * Side margin width of paper in pixels
+	 */
+	final double sideMargin = 50;      // Left and right
+	/**
 	 * Top and bottom margins width of paper in pixels
 	 */
-	final double topAndBottomMargin = (int) (sideMargins * aspectRatio);
+	final double topAndBottomMargin = (int) (sideMargin * aspectRatio);
+	/**
+	 * The height of space between staff lines. Staff lines don't occupy
+	 * extra space on the staff, they just overlay the line that joins two
+	 * spaces.
+	 */
+	final double staffSpaceHeight = 10;
 
-	public Metrics() {
-		// todo These need to be separated out
-		bravura = loadFont("Bravura.otf", 30);
-		bravuraText = loadFont("BravuraText.otf", 32);
+	// Font defaults
+	final Font bravura;
+	private final Font bravuraText;
+
+	public final static Metrics instance = new Metrics();
+
+	private Metrics() {
+		// Load fonts
+		bravura = loadFont("Bravura.otf", 36);
+		bravuraText = loadFont("BravuraText.otf", 36);
+
+		assert "Bravura".equals(FontMetadataFile.instance.fontName);
+
+		// Load engraving defaults...
+
+		final Map<String, Double> engravingDefaults = FontMetadataFile.instance.engravingDefaults;
+		arrowShaftThickness = engravingDefaults.get("arrowShaftThickness");
+		barlineSeparation = engravingDefaults.get("barlineSeparation");
+		beamSpacing = engravingDefaults.get("beamSpacing");
+		beamThickness = engravingDefaults.get("beamThickness");
+		bracketThickness = engravingDefaults.get("bracketThickness");
+		dashedBarlineDashLength = engravingDefaults.get("dashedBarlineDashLength");
+		dashedBarlineGapLength = engravingDefaults.get("dashedBarlineGapLength");
+		dashedBarlineThickness = engravingDefaults.get("dashedBarlineThickness");
+		hairpinThickness = engravingDefaults.get("hairpinThickness");
+		legerLineExtension = engravingDefaults.get("legerLineExtension");
+		legerLineThickness = engravingDefaults.get("legerLineThickness");
+		lyricLineThickness = engravingDefaults.get("lyricLineThickness");
+		octaveLineThickness = engravingDefaults.get("octaveLineThickness");
+		pedalLineThickness = engravingDefaults.get("pedalLineThickness");
+		repeatBarlineDotSeparation = engravingDefaults.get("repeatBarlineDotSeparation");
+		repeatEndingLineThickness = engravingDefaults.get("repeatEndingLineThickness");
+		slurEndpointThickness = engravingDefaults.get("slurEndpointThickness");
+		slurMidpointThickness = engravingDefaults.get("slurMidpointThickness");
+		staffLineThickness = engravingDefaults.get("staffLineThickness");
+		stemThickness = engravingDefaults.get("stemThickness");
+		subBracketThickness = engravingDefaults.get("subBracketThickness");
+		textEnclosureThickness = engravingDefaults.get("textEnclosureThickness");
+		thickBarlineThickness = engravingDefaults.get("thickBarlineThickness");
+		thinBarlineThickness = engravingDefaults.get("thinBarlineThickness");
+		tieEndpointThickness = engravingDefaults.get("tieEndpointThickness");
+		tieMidpointThickness = engravingDefaults.get("tieMidpointThickness");
+		tupletBracketThickness = engravingDefaults.get("tupletBracketThickness");
 	}
 
 	private Font loadFont(final String pathName, final int size) {
@@ -208,4 +248,7 @@ public class Metrics {
 
 		return returnValue;
 	}
+
+	final static String gClef = "\uE050";
+	final static String fClef = "\uE062";
 }

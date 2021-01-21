@@ -45,7 +45,8 @@ tempo: TEMPO ( '1' '/' COUNT '=' COUNT| STRING_LITERAL ) ;
 
 key: KEY NOTE ;
 
-time: TIME ( COUNT ('+' COUNT)* SLASH COUNT | COMMON | CUT ) ;
+// todo The Q was a +, I should be able to rewrite it so it works
+time: TIME ( COUNT ('Q' COUNT)* SLASH COUNT | COMMON | CUT ) ;
 
 /**
  * Pickup measure, e.g. pickup 1/4 which is one 1/4 notes
@@ -63,8 +64,8 @@ line: LINE ;
 
 octave
 	:	OCTAVE COUNT
-	|	OCTAVE_UP+
-	|	OCTAVE_DOWN+
+	|	OCTAVE_UP
+	|	OCTAVE_DOWN
 ;
 
 dynamic: DYNAMIC ;
@@ -193,9 +194,9 @@ SLASH: '/' ;
 
 OCTAVE: 'o' ;
 
-OCTAVE_UP: '+' ;
+OCTAVE_UP: '+'+ ;
 
-OCTAVE_DOWN: '-' ;
+OCTAVE_DOWN: '-'+ ;
 
 START_TUPLET: '[t' ;
 
@@ -239,9 +240,9 @@ fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) ','* ;
 
 fragment Tonic: [A-G] ;
 
-fragment RestName: [r] ;
+fragment RestName: [R] ;
 
-fragment GhostName: [x] ;
+fragment GhostName: [X] ;
 
 fragment Accidental: [#bn] ;
 

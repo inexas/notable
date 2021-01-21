@@ -6,6 +6,7 @@ package org.inexas.notable.gui;
 import javafx.application.*;
 import javafx.scene.*;
 import javafx.stage.*;
+import org.inexas.notable.notation.model.*;
 import org.inexas.notable.notation.render.*;
 
 public class Gui extends Application {
@@ -22,7 +23,8 @@ public class Gui extends Application {
 		primaryStage.setX(100);
 		primaryStage.setY(200);
 
-		final Sheet sheet = new Sheet();
+		final Score score = Score.fromString("C C G G | A8* B C A G2 | F4* F E E | D D C2");
+		final Sheet sheet = new Sheet(score);
 		primaryStage.setScene(new Scene(sheet, 800, 500));
 		primaryStage.show();
 

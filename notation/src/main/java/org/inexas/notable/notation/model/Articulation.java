@@ -19,49 +19,49 @@ public class Articulation extends Miki implements Annotation {
 	private final static Map<String, Articulation> lookupMiki = new HashMap<>();
 
 	@SuppressWarnings("unused")
-	final static Articulation fermata = new Articulation(
+	public final static Articulation fermata = new Articulation(
 			"fermata",
 			"The note should be prolonged beyond the normal duration",
 			"f");
 	@SuppressWarnings("unused")
-	final static Articulation glissando = new Articulation(
+	public final static Articulation glissando = new Articulation(
 			"glissando",
 			"A glide from one pitch to another",
 			"g");
 	@SuppressWarnings("unused")
-	final static Articulation legato = new Articulation(
+	public final static Articulation legato = new Articulation(
 			"legato",
 			"Indicates musical notes are to be played or sung smoothly and connected",
 			"");
 	@SuppressWarnings("unused")
-	final static Articulation marcato = new Articulation(
+	public final static Articulation marcato = new Articulation(
 			"marcato",
 			"Indicates a short note, long chord, or medium passage " +
 					"to be played louder or more forcefully than surrounding music",
 			"!");
 	@SuppressWarnings("unused")
-	final static Articulation marcatissimo = new Articulation(
+	public final static Articulation marcatissimo = new Articulation(
 			"marcatissimo",
 			"Very marcato",
 			"!!");
 	@SuppressWarnings("unused")
-	final static Articulation staccato = new Articulation(
+	public final static Articulation staccato = new Articulation(
 			"staccato",
 			"Signifies a note of shortened duration or detached (not legato)",
 			".");
 	@SuppressWarnings("unused")
-	final static Articulation staccatissimo = new Articulation(
+	public final static Articulation staccatissimo = new Articulation(
 			"staccatissimo",
 			"Very staccato",
 			"..");
 	@SuppressWarnings("unused")
-	final static Articulation tenuto = new Articulation(
+	public final static Articulation tenuto = new Articulation(
 			"tenuto",
 			"Hold the note in question its full length (or longer, " +
 					"with slight rubato), or play the note slightly louder",
 			"_");
 	final String name;
-	final String description;
+	public final String description;
 	public final String miki;
 	Articulation(final String name, final String description, final String miki) {
 		this.name = name;
@@ -72,7 +72,7 @@ public class Articulation extends Miki implements Annotation {
 	}
 
 	@SuppressWarnings("unused")
-	static Articulation getByName(final String name) {
+	public static Articulation getByName(final String name) {
 		return lookupName.get(name);
 	}
 

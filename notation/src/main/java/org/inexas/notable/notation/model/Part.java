@@ -15,7 +15,7 @@ public class Part extends Miki implements Visited {
 	public final static String IMPLICIT = "#IMPLICIT#";
 	public final String name;
 	public final Score score;
-	final LinkedHashMap<String, Phrase> phraseMap = new LinkedHashMap<>();
+	public final LinkedHashMap<String, Phrase> phraseMap = new LinkedHashMap<>();
 	public Staff staff;
 
 	Part(final String name, final Score score) {

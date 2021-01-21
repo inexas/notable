@@ -14,20 +14,20 @@ import java.util.*;
 public abstract class Event extends Miki implements Visited {
 	public final String name;
 	public final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+	// todo This should be final
 	public Duration duration;
 
 	Event(
 			final String name,
 			final Duration duration,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
-		assert duration != null;
+		assert name != null : "name cannot be null";
+		assert duration != null : "duration cannot be null";
+		assert annotations != null : "annotations cannot be null but may be empty";
+
 		this.name = name;
 		this.duration = duration;
 		this.annotations.putAll(annotations);
-		if(annotations.size() != this.annotations.size()) {
-			System.out.println("What");
-		}
-		annotations.clear();
 	}
 
 	Event(final Duration duration) {
@@ -39,6 +39,7 @@ public abstract class Event extends Miki implements Visited {
 	Event(final Event toCopy) {
 		name = toCopy.name;
 		duration = toCopy.duration;
+		// todo Copy annotations? If not, why not
 	}
 
 	public void add(final Annotation annotation) {

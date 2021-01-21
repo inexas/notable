@@ -9,4 +9,7 @@ module org.inexas.notable.notation {
 
 	exports org.inexas.notable.notation.model;
 	exports org.inexas.notable.notation.render;
+	exports org.inexas.notable.notation.parser;
+
+	opens org.inexas.notable.notation.parser;
 }

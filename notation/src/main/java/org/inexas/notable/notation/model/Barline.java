@@ -21,18 +21,18 @@ public class Barline extends Miki implements Annotation {
 			"End repeat",
 			":|", ":|", "|");
 	@SuppressWarnings("unused")
-	final static Barline beginEndRepeat = new Barline(
+	public final static Barline beginEndRepeat = new Barline(
 			"Begin-end repeat",
 			":|:", ":|", "|:");
 	public final static Barline doubleBar = new Barline(
 			"Double",
 			"||", "||", "||");
 	@SuppressWarnings("unused")
-	final static Barline thinThick = new Barline(
+	public final static Barline thinThick = new Barline(
 			"Double",
 			"-|", "-|", "-|");
 	@SuppressWarnings("unused")
-	final static Barline thickThin = new Barline(
+	public final static Barline thickThin = new Barline(
 			"Double",
 			"|-", "|-", "|-");
 	final String name;

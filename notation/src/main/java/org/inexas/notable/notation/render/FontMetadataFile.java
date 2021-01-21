@@ -4,6 +4,8 @@ import java.util.*;
 
 public class FontMetadataFile extends MetadataFile {
 	public static final String filename = "bravura_metadata.json";
+	public static final FontMetadataFile instance =
+			FontMetadataFile.load(FontMetadataFile.class, filename);
 
 	// Body of file starts
 	// Font name
@@ -14,26 +16,19 @@ public class FontMetadataFile extends MetadataFile {
 
 	// engravingDefaults
 	public Map<String, Double> engravingDefaults;
-	// GlyphBBoxes
+
+	// Glyph Bounding Boxes
 	public Map<String, Map<String, Double[]>> glyphBBoxes;
-	public Map<String, Map<String, List<Alternate>>> glyphsWithAlternates;
-	// Glyphs With Anchors
-	public Map<String, Map<String, Double[]>> glyphsWithAnchors;
-	public Map<String, Ligature> ligatures;
-	public Map<String, OptionalGlyph> optionalGlyphs;
-	public Map<String, Variation> sets;
 
-	public void printEngravingDefaults() {
-		for(final Map.Entry<String, Double> entry : engravingDefaults.entrySet()) {
-			System.out.println(entry.getKey() + ": " + entry.getValue());
-		}
-	}
-
-	// Glyphs with alternates
+	// Glyphs With Alternates
 	public static class Alternate {
 		public String codepoint;
 		public String name;
 	}
+	public Map<String, Map<String, List<Alternate>>> glyphsWithAlternates;
+
+	// Glyphs With Anchors
+	public Map<String, Map<String, Double[]>> glyphsWithAnchors;
 
 	// Ligatures
 	public static class Ligature {
@@ -41,6 +36,7 @@ public class FontMetadataFile extends MetadataFile {
 		public String[] componentGlyphs;
 		public String description;
 	}
+	public Map<String, Ligature> ligatures;
 
 	// Optional Glyphs
 	public static class OptionalGlyph {
@@ -48,18 +44,25 @@ public class FontMetadataFile extends MetadataFile {
 		public String codepoint;
 		public String description;
 	}
+	public Map<String, OptionalGlyph> optionalGlyphs;
 
 	// Sets
-	public static class Glyph {
+	public static class GlyphVariation {
 		public String alternateFor;
 		public String codepoint;
 		public String description;
 		public String name;
 	}
-
 	public static class Variation {
 		public String description;
-		public Glyph[] glyphs;
+		public GlyphVariation[] glyphs;
 		public String type;
+	}
+	public Map<String, Variation> sets;
+
+	public void printEngravingDefaults() {
+		for(final Map.Entry<String, Double> entry : engravingDefaults.entrySet()) {
+			System.out.println(entry.getKey() + ": " + entry.getValue());
+		}
 	}
 }

@@ -12,14 +12,11 @@ public class MetadataTest {
 
 	@Test
 	public void testFontMetadataFile() {
-		final FontMetadataFile file = FontMetadataFile.load(
-				FontMetadataFile.class,
-				FontMetadataFile.filename);
+		final FontMetadataFile file = FontMetadataFile.instance;
 		assertEquals("Bravura", file.fontName);
 		assertEquals("1.39", file.fontVersion);
 		assertEquals(27, file.engravingDefaults.size());
 		assertEquals(0.16, file.engravingDefaults.get("arrowShaftThickness"));
-		file.printEngravingDefaults();
 	}
 
 	@Test
@@ -34,12 +31,10 @@ public class MetadataTest {
 
 	@Test
 	public void testGlyphNames() {
-		final GlyphNamesMetadataFile file = GlyphNamesMetadataFile.load(
-				GlyphNamesMetadataFile.class,
-				GlyphNamesMetadataFile.filename);
-		final Map<String, GlyphNamesMetadataFile.Glyph> map = file.glyphs;
+		final GlyphNamesMetadataFile file = GlyphNamesMetadataFile.instance;
+		final Map<String, GlyphNamesMetadataFile.GlyphIdentity> map = file.glyphs;
 		assertEquals(2791, map.size());
-		GlyphNamesMetadataFile.Glyph glyph = map.get("4stringTabClef");
+		GlyphNamesMetadataFile.GlyphIdentity glyph = map.get("4stringTabClef");
 		assertEquals("U+E06E", glyph.codepoint);
 		assertEquals("4-string tab clef", glyph.description);
 	}

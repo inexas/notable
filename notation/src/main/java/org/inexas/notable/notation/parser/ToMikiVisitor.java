@@ -14,7 +14,7 @@ public class ToMikiVisitor implements Visitor {
 	private final StringBuilder sb = new StringBuilder();
 	private boolean inRepeat;
 	private int measure;
-	private Duration currentDuration;
+	private Duration currentDuration = Duration.quarter;
 	private boolean seenEvent;
 	private Duration saveDuration;
 
@@ -22,12 +22,12 @@ public class ToMikiVisitor implements Visitor {
 	public void enter(final Score score) {
 
 		//noinspection StringEquality
-		if (score.title != Score.defaultTitle) {
+		if(score.title != Score.defaultTitle) {
 			writeQuoted("title", score.title);
 		}
 
 		//noinspection StringEquality
-		if (score.composer != Score.defaultComposer) {
+		if(score.composer != Score.defaultComposer) {
 			writeQuoted("composer", score.composer);
 		}
 		writeQuoted("header", score.header);
@@ -35,27 +35,27 @@ public class ToMikiVisitor implements Visitor {
 		paragraph();
 
 		final Staff staff = score.staff;
-		if (staff != Staff.DEFAULT) {
+		if(staff != Staff.treble) {
 			visit(staff);
 		}
 
 		final KeySignature keySignature = score.keySignature;
-		if (keySignature != KeySignature.DEFAULT) {
+		if(keySignature != KeySignature.C) {
 			visit(keySignature);
 		}
 
 		final TimeSignature timeSignature = score.timeSignature;
-		if (timeSignature != TimeSignature.DEFAULT) {
+		if(timeSignature != TimeSignature.DEFAULT) {
 			visit(timeSignature);
 		}
 
 		final PickupMeasure pickupMeasure = score.pickupMeasure;
-		if (pickupMeasure != null) {
+		if(pickupMeasure != null) {
 			visit(pickupMeasure);
 		}
 
 		final Tempo tempo = score.tempo;
-		if (tempo != Tempo.DEFAULT) {
+		if(tempo != Tempo.DEFAULT) {
 			visit(tempo);
 		}
 
@@ -122,7 +122,7 @@ public class ToMikiVisitor implements Visitor {
 		add(']');
 		visitDuration(chord);
 
-		final Articulation articulation = (Articulation)chord.annotations.get(Articulation.class);
+		final Articulation articulation = (Articulation) chord.annotations.get(Articulation.class);
 		if(articulation != null) {
 			sb.append(articulation.miki);
 		}
@@ -174,11 +174,10 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final KeySignature keySignature) {
-		space();
-		sb.append("key ");
-		sb.append(keySignature.tonic);
-		if (keySignature.mode != null) {
-			visit(keySignature.mode);
+		if(keySignature.accidentalCount > 0) {
+			space();
+			sb.append("key ");
+			sb.append(keySignature.name);
 		}
 	}
 
@@ -318,7 +317,7 @@ public class ToMikiVisitor implements Visitor {
 	private void visitEvent(final Event event) {
 		// Annotations proceed the Event...
 		final Map<Class<? extends Annotation>, Annotation> annotations = event.annotations;
-		final Articulation articulation = (Articulation)annotations.remove(Articulation.class);
+		final Articulation articulation = (Articulation) annotations.remove(Articulation.class);
 		for(final Annotation annotation : annotations.values()) {
 			annotation.accept(this);
 		}
@@ -359,7 +358,6 @@ public class ToMikiVisitor implements Visitor {
 			sb.append(keyword);
 			sb.append(' ');
 			sb.append(value);
-			sb.append(NL);
 			newline();
 		}
 	}

@@ -25,13 +25,13 @@ public class NamedChord extends Event {
 			"([._!fg]+)?";      // 10: Articulation
 
 	private final static Pattern pattern = Pattern.compile(string);
-	final char tonic;
-	final char mode;
-	final char dimAug;
-	final boolean seventh;
-	final int add;
-	final int sus;
-	final int inversion;
+	public final char tonic;
+	public final char mode;
+	public final char dimAug;
+	public final boolean seventh;
+	public final int add;
+	public final int sus;
+	public final int inversion;
 	private NamedChord(final NamedChord toCopy) {
 		super(toCopy);
 		tonic = toCopy.tonic;

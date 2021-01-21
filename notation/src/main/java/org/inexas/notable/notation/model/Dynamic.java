@@ -12,21 +12,21 @@ public class Dynamic extends Miki implements Annotation {
 	private final static Map<String, Dynamic> lookup = new HashMap<>();
 
 	@SuppressWarnings("unused")
-	final static Dynamic fff = new Dynamic("fff");
+	public final static Dynamic fff = new Dynamic("fff");
 	@SuppressWarnings("unused")
-	final static Dynamic ff = new Dynamic("ff");
+	public final static Dynamic ff = new Dynamic("ff");
 	@SuppressWarnings("unused")
-	final static Dynamic f = new Dynamic("f");
+	public final static Dynamic f = new Dynamic("f");
 	@SuppressWarnings("unused")
-	final static Dynamic mf = new Dynamic("mf");
+	public final static Dynamic mf = new Dynamic("mf");
 	@SuppressWarnings("unused")
-	final static Dynamic mp = new Dynamic("mp");
+	public final static Dynamic mp = new Dynamic("mp");
 	@SuppressWarnings("unused")
-	final static Dynamic p = new Dynamic("p");
+	public final static Dynamic p = new Dynamic("p");
 	@SuppressWarnings("unused")
-	final static Dynamic pp = new Dynamic("pp");
+	public final static Dynamic pp = new Dynamic("pp");
 	@SuppressWarnings("unused")
-	final static Dynamic ppp = new Dynamic("ppp");
+	public final static Dynamic ppp = new Dynamic("ppp");
 	public final String name;
 
 	private Dynamic(final String name) {

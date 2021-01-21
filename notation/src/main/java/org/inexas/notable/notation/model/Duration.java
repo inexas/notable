@@ -11,36 +11,36 @@ public class Duration {
 	private final static Map<Integer, Duration> lookupByDenominator = new HashMap<>();
 	public final static Duration quarter = new Duration(
 			"quarter", "4", 4, 8, null);
-	final static Duration thirtySecond = new Duration(
+	public final static Duration thirtySecond = new Duration(
 			"thirtySecond", "32", 32, 1, null);
-	final static Duration sixteenth = new Duration(
+	public final static Duration sixteenth = new Duration(
 			"sixteenth", "16", 16, 2, null);
 	@SuppressWarnings("unused")
-	final static Duration sixteenthDot = new Duration(
+	public final static Duration sixteenthDot = new Duration(
 			"sixteenthDot", "16,", 16, 3, sixteenth);
-	final static Duration eighth = new Duration(
+	public final static Duration eighth = new Duration(
 			"eighth", "8", 8, 4, null);
 	@SuppressWarnings("unused")
-	final static Duration eighthDot = new Duration(
+	public final static Duration eighthDot = new Duration(
 			"eighthDot", "8,", 8, 6, eighth);
 	@SuppressWarnings("unused")
-	final static Duration eighthDotDot = new Duration(
+	public final static Duration eighthDotDot = new Duration(
 			"eighthDotDot", "8,,", 8, 7, eighth);
 	@SuppressWarnings("unused")
-	final static Duration quarterDot = new Duration(
+	public final static Duration quarterDot = new Duration(
 			"quarterDot", "4,", 4, 12, quarter);
 	@SuppressWarnings("unused")
-	final static Duration quarterDotDot = new Duration(
+	public final static Duration quarterDotDot = new Duration(
 			"quarterDotDot", "4,,", 4, 14, quarter);
-	final static Duration half = new Duration(
+	public final static Duration half = new Duration(
 			"half", "2", 2, 16, null);
 	@SuppressWarnings("unused")
-	final static Duration halfDot = new Duration(
+	public final static Duration halfDot = new Duration(
 			"halfDot", "2,", 2, 24, half);
 	@SuppressWarnings("unused")
-	final static Duration halfDotDot = new Duration(
+	public final static Duration halfDotDot = new Duration(
 			"halfDotDot", "2,,", 2, 28, half);
-	final static Duration whole = new Duration(
+	public final static Duration whole = new Duration(
 			"whole", "1", 1, 32, null);
 	/**
 	 * This array is used to lookup the combination of notes that will add up to
@@ -104,11 +104,11 @@ public class Duration {
 	/**
 	 * E.g. "2" for half
 	 */
-	final String miki;
+	public final String miki;
 	/**
 	 * true if this Duration is dotted, e.g. 8,
 	 */
-	final boolean dotted;
+	public final boolean dotted;
 	/**
 	 * Points to the non-dotted version, e.g. for "8," the root is "8"
 	 */
