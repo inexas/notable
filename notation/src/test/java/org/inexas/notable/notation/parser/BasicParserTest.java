@@ -19,7 +19,7 @@ public class BasicParserTest {
 
 	@Test
 	void quickTest() {
-		assertEquals("C C C C", toMiki("C C C C"));
+		assertEquals("[C E G]. R R2 ||\n", toMiki("[CEG]."));
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class BasicParserTest {
 		assertNull(score.pickupMeasure);
 		assertEquals("tempo \"Andante\"\n", score.tempo.toString());
 		assertEquals("", score.keySignature.toString());
-		assertEquals("staff grand\n", score.staff.toString());
+		assertEquals("staff treble\n", score.staff.toString());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class BasicParserTest {
 
 	@Test
 	void testConstructedChords() {
-		assertEquals("[C E G] r r2 ||\n", toMiki("[CEG] "));
+		assertEquals("[C E G] R R2 ||\n", toMiki("[CEG] "));
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class BasicParserTest {
 
 	@Test
 	void testNamedChords() {
-		assertEquals("[C]2 r2 ||\n", toMiki("[C]2"));
+		assertEquals("[C]2 R2 ||\n", toMiki("[C]2"));
 	}
 
 	@Test
@@ -139,9 +139,9 @@ public class BasicParserTest {
 		assertNotNull(Articulation.getByName("staccato").description);
 
 		// [._!fg]+
-		assertEquals("C. r r2 ||\n", toMiki("C."));
-		assertEquals("C. C.. C_ C! | C!! Cf Cg r ||\n", toMiki("C. C.. C_ C! C!! Cf Cg"));
-		assertEquals("[C E G]. r r2 ||\n", toMiki("[CEG]."));
+		assertEquals("C. R R2 ||\n", toMiki("C."));
+		assertEquals("C. C.. C_ C! | C!! Cf Cg R ||\n", toMiki("C. C.. C_ C! C!! Cf Cg"));
+		assertEquals("[C E G]. R R2 ||\n", toMiki("[CEG]."));
 	}
 
 	@Test
@@ -154,7 +154,7 @@ public class BasicParserTest {
 		assertEquals("|-", Barline.thickThin.miki);
 		assertEquals("-|", Barline.thinThick.miki);
 		assertEquals("||", Barline.doubleBar.miki);
-		assertEquals("|- A B C D -| E r r2 ||\n", toMiki("|- A B C D -| E"));
+		assertEquals("|- A B C D -| E R R2 ||\n", toMiki("|- A B C D -| E"));
 	}
 
 	@Test
@@ -185,31 +185,31 @@ public class BasicParserTest {
 		assertEquals("pp", Dynamic.pp.name);
 		assertEquals("ppp", Dynamic.ppp.name);
 
-		assertEquals("fff C r r2 ||\n", toMiki("fff C"));
+		assertEquals("fff C R R2 ||\n", toMiki("fff C"));
 	}
 
 	@Test
 	void testFingering() {
-		assertEquals("~2 C r r2 ||\n", toMiki("~2 C"));
+		assertEquals("~2 C R R2 ||\n", toMiki("~2 C"));
 	}
 
 	@Test
 	void testLines() {
-		assertEquals("{b 2} C E G r ||\n", toMiki("{b 2} C E G"));
-		assertEquals("{b 2} C E G r ||\n", toMiki("{bind 2} C E G"));
-		assertEquals("{c 1.2} C E G r ||\n", toMiki("{cre 1.2} C E G"));
-		assertEquals("{d 1.2} C E G r ||\n", toMiki("{decrescendo 1.2} C E G"));
-		assertEquals("{o-8 2} C r r2 ||\n", toMiki("{o-8 2} C "));
-		assertEquals("{o8 2} C r r2 ||\n", toMiki("{o8 2} C "));
-		assertEquals("{p 2.2} C D A r ||\n", toMiki("{pedal 2.2} C D A"));
-		assertEquals("{p 2.2} C D A r ||\n", toMiki("{pedal 2.2} C D A"));
-		assertEquals("{r 2} C r r2 ||\n", toMiki("{rest 2} C"));
-		assertEquals("{v1 2} C r r2 ||\n", toMiki("{volta1 2} C"));
+		assertEquals("{b 2} C E G R ||\n", toMiki("{b 2} C E G"));
+		assertEquals("{b 2} C E G R ||\n", toMiki("{bind 2} C E G"));
+		assertEquals("{c 1.2} C E G R ||\n", toMiki("{cre 1.2} C E G"));
+		assertEquals("{d 1.2} C E G R ||\n", toMiki("{decrescendo 1.2} C E G"));
+		assertEquals("{o-8 2} C R R2 ||\n", toMiki("{o-8 2} C "));
+		assertEquals("{o8 2} C R R2 ||\n", toMiki("{o8 2} C "));
+		assertEquals("{p 2.2} C D A R ||\n", toMiki("{pedal 2.2} C D A"));
+		assertEquals("{p 2.2} C D A R ||\n", toMiki("{pedal 2.2} C D A"));
+		assertEquals("{r 2} C R R2 ||\n", toMiki("{rest 2} C"));
+		assertEquals("{v1 2} C R R2 ||\n", toMiki("{volta1 2} C"));
 	}
 
 	@Test
 	void testText() {
-		assertEquals("\"Text\" C r r2 ||\n", toMiki("\"Text\"C"));
+		assertEquals("\"Text\" C R R2 ||\n", toMiki("\"Text\"C"));
 	}
 
 	private void expectMessage(final String string, final String excerpt) {
@@ -224,10 +224,10 @@ public class BasicParserTest {
 
 	@Test
 	void testTuplet() {
-		assertEquals("[t A8* B C] A B r ||\n", toMiki("[t A8* B C] A B"));
+		assertEquals("[t A8* B C] A B R ||\n", toMiki("[t A8* B C] A B"));
 		assertEquals("[t A B C] A B C ||\n", toMiki("[t A B C] A B C"));
-		assertEquals("[t A B C]8 A8 B8 C8 r2 ||\n", toMiki("[t A B C]8 A B C"));
-		assertEquals("[t A B C]8* A B C r2 ||\n", toMiki("[t A B C]8* A B C"));
+		assertEquals("[t A B C]8 A8 B8 C8 R2 ||\n", toMiki("[t A B C]8 A B C"));
+		assertEquals("[t A B C]8* A B C R2 ||\n", toMiki("[t A B C]8* A B C"));
 	}
 
 

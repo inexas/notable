@@ -9,13 +9,13 @@ import org.inexas.notable.notation.parser.*;
 import java.util.*;
 
 public class Chord extends Event {
-	final List<Note> notes = new ArrayList<>();
+	private final List<Note> notes = new ArrayList<>();
 
 	public Chord(
 			final Duration duration,
 			final List<Event> events,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
-		super(null, duration, annotations);
+		super("<Chord>", duration, annotations);
 		// todo Trap Rest, Ghosts....
 		for(final Event event : events) {
 			notes.add((Note) event);

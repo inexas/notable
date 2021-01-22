@@ -30,6 +30,7 @@ public class MikiParser extends MusicBaseListener {
 			"([._!fg]+)?");     // Articulation
 	// To collect Annotations for the current or next Event
 	private final Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
+	private final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
 	private Phrase currentPhrase;
 	/**
 	 * Set by an o8 command
@@ -484,16 +485,18 @@ public class MikiParser extends MusicBaseListener {
 		}
 
 		final char c = tonic.charAt(0);
+		final Map<Class<? extends Annotation>, Annotation> annotations = inNoteGroup ?
+				mtAnnotationMap : annotationMap;
 		if(c == 'R') {
-			event = new Rest(duration, annotationMap);
+			event = new Rest(duration, annotations);
 		} else if(c == 'X') {
-			event = new Ghost(duration, annotationMap);
+			event = new Ghost(duration, annotations);
 		} else {
 			final int number = Note.next(
 					lastNote,
 					absoluteOctave, relativeOctave,
 					tonic);
-			event = new Note(tonic, number, duration, annotationMap);
+			event = new Note(tonic, number, duration, annotations);
 		}
 
 		if(event instanceof Note) {
