@@ -38,7 +38,7 @@ public class Parser extends MusicBaseListener {
 	private int relativeOctave;
 	private int lastNote;
 	private Part currentPart;
-	private boolean settingDefaults = true;
+	private boolean settingScoreDefaults = true;
 	/**
 	 * The number of clicks counted so far in the current measure
 	 */
@@ -63,20 +63,20 @@ public class Parser extends MusicBaseListener {
 	public final Score score = new Score();
 	final Messages messages;
 
-	private Parser(final String filename) {
-		messages = new Messages(true, filename);
+	private Parser(final String string) {
+		messages = new Messages(false, string);
 	}
 
 	public static Parser fromString(final String string) {
 		final CharStream cs = CharStreams.fromString(string);
-		final MusicLexer lexer = new MusicLexer(cs);
-		final CommonTokenStream tokens = new CommonTokenStream(lexer);
-		final MusicParser parser = new MusicParser(tokens);
-		final MusicParser.ScoreContext tree = parser.score();
-		final Parser listener = new Parser(string);
+		final MusicLexer musicLexer = new MusicLexer(cs);
+		final CommonTokenStream tokens = new CommonTokenStream(musicLexer);
+		final MusicParser musicParser = new MusicParser(tokens);
+		final MusicParser.ScoreContext tree = musicParser.score();
+		final Parser parser = new Parser(string);
 		final ParseTreeWalker walker = new ParseTreeWalker();
-		walker.walk(listener, tree);
-		return listener;
+		walker.walk(parser, tree);
+		return parser;
 	}
 
 	@Override
@@ -87,7 +87,6 @@ public class Parser extends MusicBaseListener {
 		// Set the defaults...
 		setTimeSignature(TimeSignature.COMMON);
 		currentDuration = Duration.quarter;
-		lastNote = Note.C4;
 	}
 
 	@Override
@@ -115,7 +114,7 @@ public class Parser extends MusicBaseListener {
 	public void enterPart(final MusicParser.PartContext ctx) {
 		final String name = ctx.getStop().getText();
 		currentPart = score.getPart(StringU.stripQuotes(name));
-		settingDefaults = false;
+		settingScoreDefaults = false;
 	}
 
 	@Override
@@ -130,10 +129,10 @@ public class Parser extends MusicBaseListener {
 			name = name.substring(colon + 1);
 		}
 		currentPhrase = currentPart.getPhrase(name);
-		settingDefaults = false;
-		// todo Reset everything
-		clicksSoFar = 0;
 		events = currentPhrase.events;
+		settingScoreDefaults = false;
+		lastNote = Note.C4;
+		clicksSoFar = 0;
 	}
 
 	@Override
@@ -145,7 +144,7 @@ public class Parser extends MusicBaseListener {
 	public void enterStaff(final MusicParser.StaffContext ctx) {
 		final String text = ctx.getStop().getText();
 		final Staff staff = Staff.getStaff(text);
-		if(settingDefaults) {
+		if(settingScoreDefaults) {
 			score.staff = staff;
 		} else {
 			currentPart.staff = staff;
@@ -175,7 +174,7 @@ public class Parser extends MusicBaseListener {
 	public void enterKey(final MusicParser.KeyContext ctx) {
 		final String text = ctx.getStop().getText();
 		final KeySignature keySignature = parseKeySignature(text);
-		if(settingDefaults) {
+		if(settingScoreDefaults) {
 			score.keySignature = keySignature;
 		} else {
 			annotate(ctx, keySignature);
@@ -195,7 +194,7 @@ public class Parser extends MusicBaseListener {
 			timeSignature = ctx.getStop().getType() == MusicParser.CUT ?
 					TimeSignature.CUT : TimeSignature.COMMON;
 		}
-		if(settingDefaults) {
+		if(settingScoreDefaults) {
 			score.timeSignature = timeSignature;
 		} else {
 			annotate(ctx, timeSignature);

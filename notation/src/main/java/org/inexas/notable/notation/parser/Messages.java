@@ -2,6 +2,7 @@ package org.inexas.notable.notation.parser;
 
 import org.antlr.v4.runtime.*;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -41,8 +42,20 @@ public class Messages {
 
 		@Override
 		public String toString() {
+			final StringBuilder sb = new StringBuilder();
+			toString(sb);
+			return sb.toString();
+		}
+
+		public void toString(final StringBuilder sb) {
 			final Token token = ctx.start;
-			return type + ": " + token.getLine() + ':' + token.getStartIndex() + ' ' + message;
+			sb.append(type);
+			sb.append(": ");
+			sb.append(token.getLine());
+			sb.append(':');
+			sb.append(token.getCharPositionInLine());
+			sb.append(' ');
+			sb.append(message);
 		}
 	}
 
@@ -63,5 +76,29 @@ public class Messages {
 
 	void warn(final ParserRuleContext ctx, final String text) {
 		messages.add(new Message(Message.Type.Warning, ctx, text));
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+
+		if(isFile) {
+			sb.append(new File(source).getAbsolutePath());
+			sb.append('\n');
+		} else {
+			sb.append("--------------\n");
+			sb.append(source);
+			if(sb.charAt(sb.length() - 1) != '\n') {
+				sb.append('\n');
+			}
+			sb.append("--------------\n");
+		}
+
+		for(final Message message : messages) {
+			message.toString(sb);
+			sb.append('\n');
+		}
+
+		return sb.toString();
 	}
 }
