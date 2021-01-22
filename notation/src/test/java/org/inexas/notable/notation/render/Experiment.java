@@ -22,7 +22,8 @@ public class Experiment extends Application {
 		primaryStage.setX(10);
 		primaryStage.setY(10);
 
-		final Parser parser = Parser.fromString("C4 + C G G | A8* B C A G2 | F4* F E E | D D C2");
+		final MikiParser parser = MikiParser.fromString(
+				"C4 + C G G | A8* B C A G2 | F4* F E E | D D C2");
 		final Sheet sheet = new Sheet(parser.score);
 
 		final Metrics metrics = sheet.metrics;

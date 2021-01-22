@@ -167,7 +167,7 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final PickupMeasure pickupMeasure) {
-		writeUnquoted("pickup", pickupMeasure.name);
+		writeUnquoted("pickup", pickupMeasure.fraction.toString());
 	}
 
 	@Override

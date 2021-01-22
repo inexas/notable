@@ -41,17 +41,17 @@ phrase: PHRASE STRING_LITERAL ;
 
 staff: STAFF ( GRAND | TREBLE | BASS ) ;
 
-tempo: TEMPO ( '1/' COUNT '=' COUNT | STRING_LITERAL ) ;
+tempo: TEMPO ( FRACTION '=' COUNT | STRING_LITERAL ) ;
 
 key: KEY NOTE ;
 
 // todo The Q was a +, I should be able to rewrite it so it works
-time: TIME ( COUNT ('Q' COUNT)* SLASH COUNT | COMMON | CUT ) ;
+time: TIME ( FRACTION | COMMON | CUT ) ;
 
 /**
  * Pickup measure, e.g. pickup 1/4 which is one 1/4 notes
  */
-pickup: PICKUP COUNT SLASH COUNT ;
+pickup: PICKUP FRACTION ;
 
 barline
 	:	BAR | DOUBLE_BAR
@@ -180,6 +180,8 @@ REST: RestName ( Duration Default? )? ;
 GHOST: GhostName ( Duration Default? )? ;
 
 TIME: 'time' ;
+
+FRACTION: Count'/'Count ;
 
 BAR: '|' ;
 DOUBLE_BAR: '||' ;

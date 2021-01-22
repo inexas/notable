@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BarAnnotationTest {
 	private String process(final String string) {
-		final Parser parser = Parser.fromString(string);
+		final MikiParser parser = MikiParser.fromString(string);
 		if(parser.messages.hasMessages()) {
 			System.out.println(parser.messages);
 			throw new RuntimeException("Got unexpected messages");

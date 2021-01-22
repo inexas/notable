@@ -12,7 +12,7 @@ import org.inexas.notable.util.*;
 import java.util.*;
 import java.util.regex.*;
 
-public class Parser extends MusicBaseListener {
+public class MikiParser extends MusicBaseListener {
 	@SuppressWarnings("FieldCanBeLocal")
 	private final boolean DEBUG = false;
 	private final static Pattern keySignaturePattern = Pattern.compile("" +
@@ -36,7 +36,7 @@ public class Parser extends MusicBaseListener {
 	 */
 	private int absoluteOctave = -1;
 	private int relativeOctave;
-	private int lastNote;
+	private int lastNote = Note.C4;
 	private Part currentPart;
 	private boolean settingScoreDefaults = true;
 	/**
@@ -63,17 +63,17 @@ public class Parser extends MusicBaseListener {
 	public final Score score = new Score();
 	final Messages messages;
 
-	private Parser(final String string) {
+	private MikiParser(final String string) {
 		messages = new Messages(false, string);
 	}
 
-	public static Parser fromString(final String string) {
+	public static MikiParser fromString(final String string) {
 		final CharStream cs = CharStreams.fromString(string);
 		final MusicLexer musicLexer = new MusicLexer(cs);
 		final CommonTokenStream tokens = new CommonTokenStream(musicLexer);
 		final MusicParser musicParser = new MusicParser(tokens);
 		final MusicParser.ScoreContext tree = musicParser.score();
-		final Parser parser = new Parser(string);
+		final MikiParser parser = new MikiParser(string);
 		final ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(parser, tree);
 		return parser;
@@ -205,10 +205,8 @@ public class Parser extends MusicBaseListener {
 
 	@Override
 	public void enterPickup(final MusicParser.PickupContext ctx) {
-		// pickup: COUNT '/' COUNT ;
-		score.pickupMeasure = new PickupMeasure(
-				Integer.parseInt(ctx.getChild(1).getText()),
-				Integer.parseInt(ctx.getChild(3).getText()));
+		// pickup FRACTION ;
+		score.pickupMeasure = new PickupMeasure(ctx.getChild(1).getText());
 	}
 
 	@Override

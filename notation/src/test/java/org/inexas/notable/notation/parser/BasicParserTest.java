@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicParserTest {
 	private String toMiki(final String string) {
-		final Score score = Parser.fromString(string).score;
+		final Score score = MikiParser.fromString(string).score;
 		return score.toString();
 	}
 
 	private Score toScore(final String string) {
-		return Parser.fromString(string).score;
+		return MikiParser.fromString(string).score;
 	}
 
 	@Test
@@ -81,11 +81,6 @@ public class BasicParserTest {
 		assertEquals(1, part.phraseMap.size());
 		final Phrase phrase = part.getFirstPhrase();
 		assertEquals("f1", phrase.name);
-	}
-
-	@Test
-	void testPickupMeasure() {
-		assertEquals("pickup 1/4\n\n", toMiki("pickup 1/4"));
 	}
 
 	@Test
@@ -218,7 +213,7 @@ public class BasicParserTest {
 	}
 
 	private void expectMessage(final String string, final String excerpt) {
-		final Parser parser = Parser.fromString(string);
+		final MikiParser parser = MikiParser.fromString(string);
 		assertTrue(parser.messages.containExcerpt(excerpt));
 	}
 

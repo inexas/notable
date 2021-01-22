@@ -11,7 +11,7 @@ public class OctaveParsingTest {
 	private List<Note> getNotes(final String miki) {
 		final List<Note> returnValue = new ArrayList<>();
 
-		final Score score = Parser.fromString(miki).score;
+		final Score score = MikiParser.fromString(miki).score;
 		score.getFirstPart().getFirstPhrase().events.forEach(event -> {
 			if(event instanceof Note) {
 				returnValue.add((Note) event);

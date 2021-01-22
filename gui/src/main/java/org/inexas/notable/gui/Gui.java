@@ -24,7 +24,8 @@ public class Gui extends Application {
 		primaryStage.setX(100);
 		primaryStage.setY(200);
 
-		final Parser parser = Parser.fromString("C C G G | A8* B C A G2 | F4* F E E | D D C2");
+		final MikiParser parser = MikiParser.fromString(
+				"C C G G | A8* B C A G2 | F4* F E E | D D C2");
 		final Score score = parser.score;
 		final Sheet sheet = new Sheet(score);
 		primaryStage.setScene(new Scene(sheet, 800, 500));

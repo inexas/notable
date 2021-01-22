@@ -6,20 +6,11 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-// todo Not sure if this is needed
 public class PickupMeasure extends Element implements Visited {
-	// Implicit 4/4, don't annotate
-	public final int numerator;
-	public final int denominator;
-	public final String name;
+	public final Fraction fraction;
 
-	public PickupMeasure(final int numerator, final int denominator) {
-		if(!Duration.isDenominator(denominator)) {
-			throw new MusicParseException("Invalid denominator", null);
-		}
-		this.numerator = numerator;
-		this.denominator = denominator;
-		name = String.valueOf(numerator) + '/' + denominator;
+	public PickupMeasure(final String fraction) {
+		this.fraction = new Fraction(fraction);
 	}
 
 	@Override
@@ -28,10 +19,10 @@ public class PickupMeasure extends Element implements Visited {
 	}
 
 	/**
-	 * @return The size of each measure in thirty-seconds
+	 * @return The size of each measure in 1/32nds
 	 */
 	@SuppressWarnings("unused")
 	public int getMeasureSize() {
-		return numerator * Duration.getByDenominator(denominator).clicks;
+		return fraction.numerator * Duration.getByDenominator(fraction.denominator).clicks;
 	}
 }
