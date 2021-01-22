@@ -57,6 +57,14 @@ public class OctaveParsingTest {
 	}
 
 	@Test
+	void subsequentNotes() {
+		final List<Note> notes = getNotes("C + C C");
+		assertEquals(Note.C4, notes.get(0).number);
+		assertEquals(Note.C5, notes.get(1).number);
+		assertEquals(Note.C5, notes.get(2).number);
+	}
+
+	@Test
 	void testSearchSpace() {
 		final Note.SearchSpace ss = new Note.SearchSpace(Note.E1);
 		assertEquals(Note.B0, ss.lookup(Note.B));

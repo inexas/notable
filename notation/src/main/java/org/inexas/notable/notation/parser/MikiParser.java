@@ -508,6 +508,10 @@ public class MikiParser extends MusicBaseListener {
 			account(event, ctx);
 		}
 		events.add(event);
+
+		// Ready for next
+		relativeOctave = 0;
+		absoluteOctave = -1;
 	}
 
 	private void padToEnd() {
