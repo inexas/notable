@@ -3,7 +3,7 @@ package org.inexas.notable.notation.render;
 import javafx.application.*;
 import javafx.scene.*;
 import javafx.stage.*;
-import org.inexas.notable.notation.model.*;
+import org.inexas.notable.notation.parser.*;
 
 // todo Add notes from score
 // todo Remember window position
@@ -22,9 +22,9 @@ public class Experiment extends Application {
 		primaryStage.setX(10);
 		primaryStage.setY(10);
 
-		final Score score = Score.fromString("C4 + C G G | A8* B C A G2 | F4* F E E | D D C2");
+		final Parser parser = Parser.fromString("C4 + C G G | A8* B C A G2 | F4* F E E | D D C2");
+		final Sheet sheet = new Sheet(parser.score);
 
-		final Sheet sheet = new Sheet(score);
 		final Metrics metrics = sheet.metrics;
 		primaryStage.setScene(new Scene(sheet, metrics.paperWidth, metrics.paperHeight));
 		primaryStage.show();

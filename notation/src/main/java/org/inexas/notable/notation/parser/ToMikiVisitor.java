@@ -21,13 +21,11 @@ public class ToMikiVisitor implements Visitor {
 	@Override
 	public void enter(final Score score) {
 
-		//noinspection StringEquality
-		if(score.title != Score.defaultTitle) {
+		if(score.title != null) {
 			writeQuoted("title", score.title);
 		}
 
-		//noinspection StringEquality
-		if(score.composer != Score.defaultComposer) {
+		if(score.composer != null) {
 			writeQuoted("composer", score.composer);
 		}
 		writeQuoted("header", score.header);
@@ -45,7 +43,7 @@ public class ToMikiVisitor implements Visitor {
 		}
 
 		final TimeSignature timeSignature = score.timeSignature;
-		if(timeSignature != TimeSignature.DEFAULT) {
+		if(timeSignature != TimeSignature.COMMON) {
 			visit(timeSignature);
 		}
 

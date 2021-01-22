@@ -7,9 +7,9 @@ package org.inexas.notable.notation.model;
 import org.inexas.notable.notation.parser.*;
 
 /**
- * The ABC of all objects in the model
+ * The ABC of all elements in the model
  */
-abstract class Miki implements Visited {
+abstract class Element implements Visited {
 
 	@Override
 	public String toString() {

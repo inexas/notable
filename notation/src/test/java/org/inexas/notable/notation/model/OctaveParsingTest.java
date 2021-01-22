@@ -1,5 +1,6 @@
 package org.inexas.notable.notation.model;
 
+import org.inexas.notable.notation.parser.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -10,7 +11,7 @@ public class OctaveParsingTest {
 	private List<Note> getNotes(final String miki) {
 		final List<Note> returnValue = new ArrayList<>();
 
-		final Score score = Score.fromString(miki);
+		final Score score = Parser.fromString(miki).score;
 		score.getFirstPart().getFirstPhrase().events.forEach(event -> {
 			if(event instanceof Note) {
 				returnValue.add((Note) event);

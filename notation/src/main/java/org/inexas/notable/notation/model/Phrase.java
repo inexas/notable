@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * A piano has two Phrases, one for each hand
  */
-public class Phrase extends Miki {
+public class Phrase extends Element {
 	public final static String IMPLICIT = "#IMPLICIT#";
 	public final Score score;
 	public final List<Event> events = new ArrayList<>();

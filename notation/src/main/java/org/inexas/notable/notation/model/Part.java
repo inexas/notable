@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * The part played by one instrument
  */
-public class Part extends Miki implements Visited {
+public class Part extends Element implements Visited {
 	public final static String IMPLICIT = "#IMPLICIT#";
 	public final String name;
 	public final Score score;

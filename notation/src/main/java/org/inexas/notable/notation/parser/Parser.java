@@ -5,13 +5,14 @@
 package org.inexas.notable.notation.parser;
 
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
 import org.inexas.notable.notation.model.*;
 import org.inexas.notable.util.*;
 
 import java.util.*;
 import java.util.regex.*;
 
-public class ToScoreListener extends MusicBaseListener {
+public class Parser extends MusicBaseListener {
 	@SuppressWarnings("FieldCanBeLocal")
 	private final boolean DEBUG = false;
 	private final static Pattern keySignaturePattern = Pattern.compile("" +
@@ -29,7 +30,6 @@ public class ToScoreListener extends MusicBaseListener {
 			"([._!fg]+)?");     // Articulation
 	// To collect Annotations for the current or next Event
 	private final Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
-	private final String filename;
 	private Phrase currentPhrase;
 	/**
 	 * Set by an o8 command
@@ -43,14 +43,10 @@ public class ToScoreListener extends MusicBaseListener {
 	 * The number of clicks counted so far in the current measure
 	 */
 	private int clicksSoFar;
+	/**
+	 * Number of clicks in a measure
+	 */
 	private int measureSize;
-	// C  .  .  .  E  .  .  G
-	//       D  .  .  F  .  .  .  F
-	//                                  B  .  .  D  .  .  F
-	// C  Cs D  Ds E  F  Fs G  Gs A  As B  C  Cs D  Ds E  F  Fs G  Gs A  As B  C
-	// 3                                   4                                   5
-	// 0  1  2  3  4  5  6  7  8  9  10 11 0  1  2  3  4  5  6  7  8  9  10 11 1
-	// 0  1  2  3  4  5  6  7  8  9  10 11 13 14 15 16 17 18 19 20 21 22 23 24 25
 	@SuppressWarnings("unused")
 	private TimeSignature timeSignature;
 	private List<Event> events;
@@ -65,10 +61,22 @@ public class ToScoreListener extends MusicBaseListener {
 	 */
 	private Duration saveDuration;
 	public final Score score = new Score();
-	final List<String> messages = score.messages;
+	final Messages messages;
 
-	public ToScoreListener(final String filename) {
-		this.filename = filename;
+	private Parser(final String filename) {
+		messages = new Messages(true, filename);
+	}
+
+	public static Parser fromString(final String string) {
+		final CharStream cs = CharStreams.fromString(string);
+		final MusicLexer lexer = new MusicLexer(cs);
+		final CommonTokenStream tokens = new CommonTokenStream(lexer);
+		final MusicParser parser = new MusicParser(tokens);
+		final MusicParser.ScoreContext tree = parser.score();
+		final Parser listener = new Parser(string);
+		final ParseTreeWalker walker = new ParseTreeWalker();
+		walker.walk(listener, tree);
+		return listener;
 	}
 
 	@Override
@@ -77,7 +85,7 @@ public class ToScoreListener extends MusicBaseListener {
 		currentPhrase = currentPart.getFirstPhrase();
 		events = currentPhrase.events;
 		// Set the defaults...
-		setTimeSignature(TimeSignature.DEFAULT);
+		setTimeSignature(TimeSignature.COMMON);
 		currentDuration = Duration.quarter;
 		lastNote = Note.C4;
 	}
@@ -152,15 +160,15 @@ public class ToScoreListener extends MusicBaseListener {
 			final String noQuotes = text.charAt(0) == '"' ? StringU.stripQuotes(text) : text;
 			tempo = Tempo.getTempo(noQuotes);
 		} else {
-			// tempo 1 / 4 = 120
-			// 0     1 2 3 4 5
-			assert ctx.getChildCount() == 6;
-			final int denominator = Integer.parseInt(ctx.getChild(3).getText());
+			// tempo 1/ 4 = 120
+			// 0     1  2 3 4
+			assert ctx.getChildCount() == 5;
+			final int denominator = Integer.parseInt(ctx.getChild(2).getText());
 			final Duration duration = Duration.getByDenominator(denominator);
-			final int bpm = Integer.parseInt(ctx.getChild(5).getText());
+			final int bpm = Integer.parseInt(ctx.getChild(4).getText());
 			tempo = Tempo.getTempo(duration, bpm);
 		}
-		annotate(tempo);
+		annotate(ctx, tempo);
 	}
 
 	@Override
@@ -170,7 +178,7 @@ public class ToScoreListener extends MusicBaseListener {
 		if(settingDefaults) {
 			score.keySignature = keySignature;
 		} else {
-			annotate(keySignature);
+			annotate(ctx, keySignature);
 		}
 	}
 
@@ -190,7 +198,7 @@ public class ToScoreListener extends MusicBaseListener {
 		if(settingDefaults) {
 			score.timeSignature = timeSignature;
 		} else {
-			annotate(timeSignature);
+			annotate(ctx, timeSignature);
 		}
 		clicksSoFar = 0;
 		setTimeSignature(timeSignature);
@@ -208,14 +216,14 @@ public class ToScoreListener extends MusicBaseListener {
 	public void enterBarline(final MusicParser.BarlineContext ctx) {
 		final String text = ctx.getStop().getText();
 		final Barline barline = Barline.getBarline(text);
-		annotate(barline);
+		annotate(ctx, barline);
 	}
 
 	@Override
 	public void enterLine(final MusicParser.LineContext ctx) {
 		final String text = ctx.getStop().getText();
 		final LineParser parser = new LineParser(text);
-		annotate(parser.line);
+		annotate(ctx, parser.line);
 	}
 
 	@Override
@@ -228,12 +236,12 @@ public class ToScoreListener extends MusicBaseListener {
 			final int direction = text.charAt(0) == '+' ? 1 : -1;
 			if(direction > 0) {
 				if(absoluteOctave >= 0 || relativeOctave < 0) {
-					messages.add("Possible confusion over octaves?");
+					messages.warn(ctx, "Possible confusion over octaves?");
 				}
 				relativeOctave += text.length();
 			} else { // direction < 0;
 				if(absoluteOctave >= 0 || relativeOctave > 0) {
-					messages.add("Possible confusion over octaves?");
+					messages.warn(ctx, "Possible confusion over octaves?");
 				}
 				relativeOctave -= text.length();
 			}
@@ -241,7 +249,7 @@ public class ToScoreListener extends MusicBaseListener {
 			// Absolute octave
 			absoluteOctave = Integer.parseInt(text);
 			if(relativeOctave != 0) {
-				messages.add("Possible confusion over octaves?");
+				messages.warn(ctx, "Possible confusion over octaves?");
 				relativeOctave = 0;
 			}
 		}
@@ -251,21 +259,21 @@ public class ToScoreListener extends MusicBaseListener {
 	public void enterDynamic(final MusicParser.DynamicContext ctx) {
 		final String text = ctx.getStop().getText();
 		final Dynamic dynamic = Dynamic.getDynamic(text);
-		annotate(dynamic);
+		annotate(ctx, dynamic);
 	}
 
 	@Override
 	public void enterText(final MusicParser.TextContext ctx) {
 		final String text = StringU.stripQuotes(ctx.getStop().getText());
 		final TextAnnotation textAnnotation = new TextAnnotation(text);
-		annotate(textAnnotation);
+		annotate(ctx, textAnnotation);
 	}
 
 	@Override
 	public void enterFingering(final MusicParser.FingeringContext ctx) {
 		final String text = ctx.getStop().getText();
 		final Fingering fingering = new Fingering(text.substring(1));
-		annotate(fingering);
+		annotate(ctx, fingering);
 	}
 
 	@Override
@@ -275,12 +283,12 @@ public class ToScoreListener extends MusicBaseListener {
 		if(clicksSoFar == 0) {
 			// We're at the start of a new measure, make sure it's annotated...
 			if(!barAnnotated) {
-				annotate(Barline.bar);
+				annotate(ctx, Barline.bar);
 			}
 		} else if(barAnnotated) {
 			// todo Removing a repeat bar may cause other issues
 			annotationMap.remove(Barline.class);
-			warning(ctx, "Bar annotation not at start of measure; removed.");
+			messages.warn(ctx, "Bar annotation not at start of measure; removed.");
 		}
 	}
 
@@ -331,7 +339,7 @@ public class ToScoreListener extends MusicBaseListener {
 				throw new RuntimeException("Recognizer/event parser mismatch");
 			}
 			if(matcher.group(2) != null) {
-				warning(ctx, "Tuplet articulation not supported, ignored: " + text);
+				messages.warn(ctx, "Tuplet articulation not supported, ignored: " + text);
 			}
 
 			// Group 1: Duration...
@@ -351,7 +359,7 @@ public class ToScoreListener extends MusicBaseListener {
 		}
 		final int total = clicksSoFar + duration.clicks;
 		if(total > measureSize) {
-			warning(ctx, "Tuplet duration to long, reduced");
+			messages.warn(ctx, "Tuplet duration to long, reduced");
 			final Duration[] durations = Duration.getByClicks(total - measureSize);
 			duration = durations[durations.length - 1];
 		}
@@ -415,7 +423,7 @@ public class ToScoreListener extends MusicBaseListener {
 		final String group2 = matcher.group(2);
 		if(group2 != null) {
 			final Articulation articulation = Articulation.getByMiki(group2);
-			annotate(articulation);
+			annotate(ctx, articulation);
 		}
 
 		result = new Chord(duration, events, annotationMap);
@@ -470,7 +478,7 @@ public class ToScoreListener extends MusicBaseListener {
 		final String group5 = matcher.group(4);
 		if(group5 != null) {
 			final Articulation articulation = Articulation.getByMiki(group5);
-			annotate(articulation);
+			annotate(ctx, articulation);
 		}
 
 		final char c = tonic.charAt(0);
@@ -507,34 +515,6 @@ public class ToScoreListener extends MusicBaseListener {
 				events.add(new Rest(duration, annotationMap));
 			}
 		}
-	}
-
-	/**
-	 * Warnings can be corrected whilst building the Score but perhaps not with the
-	 * results that the user expected.
-	 *
-	 * @param ctx     Parser context
-	 * @param message Warning message
-	 */
-	private void warning(final ParserRuleContext ctx, final String message) {
-		final Token token = ctx.start;
-		messages.add("WARNING " + filename + ' ' +
-				token.getLine() + ':' + token.getStartIndex() +
-				' ' + message);
-	}
-
-	/**
-	 * Errors result in a failure to create a score
-	 *
-	 * @param ctx     Parser context
-	 * @param message Error message
-	 */
-	@SuppressWarnings("unused")
-	private void error(final ParserRuleContext ctx, final String message) {
-		final Token token = ctx.start;
-		messages.add("ERROR " + filename + ' ' +
-				token.getLine() + ':' + token.getStartIndex() +
-				' ' + message);
 	}
 
 	private Event account(final Event event, final ParserRuleContext ctx) {
@@ -575,7 +555,7 @@ public class ToScoreListener extends MusicBaseListener {
 				if(!(event instanceof Rest)) {
 					event.add(new Bind(count));
 				}
-				warning(ctx, "Event overflowed measure, rewritten");
+				messages.warn(ctx, "Event overflowed measure, rewritten");
 			}
 		}
 		return result;
@@ -631,9 +611,9 @@ public class ToScoreListener extends MusicBaseListener {
 		return result;
 	}
 
-	private void annotate(final Annotation annotation) {
+	private void annotate(final ParserRuleContext ctx, final Annotation annotation) {
 		if(annotationMap.put(annotation.getClass(), annotation) != null) {
-			messages.add("Annotation overwrites previous value: " + annotation);
+			messages.warn(ctx, "Annotation overwrites previous value: " + annotation);
 		}
 	}
 

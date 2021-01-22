@@ -14,7 +14,7 @@ import java.util.*;
  * todo Not sure if they can be mix and matched to, for time being I will assume
  * not.
  */
-public class Articulation extends Miki implements Annotation {
+public class Articulation extends Element implements Annotation {
 	private final static Map<String, Articulation> lookupName = new HashMap<>();
 	private final static Map<String, Articulation> lookupMiki = new HashMap<>();
 
@@ -60,10 +60,11 @@ public class Articulation extends Miki implements Annotation {
 			"Hold the note in question its full length (or longer, " +
 					"with slight rubato), or play the note slightly louder",
 			"_");
-	final String name;
+	private final String name;
 	public final String description;
 	public final String miki;
-	Articulation(final String name, final String description, final String miki) {
+
+	private Articulation(final String name, final String description, final String miki) {
 		this.name = name;
 		this.description = description;
 		this.miki = miki;

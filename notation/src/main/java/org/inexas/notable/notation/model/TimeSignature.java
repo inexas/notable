@@ -6,11 +6,9 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-public class TimeSignature extends Miki implements Visited, Annotation {
+public class TimeSignature extends Element implements Visited, Annotation {
 	public final static TimeSignature COMMON = new TimeSignature(4, 4);
 	public final static TimeSignature CUT = new TimeSignature(2, 2);
-	// Implicit 4/4, don't annotate
-	public final static TimeSignature DEFAULT = new TimeSignature(4, 4);
 	public final int numerator;
 	public final int denominator;
 	public final String name;

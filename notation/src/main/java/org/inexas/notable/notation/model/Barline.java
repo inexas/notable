@@ -8,8 +8,8 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Barline extends Miki implements Annotation {
-	final static Map<String, Barline> lookup = new HashMap<>();
+public class Barline extends Element implements Annotation {
+	private final static Map<String, Barline> lookup = new HashMap<>();
 	// Note simple bars don't get printed at begging on line
 	public final static Barline bar = new Barline(
 			"Bar",
@@ -35,7 +35,7 @@ public class Barline extends Miki implements Annotation {
 	public final static Barline thickThin = new Barline(
 			"Double",
 			"|-", "|-", "|-");
-	final String name;
+	private final String name;
 	public final String miki;
 	public final String endOfLineMiki;
 	public final String beginningOfLineMiki;

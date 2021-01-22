@@ -4,7 +4,7 @@
 
 package org.inexas.notable.notation.model;
 
-public abstract class Line extends Miki implements Annotation {
+public abstract class Line extends Element implements Annotation {
 	public final int beats;
 	public final int bars;
 

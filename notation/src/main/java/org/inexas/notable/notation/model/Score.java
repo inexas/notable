@@ -4,8 +4,6 @@
 
 package org.inexas.notable.notation.model;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
 import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
@@ -13,14 +11,10 @@ import java.util.*;
 /**
  * Top level representation of a musical piece that contains a list of partMaps
  */
-public class Score extends Miki implements Visited {
-	// Set up with default values
-	public final static String defaultTitle = "Untitled";
-	public final static String defaultComposer = "Unknown composer";
-	public final List<String> messages = new ArrayList<>();
+public class Score extends Element implements Visited {
 	public final LinkedHashMap<String, Part> partMap = new LinkedHashMap<>();
-	public String title = defaultTitle;
-	public String composer = defaultComposer;
+	public String title;
+	public String composer;
 	public String header;
 	public PickupMeasure pickupMeasure;
 	public Staff staff = Staff.treble;
@@ -30,7 +24,7 @@ public class Score extends Miki implements Visited {
 	 * default Duration, so a time signature of 1/4 will set the starting
 	 * Duration to quarters
 	 */
-	public TimeSignature timeSignature = TimeSignature.DEFAULT;
+	public TimeSignature timeSignature = TimeSignature.COMMON;
 	public Tempo tempo = Tempo.DEFAULT;
 
 	public Score() {
@@ -38,18 +32,6 @@ public class Score extends Miki implements Visited {
 		// if explicit parts/phrases are defined afterwards
 		final Part implicit = getPart(Part.IMPLICIT);
 		implicit.getPhrase(Phrase.IMPLICIT);
-	}
-
-	public static Score fromString(final String string) {
-		final CharStream cs = CharStreams.fromString(string);
-		final MusicLexer lexer = new MusicLexer(cs);
-		final CommonTokenStream tokens = new CommonTokenStream(lexer);
-		final MusicParser parser = new MusicParser(tokens);
-		final MusicParser.ScoreContext tree = parser.score();
-		final ToScoreListener listener = new ToScoreListener(string);
-		final ParseTreeWalker walker = new ParseTreeWalker();
-		walker.walk(listener, tree);
-		return listener.score;
 	}
 
 	@Override

@@ -41,7 +41,7 @@ phrase: PHRASE STRING_LITERAL ;
 
 staff: STAFF ( GRAND | TREBLE | BASS ) ;
 
-tempo: TEMPO ( '1' '/' COUNT '=' COUNT| STRING_LITERAL ) ;
+tempo: TEMPO ( '1/' COUNT '=' COUNT | STRING_LITERAL ) ;
 
 key: KEY NOTE ;
 

@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Something that occupies time
  */
-public abstract class Event extends Miki implements Visited {
+public abstract class Event extends Element implements Visited {
 	public final String name;
 	public final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
 	// todo This should be final
@@ -33,7 +33,7 @@ public abstract class Event extends Miki implements Visited {
 	Event(final Duration duration) {
 		assert duration != null;
 		this.duration = duration;
-		this.name = null;
+		name = null;
 	}
 
 	Event(final Event toCopy) {

@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Mode extends Miki implements Annotation {
+public class Mode extends Element implements Annotation {
 	final static Mode Ionian = new Mode("Ionian", "M", "I", "i");
 	private final static Map<String, Mode> lookup = new HashMap<>();
 	@SuppressWarnings("unused")
@@ -24,7 +24,7 @@ public class Mode extends Miki implements Annotation {
 	@SuppressWarnings("unused")
 	private final static Mode Locrian = new Mode("Locrian", "L", "l");
 
-	final String name;
+	private final String name;
 	public final String miki;
 
 	private Mode(final String name, final String... mikis) {
@@ -33,7 +33,7 @@ public class Mode extends Miki implements Annotation {
 		for(final String miki : mikis) {
 			lookup.put(miki, this);
 		}
-		this.miki = mikis[0];
+		miki = mikis[0];
 	}
 
 	@SuppressWarnings("unused")

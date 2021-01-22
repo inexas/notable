@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class KeySignature extends Miki implements Annotation {
+public class KeySignature extends Element implements Annotation {
 	private final static int FLAT = -1;     // Double flat would be -2, ...
 	private final static int NATURAL = 0;
 	private final static int SHARP = 1;

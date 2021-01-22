@@ -1,13 +1,12 @@
-package org.inexas.notable.notation.parser;
+package org.inexas.notable.notation.model;
 
-import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class NotesTest {
+public class NoteTest {
 	private final Map<Class<? extends Annotation>, Annotation> noAnnotations = Map.of();
 
 	@Test

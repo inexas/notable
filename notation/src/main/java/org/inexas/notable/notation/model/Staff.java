@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Staff extends Miki {
+public class Staff extends Element {
 	private final static Map<String, Staff> lookup = new HashMap<>();
 	public static Staff treble = new Staff("treble", Note.E4);
 	public static Staff bass = new Staff("bass", Note.G2);

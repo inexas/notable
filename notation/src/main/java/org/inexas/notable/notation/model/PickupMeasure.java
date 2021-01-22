@@ -7,7 +7,7 @@ package org.inexas.notable.notation.model;
 import org.inexas.notable.notation.parser.*;
 
 // todo Not sure if this is needed
-public class PickupMeasure extends Miki implements Visited {
+public class PickupMeasure extends Element implements Visited {
 	// Implicit 4/4, don't annotate
 	public final int numerator;
 	public final int denominator;
