@@ -86,12 +86,14 @@ public class Messages {
 			sb.append(new File(source).getAbsolutePath());
 			sb.append('\n');
 		} else {
-			sb.append("--------------\n");
-			sb.append(source);
-			if(sb.charAt(sb.length() - 1) != '\n') {
-				sb.append('\n');
+			if(messages.size() > 1) {
+				sb.append("--------------\n");
+				sb.append(source);
+				if(sb.charAt(sb.length() - 1) != '\n') {
+					sb.append('\n');
+				}
+				sb.append("--------------\n");
 			}
-			sb.append("--------------\n");
 		}
 
 		for(final Message message : messages) {

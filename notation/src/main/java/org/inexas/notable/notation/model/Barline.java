@@ -60,4 +60,9 @@ public class Barline extends Element implements Annotation {
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
 	}
+
+	@Override
+	public String toString() {
+		return miki;
+	}
 }

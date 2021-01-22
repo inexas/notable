@@ -20,7 +20,7 @@ public class Parser extends MusicBaseListener {
 			"([b#n])?" +        // Accidental
 			"([Mm])?");         // Major/minor
 	private final static Pattern notePattern = Pattern.compile("" +
-			"([A-Grx])" +       // Tonic, including rest & ghost
+			"([A-GRX])" +       // Tonic, including rest & ghost
 			"([b#n])?" +        // Accidental
 			"([0-9]+,*\\*?)?" + // Duration
 			"([._!fg]+)?");     // Articulation
@@ -91,7 +91,6 @@ public class Parser extends MusicBaseListener {
 
 	@Override
 	public void exitScore(final MusicParser.ScoreContext ctx) {
-		// todo Pad all the Phrases the end
 		padToEnd();
 	}
 
@@ -137,6 +136,7 @@ public class Parser extends MusicBaseListener {
 
 	@Override
 	public void exitPhrase(final MusicParser.PhraseContext ctx) {
+		padToEnd();
 		currentPhrase = null;
 	}
 
@@ -292,6 +292,11 @@ public class Parser extends MusicBaseListener {
 	}
 
 	@Override
+	public void exitEvent(final MusicParser.EventContext ctx) {
+		annotationMap.clear();
+	}
+
+	@Override
 	public void enterNote(final MusicParser.NoteContext ctx) {
 		buildEvent(ctx);
 	}
@@ -438,7 +443,7 @@ public class Parser extends MusicBaseListener {
 		// Split up the Event into its parts..
 		final Matcher matcher = notePattern.matcher(input);
 		if(!matcher.matches()) {
-			throw new RuntimeException("Recognizer/event parser mismatch");
+			throw new RuntimeException("Recognizer/event parser mismatch: '" + input + '\'');
 		}
 
 		// Group 1: Tonic...
@@ -508,6 +513,7 @@ public class Parser extends MusicBaseListener {
 		if(clicksSoFar > 0) {
 			// End of phrase and we have an incomplete measure, pad to the end
 			// with rests
+			annotationMap.clear();
 			final int padSize = measureSize - clicksSoFar;
 			final Duration[] durations = Duration.getByClicks(padSize);
 			for(final Duration duration : durations) {
