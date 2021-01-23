@@ -34,6 +34,11 @@ public class Glyph {
 		return returnValue;
 	}
 
+	public static Glyph get(final Rest note) {
+		// todo Load rests
+		return null;
+	}
+
 	// Rests
 	public static Glyph restWhole = new Glyph("restWhole");
 	public static Glyph restHalf = new Glyph("restHalf");

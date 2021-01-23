@@ -53,4 +53,9 @@ public abstract class Event extends Element implements Visited {
 	 * @return The new event
 	 */
 	public abstract Event copy(final Duration duration);
+
+	public <T> T get(final Class<T> clazz) {
+		//noinspection unchecked
+		return (T) annotations.get(clazz);
+	}
 }

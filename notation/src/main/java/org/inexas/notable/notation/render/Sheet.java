@@ -34,15 +34,8 @@ public class Sheet extends VBox {
 		final double height = staffSpaceHeight * 4;
 
 		// y coordinate of lines and spaces...
-		final double staff8y = y;
-		final double staff7y = y + staffSpaceHeight * 0.5;
-		final double staff6y = y + staffSpaceHeight * 1;
-		final double staff5y = y + staffSpaceHeight * 1.5;
-		final double staff4y = y + staffSpaceHeight * 2;
-		final double staff3y = y + staffSpaceHeight * 2.5;
-		final double staff2y = y + staffSpaceHeight * 3;
-		final double staff1y = y + staffSpaceHeight * 3.5;
-		final double staff0y = y + staffSpaceHeight * 4;
+		final double topLine = y;
+		final double baseLine = topLine + staffSpaceHeight * 4;
 
 		gc.setLineWidth(metrics.staffLineThickness * 7.7);
 
@@ -73,7 +66,7 @@ public class Sheet extends VBox {
 			final Glyph accidental = keySignature.isSharp() ?
 					Glyph.accidentalSharp : Glyph.accidentalFlat;
 			for(int i = 0; i < keySignature.accidentalCount; i++) {
-				final double y1 = staff0y - noteHeight * lines[i];
+				final double y1 = baseLine - noteHeight * lines[i];
 				gc.fillText(accidental.c, cursor, y1);
 				cursor += accidental.width * 8;
 			}
@@ -95,11 +88,22 @@ public class Sheet extends VBox {
 
 		final double[] yLookup = KeySignature.C.yLookup(
 				score.staff,
-				staff0y,
+				baseLine,
 				staffSpaceHeight / 2);
 
 		final List<Event> events = score.getFirstPart().getFirstPhrase().events;
+		boolean first = true;
 		for(final Event event : events) {
+			// Barlines?
+			if(first) {
+				first = false;
+			} else {
+				final Barline barline = event.get(Barline.class);
+				if(barline != null) {
+					gc.strokeLine(cursor - 8, topLine, cursor - 8, baseLine);
+				}
+			}
+
 			final Duration duration = event.duration;
 			if(event instanceof Note) {
 				final Note note = (Note) event;
@@ -107,6 +111,7 @@ public class Sheet extends VBox {
 				gc.fillText(glyph.c, cursor, yLookup[note.number]);
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
+				final Glyph glyph = Glyph.get(rest);
 			}
 			cursor += duration.clicks * perClick;
 			// todo Ghost, Tuplet, Ghost, Chords
