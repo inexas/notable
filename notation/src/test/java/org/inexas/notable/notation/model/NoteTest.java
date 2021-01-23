@@ -82,4 +82,21 @@ public class NoteTest {
 		final Note note = new Note("C", 48, Duration.quarter, noAnnotations);
 		assertEquals("C", note.toString());
 	}
+
+	@Test
+	void testIsValid() {
+		assertTrue(Note.isValid(9));
+		assertTrue(Note.isValid(29));
+		assertTrue(Note.isValid(96));
+
+		assertFalse(Note.isValid(8));
+		assertFalse(Note.isValid(97));
+	}
+
+	@Test
+	void testName() {
+		assertEquals("C4", Note.name(Note.C4));
+		assertEquals("A0", Note.name(9));
+		assertEquals("C8", Note.name(8 * 12));
+	}
 }

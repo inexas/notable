@@ -33,11 +33,11 @@ public class ToMikiVisitor implements Visitor {
 		paragraph();
 
 		final Staff staff = score.staff;
-		if(staff != Staff.treble) {
+		if(!staff.equals(Staff.trebleC)) {
 			visit(staff);
 		}
 
-		final KeySignature keySignature = score.keySignature;
+		final KeySignature keySignature = score.key;
 		if(keySignature != KeySignature.C) {
 			visit(keySignature);
 		}
@@ -157,7 +157,7 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final Staff staff) {
-		writeUnquoted("staff", staff.name);
+		writeUnquoted("staff", staff.type.name());
 	}
 
 	@Override

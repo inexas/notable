@@ -99,27 +99,36 @@ public class Note extends Event {
 		return number % BASE;
 	}
 
-	public final static int Bs = 0;
+	public static String name(final int number) {
+		assert isValid(number);
+		return tonicName[number % BASE] + (number / BASE);
+	}
+
+	static boolean isValid(final int number) {
+		return number >= MINIMUM && number <= MAXIMUM;
+	}
+
+	final static int Bs = 0;
 	public final static int C = 0;
-	public final static int Cs = 1;
-	public final static int Db = 1;
+	final static int Cs = 1;
+	final static int Db = 1;
 	public final static int D = 2;
-	public final static int Ds = 3;
-	public final static int Eb = 3;
+	final static int Ds = 3;
+	final static int Eb = 3;
 	public final static int E = 4;
-	public final static int Fb = 4;
-	public final static int Es = 5;
+	final static int Fb = 4;
+	final static int Es = 5;
 	public final static int F = 5;
-	public final static int Fs = 6;
-	public final static int Gb = 6;
+	final static int Fs = 6;
+	final static int Gb = 6;
 	public final static int G = 7;
-	public final static int Gs = 8;
-	public final static int Ab = 8;
+	final static int Gs = 8;
+	final static int Ab = 8;
 	public final static int A = 9;
-	public final static int As = 10;
-	public final static int Bb = 10;
+	final static int As = 10;
+	final static int Bb = 10;
 	public final static int B = 11;
-	public final static int Cb = 11;
+	final static int Cb = 11;
 
 	final static int C2 = number(2, C);
 	final static int C3 = number(3, C);
@@ -127,6 +136,7 @@ public class Note extends Event {
 	final static int C5 = number(5, C);
 	final static int C6 = number(6, C);
 	final static int C8 = number(8, C);
+	final static int Cs4 = number(4, Cs);
 	final static int D1 = number(1, D);
 	final static int D4 = number(4, D);
 	final static int Ds1 = number(1, Ds);
@@ -139,10 +149,18 @@ public class Note extends Event {
 	final static int F2 = number(2, F);
 	final static int F3 = number(3, F);
 	final static int F4 = number(4, F);
+	final static int F5 = number(5, F);
+	final static int Fs4 = number(4, Fs);
 	final static int Fs7 = number(7, Fs);
+	final static int G1 = number(1, G);
 	final static int G2 = number(2, G);
 	final static int G3 = number(3, G);
+	final static int G4 = number(4, G);
+	final static int G5 = number(5, G);
+	final static int G6 = number(6, G);
+	final static int G7 = number(7, G);
 	final static int Gs1 = number(1, Gs);
+	final static int Gs4 = number(4, Gs);
 	final static int A0 = number(0, A);
 	final static int A3 = number(3, A);
 	final static int As1 = number(1, As);
@@ -176,7 +194,7 @@ public class Note extends Event {
 		register(11, "B", "Bn", "Cb");
 	}
 
-	String[] names = {
+	static String[] tonicName = {
 			"C",    // 0
 			"C#",   // 1
 			"D",    // 2

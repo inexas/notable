@@ -8,42 +8,49 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
+import static org.inexas.notable.notation.model.KeySignature.State.*;
+
 public class KeySignature extends Element implements Annotation {
-	private final static int FLAT = -1;     // Double flat would be -2, ...
-	private final static int NATURAL = 0;
-	private final static int SHARP = 1;
-	/**
-	 * Key is flat, natural, or sharp, e.g. Cb, C or C#
-	 */
-	private final int accidental;
-	/**
-	 * See if a note in this key is FLAT, NATURAL or SHARP, enter with tonic
-	 */
-	private final int[] isAccidental = new int[12];
+	public enum State {chromatic, natural, sharp, flat}
+
+	private final State keyState;
+	private final State[] tonicState = new State[12];
+
+	//  0  1  2  3  4  5  6  7  8  9  10 11
+	//  C  C# D  D# E  F  F# G  G# A  A# B
+	//                                   F  C  G  D  A  E  B
+	private static final int[] sharps = {5, 0, 7, 2, 9, 4, 11};
+	//                                  B   E  A  D  G  C  F
+	private static final int[] flats = {11, 4, 9, 2, 7, 0, 5};
+
+	private final boolean[] isNaturual = {
+			// C         D            E     F            G            A            B
+			true, false, true, false, true, true, false, true, false, true, false, true
+	};
 
 	/**
 	 * This allows the KeySignature to be looked up by the key
 	 * name, e.g. C, Cm, C#, Bbm
 	 */
-	public final static Map<String, KeySignature> map = new HashMap<>();
+	private final static Map<String, KeySignature> map = new HashMap<>();
 
 	public final String name;
 	public final int accidentalCount;
-	public static KeySignature C = new KeySignature(NATURAL, 0, "C", 0);
-	private static final KeySignature S7 = new KeySignature(SHARP, 7, "C#", 1);
-	private static final KeySignature F5 = new KeySignature(FLAT, 5, "Db", 1);
-	private static final KeySignature S2 = new KeySignature(SHARP, 2, "D", 2);
-	private static final KeySignature F3 = new KeySignature(FLAT, 3, "Eb", 3);
-	private static final KeySignature S4 = new KeySignature(SHARP, 4, "E", 4);
-	private static final KeySignature F1 = new KeySignature(FLAT, 1, "F", 5);
-	private static final KeySignature S6 = new KeySignature(SHARP, 6, "F#", 6);
-	private static final KeySignature F6 = new KeySignature(FLAT, 6, "Gb", 6);
-	private static final KeySignature S1 = new KeySignature(SHARP, 1, "G", 7);
-	private static final KeySignature F4 = new KeySignature(FLAT, 4, "Ab", 8);
-	private static final KeySignature S3 = new KeySignature(SHARP, 3, "A", 9);
-	private static final KeySignature F2 = new KeySignature(FLAT, 2, "Bb", 10);
-	private static final KeySignature S5 = new KeySignature(SHARP, 5, "B", 11);
-	private static final KeySignature F7 = new KeySignature(FLAT, 7, "Cb", 11);
+	public static KeySignature C = new KeySignature(natural, 0, "C", 0);
+	private static final KeySignature S7 = new KeySignature(sharp, 7, "C#", 1);
+	private static final KeySignature F5 = new KeySignature(flat, 5, "Db", 1);
+	private static final KeySignature S2 = new KeySignature(sharp, 2, "D", 2);
+	private static final KeySignature F3 = new KeySignature(flat, 3, "Eb", 3);
+	private static final KeySignature S4 = new KeySignature(sharp, 4, "E", 4);
+	private static final KeySignature F1 = new KeySignature(flat, 1, "F", 5);
+	private static final KeySignature S6 = new KeySignature(sharp, 6, "F#", 6);
+	private static final KeySignature F6 = new KeySignature(flat, 6, "Gb", 6);
+	private static final KeySignature S1 = new KeySignature(sharp, 1, "G", 7);
+	private static final KeySignature F4 = new KeySignature(flat, 4, "Ab", 8);
+	private static final KeySignature S3 = new KeySignature(sharp, 3, "A", 9);
+	private static final KeySignature F2 = new KeySignature(flat, 2, "Bb", 10);
+	private static final KeySignature S5 = new KeySignature(sharp, 5, "B", 11);
+	private static final KeySignature F7 = new KeySignature(flat, 7, "Cb", 11);
 
 	static {
 		map.put("C", C);
@@ -83,35 +90,60 @@ public class KeySignature extends Element implements Annotation {
 		map.put("Abm", F7);
 	}
 
-	//  0  1  2  3  4  5  6  7  8  9  10 11
-	//  C  C# D  D# E  F  F# G  G# A  A# B
-	//                                   F  C  G  D  A  E  B
-	private static final int[] sharps = {5, 0, 7, 2, 9, 4, 11};
-	//                                  B   E  A  D  G  C  F
-	private static final int[] flats = {11, 4, 9, 2, 7, 0, 5};
+	public static KeySignature get(final String name) {
+		return map.get(name);
+	}
 
 	private KeySignature(
-			final int accidental,
+			final State keyState,
 			final int accidentalCount,
 			final String name,
 			final int offset) {
-		this.accidental = accidental;
+		this.keyState = keyState;
 		this.accidentalCount = accidentalCount;
 		this.name = name;
 
+		// Mark all the chromatic (non-diatonic) and diatonic notes...
 		for(int i = 0; i < 12; i++) {
+			final int index = (offset + i) % 12;
 			//  0  1  2  3  4  5  6  7  8  9  10 11
 			//  C  C# D  D# E  F  F# G  G# A  A# B
 			//  T     T     T  T     T     T     T
-			final int j = (i + offset) % 12;
 			switch(i) {
-				case 0, 2, 4, 5, 7, 9, 11 -> {
-					isDiatonic[j] = true;
-					isAccidental[j] = accidental;
-				}
-				default -> isDiatonic[j] = false;
+				case 0, 2, 4, 5, 7, 9, 11 -> tonicState[index] = natural;
+				default -> tonicState[index] = chromatic;
 			}
 		}
+
+		// Now correct all the sharps/flats
+		final int[] altered = keyState == sharp ? sharps : flats;
+		for(int i = 0; i < accidentalCount; i++) {
+			final int index = (altered[i] + offset) % 12;
+			tonicState[index] = keyState;
+		}
+	}
+
+	private State getTonicState(final int number) {
+		assert Note.isValid(number);
+		return tonicState[number % 12];
+	}
+
+	/**
+	 * @return true if this key is sharp, e.g. C#
+	 */
+	public boolean isSharp() {
+		return keyState == sharp;
+	}
+
+	/**
+	 * @return true if this key is flat, e.g. Cb
+	 */
+	public boolean isFlat() {
+		return keyState == flat;
+	}
+
+	boolean isDiatonic(final int number) {
+		return tonicState[number % 12] != chromatic;
 	}
 
 	@Override
@@ -120,28 +152,28 @@ public class KeySignature extends Element implements Annotation {
 	}
 
 	/**
-	 * Given a note tonic 0..11 test if the note is in the key
+	 * Given a note number sharpen, flatten or leave it as is for this key.
+	 *
+	 * @param number The note number to normalize
+	 * @return The normalized number, e.g. C4 in the key of C# becomes C#4
 	 */
-	public final boolean[] isDiatonic = new boolean[12];
+	int normalize(final int number) {
+		final int returnValue;
 
-	/**
-	 * @return true if this key is sharp, e.g. C#
-	 */
-	public boolean isSharp() {
-		return accidental == SHARP;
+		if(getTonicState(number) == chromatic) {
+			returnValue = number + (keyState == sharp ? 1 : -1);
+		} else {
+			returnValue = number;
+		}
+
+		return returnValue;
 	}
 
 	/**
-	 * @return true if this key is flat, e.g. Cb
-	 */
-	public boolean isFlat() {
-		return accidental == FLAT;
-	}
-
-	/**
-	 * Generate a lookup table that, given a note, we can look up which position
-	 * the note should appear on the 'global' staff. The global staff's position
-	 * 0 is A0 and each white note on the piano keyboard occupies the next note.
+	 * Generate a lookup table that, given a number, can be used look up which
+	 * position the note should appear on the 'global' staff. The global staff's
+	 * position 0 is A0 and each white note on the piano keyboard occupies the
+	 * next note.
 	 * <p>
 	 * The table will go from A0..C8, i.e. 7 octaves plus one. In fact the notes
 	 * C0..G#0 are never used as they are outside the range of a piano but we'll
@@ -156,22 +188,22 @@ public class KeySignature extends Element implements Annotation {
 	public double[] yLookup(final Staff staff, final double baseline, final double spacing) {
 		final double[] returnValue = new double[8 * 12 + 1];
 
-		int position = isDiatonic[0] ? -1 : 0;
+		int position = -1;
 		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			if(isDiatonic[i % 12]) {
+			if(isNaturual[i % 12]) {
 				position++;
 			}
-			// There are 56 possible positions
+			// There are 56 possible positions if we imagine the piano keyboard
+			// starting with C0
 			returnValue[i] = 56 - position;
 		}
 
 		// Correct for staff base line
-		final double correction = returnValue[staff.baseNote];
+		final double correction = returnValue[staff.lowNumber];
 		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			returnValue[i] =
-					(returnValue[i] - correction)
-							* spacing
-							+ baseline;
+			returnValue[i] = (returnValue[i] - correction)
+					* spacing
+					+ baseline;
 		}
 
 		return returnValue;

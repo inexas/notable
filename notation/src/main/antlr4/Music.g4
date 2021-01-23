@@ -39,7 +39,7 @@ part: PART STRING_LITERAL ;
 
 phrase: PHRASE STRING_LITERAL ;
 
-staff: STAFF ( GRAND | TREBLE | BASS ) ;
+staff: STAFF STAFFS ;
 
 tempo: TEMPO ( FRACTION '=' COUNT | STRING_LITERAL ) ;
 
@@ -122,11 +122,7 @@ PHRASE: 'phrase' ;
 
 STAFF: 'staff' ;
 
-GRAND: 'grand' ;
-
-TREBLE: 'treble' ;
-
-BASS: 'bass' ;
+STAFFS: ( 'alto' | 'bass' | 'grand' | 'tenor' | 'treble' ) ;
 
 TEMPO: 'tempo' ;
 

@@ -25,7 +25,7 @@ public class Sheet extends VBox {
 
 		// Draw staff...
 
-		// Setup
+		// Gather some useful variables...
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
 		final double noteHeight = staffSpaceHeight / 2;
 		final double x = metrics.sideMargin;
@@ -60,7 +60,7 @@ public class Sheet extends VBox {
 		cursor += Glyph.gClef.width * 10;
 
 		// Key signature...
-		final KeySignature keySignature = score.keySignature;
+		final KeySignature keySignature = score.key;
 		if(keySignature.accidentalCount > 0) {
 			final int[] lines = {8, 5, 9, 6, 3, 7, 4};
 			final Glyph accidental = keySignature.isSharp() ?
@@ -115,6 +115,19 @@ public class Sheet extends VBox {
 			}
 			cursor += duration.clicks * perClick;
 			// todo Ghost, Tuplet, Ghost, Chords
+		}
+	}
+
+	private void calculateRange() {
+		int minNote = score.staff.lowNumber;
+		int maxNote = score.staff.highNumber;
+		for(final Event event : score.getFirstPart().getFirstPhrase().events) {
+			final int number = ((Note) event).number;
+			if(number < minNote) {
+				minNote = number;
+			} else if(number > maxNote) {
+				maxNote = number;
+			}
 		}
 	}
 }

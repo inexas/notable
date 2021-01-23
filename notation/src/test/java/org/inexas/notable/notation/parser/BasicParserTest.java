@@ -55,7 +55,7 @@ public class BasicParserTest {
 		assertEquals("time 4/4\n", score.timeSignature.toString());
 		assertNull(score.pickupMeasure);
 		assertEquals("tempo \"Andante\"\n", score.tempo.toString());
-		assertEquals("", score.keySignature.toString());
+		assertEquals("", score.key.toString());
 		assertEquals("staff treble\n", score.staff.toString());
 	}
 

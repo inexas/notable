@@ -39,6 +39,7 @@ public class MikiParser extends MusicBaseListener {
 	private int relativeOctave;
 	private int lastNote = Note.C4;
 	private Part currentPart;
+	private KeySignature currentKey;
 	private boolean settingScoreDefaults = true;
 	/**
 	 * The number of clicks counted so far in the current measure
@@ -88,6 +89,7 @@ public class MikiParser extends MusicBaseListener {
 		// Set the defaults...
 		setTimeSignature(TimeSignature.COMMON);
 		currentDuration = Duration.quarter;
+		score.key = currentKey = KeySignature.C;
 	}
 
 	@Override
@@ -144,7 +146,7 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterStaff(final MusicParser.StaffContext ctx) {
 		final String text = ctx.getStop().getText();
-		final Staff staff = Staff.getStaff(text);
+		final Staff staff = new Staff(text, currentKey);
 		if(settingScoreDefaults) {
 			score.staff = staff;
 		} else {
@@ -174,11 +176,11 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterKey(final MusicParser.KeyContext ctx) {
 		final String text = ctx.getStop().getText();
-		final KeySignature keySignature = parseKeySignature(text);
+		currentKey = parseKeySignature(text);
 		if(settingScoreDefaults) {
-			score.keySignature = keySignature;
+			score.key = currentKey;
 		} else {
-			annotate(ctx, keySignature);
+			annotate(ctx, currentKey);
 		}
 	}
 
@@ -603,7 +605,7 @@ public class MikiParser extends MusicBaseListener {
 			mode = group3;
 		}
 
-		result = KeySignature.map.get(tonic);
+		result = KeySignature.get(tonic);
 
 		return result;
 	}
