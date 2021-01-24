@@ -11,44 +11,48 @@ import java.util.*;
 /**
  * A representation of a sound event of a given duration and pitch. A
  * note can be represented either as an octave + tonic e.g. C4 or
- * as a note number: the octave x 12 + tonic where the tonic is a number
+ * as a note position: the octave x 12 + tonic where the tonic is a position
  * between 0 and 11 for C..B
  */
 public class Note extends Event {
-	final static int BASE = 12;
-	private final static int MINIMUM = 9;
-	final static int MAXIMUM = 96;
+	final static int BASE = 7;
+	private final static int MINIMUM = 5;
+	final static int MAXIMUM = 56;
 
 	static class SearchSpace {
-		private static final int[] lookup = {0, 1, 2, 3, 4, 5, 6, -5, -4, -3, -2, -1};
-
+		private static final int[] lookup = {0, 1, 2, 3, -3, -2, -1};
 		private int anchor, anchorTonic;
 
-		SearchSpace(final int noteNumber) {
-			setAnchor(noteNumber);
+		SearchSpace(final int position) {
+			setAnchor(position);
 		}
 
-		void setAnchor(final int noteNumber) {
-			if(noteNumber < 14) {
-				anchor = 14;
-			} else if(noteNumber > 90) {
-				anchor = 90;
+		void setAnchor(final int position) {
+			if(position < 8) {
+				anchor = 8;
+			} else if(position > 53) {
+				anchor = 53;
 			} else {
-				anchor = noteNumber;
+				anchor = position;
 			}
 			anchorTonic = tonic(anchor);
 		}
 
 		int lookup(final int tonic) {
-			final int index = (BASE + tonic - anchorTonic) % BASE;
-			return anchor + lookup[index];
+			return anchor + lookup[(BASE + tonic - anchorTonic) % BASE];
 		}
 
+		/**
+		 * Move the SearchSpace up or down by a given amount
+		 *
+		 * @param vector E.g. '++' gives a vector of +2
+		 */
 		void moveAnchor(final int vector) {
 			assert vector != 0;
+
 			final boolean up = vector > 0;
 			int distance = up ? vector : -vector;
-			final int newAnchor = anchor + (up ? 6 : -7);
+			final int newAnchor = anchor + (up ? 4 : -5);
 			distance--;
 			setAnchor(newAnchor + (up ? distance * BASE : distance * -BASE));
 		}
@@ -58,223 +62,209 @@ public class Note extends Event {
 		}
 	}
 
+	private static final String[] labels = {"C", "D", "E", "F", "G", "A", "B"};
+
 	/**
-	 * Covert an octave and tonic number to note number
+	 * Covert an octave and tonic to a position
 	 *
 	 * @param octave Octave value 0 to 8
-	 * @param tonic  Tonic value  0..11
-	 * @return Note number from A0=9, through C4=48, to C8=96
+	 * @param tonic  Tonic value  0..6
+	 * @return Note position from A0=5, through C4=28, to C8=56
 	 */
-	public static int number(final int octave, final int tonic) {
+	public static int position(final int octave, final int tonic) {
 		final int returnValue;
 
-		assert tonic >= 0 && tonic < BASE : "tonic out of range: " + tonic;
-		assert octave >= 0 & octave < 9 : "octave out of range: " + octave;
+		assert tonic >= 0 && tonic < BASE : "Tonic out of range: " + tonic;
+		assert octave >= 0 & octave < 9 : "Octave out of range: " + octave;
 
 		returnValue = octave * BASE + tonic;
-		assert returnValue >= MINIMUM && returnValue <= MAXIMUM : "Note number out of range: " + returnValue;
+		assert returnValue >= MINIMUM && returnValue <= MAXIMUM : "Note position out of range: " + returnValue;
 
 		return returnValue;
 	}
 
 	/**
-	 * Return the octave given the note number
+	 * Return the octave given the note position
 	 *
-	 * @param number Note number, e.g. 21
+	 * @param position Note position, e.g. 28
 	 * @return The octave, e.g. 4
 	 */
-	public static int octave(final int number) {
-		assert number >= MINIMUM && number <= MAXIMUM : "Note number out of range: " + number;
-		return number / BASE;
+	public static int octave(final int position) {
+		assert position >= MINIMUM && position <= MAXIMUM : "Position out of range: " + position;
+		return position / BASE;
 	}
 
 	/**
-	 * Return the tonic 0..11 given the note number
+	 * Return the tonic 0..11 given the note position
 	 *
-	 * @param number Note number, e.g. 21
-	 * @return The tonic, e.g. 11
+	 * @param position Note position, e.g. 28
+	 * @return The tonic, e.g. 0
 	 */
-	public static int tonic(final int number) {
-		assert number >= MINIMUM && number <= MAXIMUM : "Note number out of range: " + number;
-		return number % BASE;
+	public static int tonic(final int position) {
+		assert position >= MINIMUM && position <= MAXIMUM : "Note position out of range: " + position;
+		return position % BASE;
 	}
 
-	public static String name(final int number) {
-		assert isValid(number);
-		return tonicName[number % BASE] + (number / BASE);
+	public static int position(final int position) {
+		assert position >= MINIMUM && position <= MAXIMUM : "Note position out of range: " + position;
+		return position % BASE;
 	}
-
-	static boolean isValid(final int number) {
-		return number >= MINIMUM && number <= MAXIMUM;
-	}
-
-	final static int Bs = 0;
-	public final static int C = 0;
-	final static int Cs = 1;
-	final static int Db = 1;
-	public final static int D = 2;
-	final static int Ds = 3;
-	final static int Eb = 3;
-	public final static int E = 4;
-	final static int Fb = 4;
-	final static int Es = 5;
-	public final static int F = 5;
-	final static int Fs = 6;
-	final static int Gb = 6;
-	public final static int G = 7;
-	final static int Gs = 8;
-	final static int Ab = 8;
-	public final static int A = 9;
-	final static int As = 10;
-	final static int Bb = 10;
-	public final static int B = 11;
-	final static int Cb = 11;
-
-	final static int C1 = number(1, C);
-	final static int C2 = number(2, C);
-	final static int C3 = number(3, C);
-	public final static int C4 = number(4, C);
-	public final static int C5 = number(5, C);
-	final static int C6 = number(6, C);
-	final static int C8 = number(8, C);
-	final static int Cs4 = number(4, Cs);
-	final static int D1 = number(1, D);
-	final static int D4 = number(4, D);
-	final static int Ds1 = number(1, Ds);
-	final static int D3 = number(3, D);
-	final static int D5 = number(5, D);
-	final static int D6 = number(6, D);
-	final static int E1 = number(1, E);
-	public final static int E4 = number(4, E);
-	final static int F1 = number(1, F);
-	final static int F2 = number(2, F);
-	final static int F3 = number(3, F);
-	final static int F4 = number(4, F);
-	public final static int F5 = number(5, F);
-	final static int Fs4 = number(4, Fs);
-	final static int Fs7 = number(7, Fs);
-	final static int G2 = number(2, G);
-	final static int G3 = number(3, G);
-	final static int G4 = number(4, G);
-	public final static int G5 = number(5, G);
-	final static int Gs1 = number(1, Gs);
-	final static int Gs4 = number(4, Gs);
-	final static int A0 = number(0, A);
-	final static int A3 = number(3, A);
-	final static int As1 = number(1, As);
-	final static int As2 = number(2, As);
-	final static int B0 = number(0, B);
-	final static int B3 = number(3, B);
 
 	/**
-	 * Given a note name like "C#", return the tonic 0..11, e.g. 1
+	 * Given a position, return the name.
+	 *
+	 * @param position The position to resolve, e.g. 48
+	 * @return The corresponding name, e.g. C4
 	 */
-	private final static Map<String, Integer> lookupTonic = new HashMap<>();
-
-	private static void register(final int tonic, final String... names) {
-		for(final String name : names) {
-			lookupTonic.put(name, tonic);
-		}
+	public static String name(final int position) {
+		assert isValid(position);
+		return tonicName[position % BASE] + (position / BASE);
 	}
-
-	static {
-		register(0, "C", "Cn", "B#");
-		register(1, "C#", "Db");
-		register(2, "D", "Dn");
-		register(3, "D#", "Eb");
-		register(4, "E", "En");
-		register(5, "F", "Fn", "E#");
-		register(6, "F#", "Gb");
-		register(7, "G", "Gn");
-		register(8, "G#", "Ab");
-		register(9, "A", "An");
-		register(10, "A#", "Bb");
-		register(11, "B", "Bn", "Cb");
-	}
-
-	private static final String[] tonicName = {
-			"C",    // 0
-			"C#",   // 1
-			"D",    // 2
-			"D#",   // 3
-			"E",    // 4
-			"F",    // 5
-			"F#",   // 6
-			"G",    // 7
-			"G#",   // 8
-			"A",    // 9
-			"A#",   // 10
-			"B",    // 11
-	};
 
 	/**
-	 * Covert an octave and tonic name to note number
+	 * Covert an octave and tonic name to note position
 	 *
 	 * @param octave Octave value 0 to 8
 	 * @param name   E.g. "C", "Bb"
-	 * @return Note number from A0, through C4, to C8
+	 * @return Note position from A0, through C4, to C8
 	 */
-	public static int number(final int octave, final String name) {
-		assert octave >= 0 & octave < 9 : "octave out of range: " + octave;
-
-		final Integer tonic = lookupTonic.get(name);
-		assert tonic != null : "No such name: " + name;
-		return number(octave, tonic);
+	public static int position(final int octave, final String name) {
+		assert octave >= 0 & octave < 9 : "Octave out of range: " + octave;
+		return position(octave, getTonic(name));
 	}
 
-	static final int[] tonic2Ton = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
-	static final int[] number2Position = new int[MAXIMUM];
+	private static int getTonic(final String tonicText) {
+		int returnValue = tonicText.charAt(0) - 'C';
+		if(returnValue < 0) {
+			returnValue += 7;
+		}
+		return returnValue;
+	}
 
-	static {
-		for(int i = 0; i < number2Position.length; i++) {
-			number2Position[i] = (i / BASE) * 7 + tonic2Ton[i % BASE];
+
+	static boolean isValid(final int position) {
+		return position >= MINIMUM && position <= MAXIMUM;
+	}
+
+	public final static int C = 0;
+	public final static int D = 1;
+	public final static int E = 2;
+	public final static int F = 3;
+	public final static int G = 4;
+	public final static int A = 5;
+	public final static int B = 6;
+
+	final static int C1 = position(1, C);
+	final static int C2 = position(2, C);
+	final static int C3 = position(3, C);
+	public final static int C4 = position(4, C);
+	public final static int C5 = position(5, C);
+	final static int C6 = position(6, C);
+	final static int C8 = position(8, C);
+	final static int D1 = position(1, D);
+	final static int D4 = position(4, D);
+	final static int D3 = position(3, D);
+	final static int D5 = position(5, D);
+	final static int D6 = position(6, D);
+	final static int E1 = position(1, E);
+	public final static int E4 = position(4, E);
+	final static int F1 = position(1, F);
+	final static int F2 = position(2, F);
+	final static int F3 = position(3, F);
+	final static int F4 = position(4, F);
+	public final static int F5 = position(5, F);
+	final static int G2 = position(2, G);
+	final static int G3 = position(3, G);
+	final static int G4 = position(4, G);
+	public final static int G5 = position(5, G);
+	final static int A0 = position(0, A);
+	final static int A3 = position(3, A);
+	final static int B0 = position(0, B);
+	final static int B3 = position(3, B);
+
+	private static final String[] tonicName = {"C", "D", "E", "F", "G", "A", "B"};
+
+	private static class Key {
+		final int position;
+		final Duration duration;
+		final Map<Class<? extends Annotation>, Annotation> annotations;
+
+		private Key(
+				final int position,
+				final Duration duration,
+				final Map<Class<? extends Annotation>, Annotation> annotations) {
+			this.position = position;
+			this.duration = duration;
+			this.annotations = annotations;
 		}
 	}
 
+	private final static Map<Key, Note> cache = new HashMap<>();
+
 	/**
-	 * The octave number of this note valid both for number and position
+	 * Note factory
+	 *
+	 * @param position    E.g. 48 for C4
+	 * @param duration    e.g. Duration.quarter
+	 * @param annotations Annotations (not null but empty is OK)
+	 * @return The Note
+	 */
+	public static Note get(
+			final int position,
+			final Duration duration,
+			final Map<Class<? extends Annotation>, Annotation> annotations) {
+		Note returnValue;
+
+		assert position >= MINIMUM && position <= MAXIMUM : "Position out of range";
+
+		final Key key = new Key(position, duration, annotations);
+		returnValue = cache.get(key);
+		if(returnValue == null) {
+			returnValue = new Note(position, duration, annotations);
+			cache.put(key, returnValue);
+		}
+
+		return returnValue;
+	}
+
+	public static String toName(final int position) {
+		return tonicName[position % BASE] + position / BASE;
+	}
+
+	/**
+	 * The octave position of this note valid both for position and position
 	 */
 	public final int octave;
 
 	/**
-	 * The number representing the tonic independently to the
+	 * The position representing the tonic independently to the
 	 * octave, e.g. C = 0, C#, Db = 1, ...
 	 */
 	public final int tonic;
 
 	/**
-	 * The number representing the tonic independently to the
-	 * octave, e.g. C = 0, C#, Db = 1, ...
-	 */
-	public final int ton;
-
-	/**
-	 * The note 'number' is a number between 9 and 97 that represents
+	 * The note 'position' is a position between 9 and 96 that represents
 	 * the note as a combination of the octave x BASE + note index where
 	 * C is 0, C# is 1 etc.
 	 */
-	public final int number;
+	public final int position;
 
-	public Note(
-			final String name,
-			final int number,
+	private Note(
+			final int position,
 			final Duration duration,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
-		super(name, duration, annotations);
+		super(toName(position), duration, annotations);
 
-		assert lookupTonic.containsKey(name) : "No such note name: " + name;
-
-		this.number = number;
-		octave = octave(number);
-		tonic = number % BASE;
-		ton = tonic2Ton[tonic];
+		this.position = position;
+		octave = position / BASE;
+		tonic = position % BASE;
 	}
 
+	// todo I think I can get rid of the copy constructors
 	private Note(final Note toCopy) {
 		super(toCopy);
-		number = toCopy.number;
+		position = toCopy.position;
 		tonic = toCopy.tonic;
-		ton = toCopy.ton;
 		octave = toCopy.octave;
 	}
 
@@ -291,39 +281,43 @@ public class Note extends Event {
 	}
 
 	/**
-	 * Calculator that given the last note number and a new tonic, calculates
-	 * the next number.
+	 * Calculator that given the last note position and a new tonic, calculates
+	 * the next position.
 	 *
-	 * @param lastNote       The previous note number
-	 * @param absoluteOctave Octave override using o4. -1 means no override
+	 * @param lastPosition   The previous note position
+	 * @param absoluteOctave Octave override using 'o4'. -1 means no override
 	 * @param relativeOctave Octave override 0 = none requested otherwise the
-	 *                       number will be the count of +'s or -'s in the miki
-	 * @param tonicText      The tonic to move to, e.g. "C#"
-	 * @return The note number of the next note
+	 *                       position will be the count of +'s or -'s in the miki
+	 * @param tonicText      The tonic to move to, e.g. "C"
+	 * @return The note position of the next note
 	 */
 	public static int next(
-			final int lastNote,
+			final int lastPosition,
 			final int absoluteOctave,
 			final int relativeOctave,
 			final String tonicText) {
 		final int returnValue;
 
-		final int tonic = lookupTonic.get(tonicText);
+		final int tonic = getTonic(tonicText);
 
 		if(absoluteOctave >= 0) {
 			// Absolute octave has been specified
-			// todo Create exceptions for the following asserts
 			assert relativeOctave == 0;
-			assert absoluteOctave < 8 || absoluteOctave == 8 && tonic == 1;
+			assert absoluteOctave < 8 || absoluteOctave == 8 && tonic == 0;
 			returnValue = absoluteOctave * BASE + tonic;
 		} else {
-			final SearchSpace ss = new SearchSpace(lastNote);
+			final SearchSpace searchSpace = new SearchSpace(lastPosition);
 			if(relativeOctave != 0) {
-				ss.moveAnchor(relativeOctave);
+				searchSpace.moveAnchor(relativeOctave);
 			}
-			returnValue = ss.lookup(tonic);
+			returnValue = searchSpace.lookup(tonic);
 		}
 
 		return returnValue;
+	}
+
+	@Override
+	public String getLabel() {
+		return labels[tonic];
 	}
 }

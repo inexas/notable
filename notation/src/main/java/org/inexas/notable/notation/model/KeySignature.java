@@ -142,31 +142,9 @@ public class KeySignature extends Element implements Annotation {
 		return keyState == flat;
 	}
 
-	boolean isDiatonic(final int number) {
-		return tonicState[number % 12] != chromatic;
-	}
-
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
-	}
-
-	/**
-	 * Given a note number sharpen, flatten or leave it as is for this key.
-	 *
-	 * @param number The note number to normalize
-	 * @return The normalized number, e.g. C4 in the key of C# becomes C#4
-	 */
-	int normalize(final int number) {
-		final int returnValue;
-
-		if(getTonicState(number) == chromatic) {
-			returnValue = number + (keyState == sharp ? 1 : -1);
-		} else {
-			returnValue = number;
-		}
-
-		return returnValue;
 	}
 
 	/**

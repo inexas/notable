@@ -322,7 +322,7 @@ public class ToMikiVisitor implements Visitor {
 
 		// Now the event itself
 		space();
-		sb.append(event.name);
+		sb.append(event.getLabel());
 		visitDuration(event);
 
 		// Now any Articulation...

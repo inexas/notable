@@ -498,11 +498,11 @@ public class MikiParser extends MusicBaseListener {
 					lastNote,
 					absoluteOctave, relativeOctave,
 					tonic);
-			event = new Note(tonic, number, duration, annotations);
+			event = Note.get(number, duration, annotations);
 		}
 
 		if(event instanceof Note) {
-			lastNote = ((Note) event).number;
+			lastNote = ((Note) event).position;
 			score.staff.accountFor(lastNote);
 		}
 

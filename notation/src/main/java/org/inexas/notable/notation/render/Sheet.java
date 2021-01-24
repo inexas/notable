@@ -112,7 +112,7 @@ public class Sheet extends VBox {
 			if(event instanceof Note) {
 				final Note note = (Note) event;
 				final Glyph glyph = Glyph.get(note);
-				gc.fillText(glyph.c, cursor, yLookup[note.number]);
+				gc.fillText(glyph.c, cursor, yLookup[note.position]);
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
 				final Glyph glyph = Glyph.get(rest);
@@ -126,11 +126,11 @@ public class Sheet extends VBox {
 		int minNote = score.staff.lowLineNumber;
 		int maxNote = score.staff.highLineNumber;
 		for(final Event event : score.getFirstPart().getFirstPhrase().events) {
-			final int number = ((Note) event).number;
-			if(number < minNote) {
-				minNote = number;
-			} else if(number > maxNote) {
-				maxNote = number;
+			final int position = ((Note) event).position;
+			if(position < minNote) {
+				minNote = position;
+			} else if(position > maxNote) {
+				maxNote = position;
 			}
 		}
 	}

@@ -58,8 +58,8 @@ public class Staff extends Element {
 	public Staff(final Type type, final KeySignature key) {
 		this.type = type;
 		this.key = key;
-		lowLineNumber = key.normalize(type.cLow);
-		highLineNumber = key.normalize(type.cHigh);
+		lowLineNumber = type.cLow;
+		highLineNumber = type.cHigh;
 	}
 
 	@Override

@@ -13,18 +13,19 @@ public class EventAbcTests {
 	@Test
 	void testAssertions() {
 		AssertionError e = assertThrows(AssertionError.class, () ->
-				new Note(null, 4, null, null));
-		assertTrue(e.getMessage().contains("name"));
+				Note.get(4, null, null));
+		assertTrue(e.getMessage().contains("range"));
 
 		e = assertThrows(AssertionError.class, () ->
-				new Note("C", 4, null, null));
+				Note.get(5, null, null));
 		assertTrue(e.getMessage().contains("duration"));
 
 		e = assertThrows(AssertionError.class, () ->
-				new Note("C", 4, Duration.quarter, null));
+				Note.get(5, Duration.quarter, null));
 		assertTrue(e.getMessage().contains("annotations"));
 
 		e = assertThrows(AssertionError.class, () ->
-				new Note("C", 4, Duration.quarter, noAnnotations));
+				Note.get(57, Duration.quarter, noAnnotations));
+		assertTrue(e.getMessage().contains("range"));
 	}
 }

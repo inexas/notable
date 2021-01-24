@@ -87,7 +87,6 @@ public class BasicParserTest {
 	void testAccidentals() {
 		// [#bn]
 		assertEquals("B Bb A# B ||\n", toMiki("B Bb A# Bn"));
-		// todo Handle double sharps and flats
 	}
 
 	@Test

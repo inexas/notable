@@ -58,4 +58,8 @@ public abstract class Event extends Element implements Visited {
 		//noinspection unchecked
 		return (T) annotations.get(clazz);
 	}
+
+	public String getLabel() {
+		return name;
+	}
 }
