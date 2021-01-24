@@ -232,7 +232,7 @@ fragment HexDigit:	[0-9a-fA-F] ;
 
 fragment Count:	('0' | OneOrMore ) ;
 
-fragment OneOrMore: [1-9] [0-9]* ;
+fragment OneOrMore: [1-9][0-9]* ;
 
 fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) ','* ;
 

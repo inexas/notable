@@ -503,6 +503,7 @@ public class MikiParser extends MusicBaseListener {
 
 		if(event instanceof Note) {
 			lastNote = ((Note) event).number;
+			score.staff.accountFor(lastNote);
 		}
 
 		// Have we reached the end of a measure?

@@ -35,6 +35,11 @@ public class Sheet extends VBox {
 
 		// y coordinate of lines and spaces...
 		final double topLine = y;
+
+		// Account for leger lines
+		final KeySignature keySignature = score.key;
+
+
 		final double baseLine = topLine + staffSpaceHeight * 4;
 
 		gc.setLineWidth(metrics.staffLineThickness * 7.7);
@@ -60,7 +65,6 @@ public class Sheet extends VBox {
 		cursor += Glyph.gClef.width * 10;
 
 		// Key signature...
-		final KeySignature keySignature = score.key;
 		if(keySignature.accidentalCount > 0) {
 			final int[] lines = {8, 5, 9, 6, 3, 7, 4};
 			final Glyph accidental = keySignature.isSharp() ?
@@ -94,7 +98,7 @@ public class Sheet extends VBox {
 		final List<Event> events = score.getFirstPart().getFirstPhrase().events;
 		boolean first = true;
 		for(final Event event : events) {
-			// Barlines?
+			// Are there Barlines?
 			if(first) {
 				first = false;
 			} else {
@@ -119,8 +123,8 @@ public class Sheet extends VBox {
 	}
 
 	private void calculateRange() {
-		int minNote = score.staff.lowNumber;
-		int maxNote = score.staff.highNumber;
+		int minNote = score.staff.lowLineNumber;
+		int maxNote = score.staff.highLineNumber;
 		for(final Event event : score.getFirstPart().getFirstPhrase().events) {
 			final int number = ((Note) event).number;
 			if(number < minNote) {

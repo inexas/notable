@@ -24,6 +24,7 @@ public class EventAbcTests {
 				new Note("C", 4, Duration.quarter, null));
 		assertTrue(e.getMessage().contains("annotations"));
 
-		new Note("C", 4, Duration.quarter, noAnnotations);
+		e = assertThrows(AssertionError.class, () ->
+				new Note("C", 4, Duration.quarter, noAnnotations));
 	}
 }

@@ -36,12 +36,20 @@ public class Staff extends Element {
 	/**
 	 * Note number on bottom line adjusted for key
 	 */
-	public final int lowNumber;
+	public final int lowLineNumber;
 	/**
 	 * Note number on top line adjusted for key
 	 */
-	public final int highNumber;
+	public final int highLineNumber;
 
+	/**
+	 * Lowest note encountered, -1 means no notes so far
+	 */
+	public int lowestNote = -1;
+	/**
+	 * Highest note encountered, -1 means no notes so far
+	 */
+	public int highestNote = -1;
 
 	public Staff(final String name, final KeySignature key) throws IllegalArgumentException {
 		this(Type.valueOf(name), key);
@@ -50,8 +58,8 @@ public class Staff extends Element {
 	public Staff(final Type type, final KeySignature key) {
 		this.type = type;
 		this.key = key;
-		lowNumber = key.normalize(type.cLow);
-		highNumber = key.normalize(type.cHigh);
+		lowLineNumber = key.normalize(type.cLow);
+		highLineNumber = key.normalize(type.cHigh);
 	}
 
 	@Override
@@ -80,5 +88,19 @@ public class Staff extends Element {
 		}
 
 		return returnValue;
+	}
+
+	public void accountFor(final int number) {
+		assert Note.isValid(number);
+
+		if(lowestNote == -1) {
+			lowestNote = highestNote = number;
+		} else {
+			if(number < lowestNote) {
+				lowestNote = number;
+			} else if(number > highestNote) {
+				highestNote = number;
+			}
+		}
 	}
 }

@@ -50,7 +50,7 @@ public class Note extends Event {
 			int distance = up ? vector : -vector;
 			final int newAnchor = anchor + (up ? 6 : -7);
 			distance--;
-			setAnchor(newAnchor + (up ? distance * 12 : distance * -12));
+			setAnchor(newAnchor + (up ? distance * BASE : distance * -BASE));
 		}
 
 		int getAnchor() {
@@ -130,10 +130,11 @@ public class Note extends Event {
 	public final static int B = 11;
 	final static int Cb = 11;
 
+	final static int C1 = number(1, C);
 	final static int C2 = number(2, C);
 	final static int C3 = number(3, C);
 	public final static int C4 = number(4, C);
-	final static int C5 = number(5, C);
+	public final static int C5 = number(5, C);
 	final static int C6 = number(6, C);
 	final static int C8 = number(8, C);
 	final static int Cs4 = number(4, Cs);
@@ -144,21 +145,18 @@ public class Note extends Event {
 	final static int D5 = number(5, D);
 	final static int D6 = number(6, D);
 	final static int E1 = number(1, E);
-	final static int E4 = number(4, E);
+	public final static int E4 = number(4, E);
 	final static int F1 = number(1, F);
 	final static int F2 = number(2, F);
 	final static int F3 = number(3, F);
 	final static int F4 = number(4, F);
-	final static int F5 = number(5, F);
+	public final static int F5 = number(5, F);
 	final static int Fs4 = number(4, Fs);
 	final static int Fs7 = number(7, Fs);
-	final static int G1 = number(1, G);
 	final static int G2 = number(2, G);
 	final static int G3 = number(3, G);
 	final static int G4 = number(4, G);
-	final static int G5 = number(5, G);
-	final static int G6 = number(6, G);
-	final static int G7 = number(7, G);
+	public final static int G5 = number(5, G);
 	final static int Gs1 = number(1, Gs);
 	final static int Gs4 = number(4, Gs);
 	final static int A0 = number(0, A);
@@ -194,7 +192,7 @@ public class Note extends Event {
 		register(11, "B", "Bn", "Cb");
 	}
 
-	static String[] tonicName = {
+	private static final String[] tonicName = {
 			"C",    // 0
 			"C#",   // 1
 			"D",    // 2
@@ -224,8 +222,31 @@ public class Note extends Event {
 		return number(octave, tonic);
 	}
 
+	static final int[] tonic2Ton = {0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6};
+	static final int[] number2Position = new int[MAXIMUM];
 
+	static {
+		for(int i = 0; i < number2Position.length; i++) {
+			number2Position[i] = (i / BASE) * 7 + tonic2Ton[i % BASE];
+		}
+	}
+
+	/**
+	 * The octave number of this note valid both for number and position
+	 */
+	public final int octave;
+
+	/**
+	 * The number representing the tonic independently to the
+	 * octave, e.g. C = 0, C#, Db = 1, ...
+	 */
 	public final int tonic;
+
+	/**
+	 * The number representing the tonic independently to the
+	 * octave, e.g. C = 0, C#, Db = 1, ...
+	 */
+	public final int ton;
 
 	/**
 	 * The note 'number' is a number between 9 and 97 that represents
@@ -242,14 +263,19 @@ public class Note extends Event {
 		super(name, duration, annotations);
 
 		assert lookupTonic.containsKey(name) : "No such note name: " + name;
+
 		this.number = number;
+		octave = octave(number);
 		tonic = number % BASE;
+		ton = tonic2Ton[tonic];
 	}
 
 	private Note(final Note toCopy) {
 		super(toCopy);
 		number = toCopy.number;
 		tonic = toCopy.tonic;
+		ton = toCopy.ton;
+		octave = toCopy.octave;
 	}
 
 	@Override
@@ -289,7 +315,7 @@ public class Note extends Event {
 			// todo Create exceptions for the following asserts
 			assert relativeOctave == 0;
 			assert absoluteOctave < 8 || absoluteOctave == 8 && tonic == 1;
-			returnValue = absoluteOctave * 12 + tonic;
+			returnValue = absoluteOctave * BASE + tonic;
 		} else {
 			final SearchSpace ss = new SearchSpace(lastNote);
 			if(relativeOctave != 0) {

@@ -5,9 +5,6 @@ import javafx.scene.*;
 import javafx.stage.*;
 import org.inexas.notable.notation.parser.*;
 
-// todo Add notes from score
-// todo Remember window position
-
 public class Experiment extends Application {
 
 	public static void main(final String[] args) {

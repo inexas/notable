@@ -99,4 +99,29 @@ public class NoteTest {
 		assertEquals("A0", Note.name(9));
 		assertEquals("C8", Note.name(8 * 12));
 	}
+
+	@Test
+	void testTon() {
+		final Note c4 = new Note("C", 48, Duration.quarter, noAnnotations);
+		assertEquals(0, c4.ton);
+		final Note d4 = new Note("D", 50, Duration.quarter, noAnnotations);
+		assertEquals(1, d4.ton);
+
+		assertEquals(0, Note.tonic2Ton[0]);
+		assertEquals(0, Note.tonic2Ton[1]);
+		assertEquals(1, Note.tonic2Ton[2]);
+		assertEquals(1, Note.tonic2Ton[3]);
+		assertEquals(2, Note.tonic2Ton[4]);
+		assertEquals(3, Note.tonic2Ton[5]);
+		assertEquals(3, Note.tonic2Ton[6]);
+		assertEquals(4, Note.tonic2Ton[7]);
+		assertEquals(4, Note.tonic2Ton[8]);
+		assertEquals(5, Note.tonic2Ton[9]);
+		assertEquals(5, Note.tonic2Ton[10]);
+		assertEquals(6, Note.tonic2Ton[11]);
+
+		assertEquals(0, Note.number2Position[0]);
+		assertEquals(7, Note.number2Position[Note.C1]);
+		assertEquals(29, Note.number2Position[Note.D4]);
+	}
 }

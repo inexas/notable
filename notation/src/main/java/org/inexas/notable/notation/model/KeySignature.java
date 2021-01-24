@@ -23,7 +23,7 @@ public class KeySignature extends Element implements Annotation {
 	//                                  B   E  A  D  G  C  F
 	private static final int[] flats = {11, 4, 9, 2, 7, 0, 5};
 
-	private final boolean[] isNaturual = {
+	private final boolean[] isNatural = {
 			// C         D            E     F            G            A            B
 			true, false, true, false, true, true, false, true, false, true, false, true
 	};
@@ -190,7 +190,7 @@ public class KeySignature extends Element implements Annotation {
 
 		int position = -1;
 		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			if(isNaturual[i % 12]) {
+			if(isNatural[i % 12]) {
 				position++;
 			}
 			// There are 56 possible positions if we imagine the piano keyboard
@@ -199,7 +199,7 @@ public class KeySignature extends Element implements Annotation {
 		}
 
 		// Correct for staff base line
-		final double correction = returnValue[staff.lowNumber];
+		final double correction = returnValue[staff.lowLineNumber];
 		for(int i = 0; i <= Note.MAXIMUM; i++) {
 			returnValue[i] = (returnValue[i] - correction)
 					* spacing
