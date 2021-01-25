@@ -37,6 +37,8 @@ public class Sheet extends VBox {
 		final double baseLine = topLine + staffHeight;
 		final KeySignature key = score.key;
 		final double[] yLookup = KeySignature.C.yLookup(staff, baseLine, positionHeight);
+		final double yRest = yLookup[staff.lowLinePosition + 4];
+		final double yWholeRest = yLookup[staff.lowLinePosition + 6];
 
 		// Draw staff...
 
@@ -122,9 +124,10 @@ public class Sheet extends VBox {
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
 				final Glyph glyph = Glyph.get(rest);
+				y = rest.duration.clicks == 32 ? yWholeRest : yRest;
+				gc.fillText(glyph.c, xCursor, y);
 			}
 			xCursor += duration.clicks * perClick;
-			// todo Ghost, Tuplet, Ghost, Chords
 		}
 	}
 }

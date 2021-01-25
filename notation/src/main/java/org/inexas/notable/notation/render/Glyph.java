@@ -4,6 +4,9 @@ import org.inexas.notable.notation.model.*;
 
 import java.util.*;
 
+/**
+ * Seee https://w3c.github.io/smufl/gitbook/tables/individual-notes.html
+ */
 public class Glyph {
 	// Clefs
 	public static Glyph gClef = new Glyph("gClef");
@@ -18,6 +21,13 @@ public class Glyph {
 	public static Glyph note8thDown = new Glyph("note8thDown");
 	public static Glyph note16thUp = new Glyph("note16thUp");
 	public static Glyph note16thDown = new Glyph("note16thDown");
+
+	// Rests
+	public static Glyph restWhole = new Glyph("restWhole");
+	public static Glyph restHalf = new Glyph("restHalf");
+	public static Glyph restQuarter = new Glyph("restQuarter");
+	public static Glyph rest8th = new Glyph("rest8th");
+	public static Glyph rest16th = new Glyph("rest16th");
 
 	public static Glyph get(final Note note) {
 		final Glyph returnValue;
@@ -34,17 +44,20 @@ public class Glyph {
 		return returnValue;
 	}
 
-	public static Glyph get(final Rest note) {
-		// todo Load rests
-		return null;
-	}
+	public static Glyph get(final Rest rest) {
+		final Glyph returnValue;
 
-	// Rests
-	public static Glyph restWhole = new Glyph("restWhole");
-	public static Glyph restHalf = new Glyph("restHalf");
-	public static Glyph restQuarter = new Glyph("restQuarter");
-	public static Glyph rest8th = new Glyph("rest8th");
-	public static Glyph rest16th = new Glyph("rest16th");
+		switch(rest.duration.clicks) {
+			case 32 -> returnValue = restWhole;
+			case 16 -> returnValue = restHalf;
+			case 8 -> returnValue = restQuarter;
+			case 4 -> returnValue = rest8th;
+			case 2 -> returnValue = rest16th;
+			default -> throw new RuntimeException("Rest not supported: " + rest);
+		}
+
+		return returnValue;
+	}
 
 	// Time signatures
 	public static Glyph[] timeSignature = {
