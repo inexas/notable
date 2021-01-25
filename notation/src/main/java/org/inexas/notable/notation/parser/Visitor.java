@@ -70,4 +70,6 @@ public interface Visitor {
 	void visit(Mode mode);
 
 	void visit(NamedChord namedChord);
+
+	void visit(Accidental accidental);
 }

@@ -15,11 +15,11 @@ public class Staff extends Element {
 		tenor(Note.D3, Note.E4),
 		treble(Note.E4, Note.F5);
 		/**
-		 * Note number of the lowest line in the key of C
+		 * Note position of the lowest line in the key of C
 		 */
 		int cLow;
 		/**
-		 * Note number of the highest line in the key of C
+		 * Note position of the highest line in the key of C
 		 */
 		int cHigh;
 
@@ -34,13 +34,13 @@ public class Staff extends Element {
 	private final KeySignature key;
 
 	/**
-	 * Note number on bottom line adjusted for key
+	 * Note position on bottom line adjusted for key
 	 */
-	public final int lowLineNumber;
+	public final int lowLinePosition;
 	/**
-	 * Note number on top line adjusted for key
+	 * Note position on top line adjusted for key
 	 */
-	public final int highLineNumber;
+	public final int highLinePosition;
 
 	/**
 	 * Lowest note encountered, -1 means no notes so far
@@ -58,8 +58,8 @@ public class Staff extends Element {
 	public Staff(final Type type, final KeySignature key) {
 		this.type = type;
 		this.key = key;
-		lowLineNumber = type.cLow;
-		highLineNumber = type.cHigh;
+		lowLinePosition = type.cLow;
+		highLinePosition = type.cHigh;
 	}
 
 	@Override
@@ -90,16 +90,22 @@ public class Staff extends Element {
 		return returnValue;
 	}
 
-	public void accountFor(final int number) {
-		assert Note.isValid(number);
+	/**
+	 * This is fed all the notes in a section so that we can calculate
+	 * the lowest and highest notes
+	 *
+	 * @param position A note to account for
+	 */
+	public void accountFor(final int position) {
+		assert Note.isValid(position);
 
 		if(lowestNote == -1) {
-			lowestNote = highestNote = number;
+			lowestNote = highestNote = position;
 		} else {
-			if(number < lowestNote) {
-				lowestNote = number;
-			} else if(number > highestNote) {
-				highestNote = number;
+			if(position < lowestNote) {
+				lowestNote = position;
+			} else if(position > highestNote) {
+				highestNote = position;
 			}
 		}
 	}

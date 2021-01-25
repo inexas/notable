@@ -27,18 +27,18 @@ public class KeySignatureTest {
 
 		double[] yLookup = KeySignature.C.yLookup(staff, 0, 10);
 		assertEquals(300, yLookup[0]);
-		assertEquals(300, yLookup[1]);
-		assertEquals(290, yLookup[2]);
+		assertEquals(290, yLookup[1]);
+		assertEquals(280, yLookup[2]);
 
 		yLookup = KeySignature.C.yLookup(staff, 100, 10);
 		assertEquals(400, yLookup[0]);
-		assertEquals(400, yLookup[1]);
-		assertEquals(390, yLookup[2]);
+		assertEquals(390, yLookup[1]);
+		assertEquals(380, yLookup[2]);
 
 		staff = new Staff(Staff.Type.treble, KeySignature.get("D"));
 		yLookup = KeySignature.C.yLookup(staff, 0, 10);
 		assertEquals(300, yLookup[0]);
-		assertEquals(300, yLookup[1]);
-		assertEquals(290, yLookup[2]);
+		assertEquals(290, yLookup[1]);
+		assertEquals(280, yLookup[2]);
 	}
 }

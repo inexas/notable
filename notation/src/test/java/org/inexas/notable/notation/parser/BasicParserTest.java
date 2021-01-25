@@ -86,7 +86,7 @@ public class BasicParserTest {
 	@Test
 	void testAccidentals() {
 		// [#bn]
-		assertEquals("B Bb A# B ||\n", toMiki("B Bb A# Bn"));
+		assertEquals("B Bb A# Bn ||\n", toMiki("B Bb A# Bn"));
 	}
 
 	@Test

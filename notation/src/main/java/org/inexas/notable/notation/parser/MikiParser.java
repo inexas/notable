@@ -448,22 +448,16 @@ public class MikiParser extends MusicBaseListener {
 		}
 
 		// Group 1: Tonic...
-		String tonic = matcher.group(1);
+		final String tonic = matcher.group(1);
 
 		// Group 2: Accidental...
 		final String group2 = matcher.group(2);
 		if(group2 != null) {
 			switch(group2.charAt(0)) {
-				case 'b':
-					tonic += "b";
-					break;
-				case '#':
-					tonic += "#";
-					break;
-				case 'n':
-					break;
-				default:
-					throw new RuntimeException("Should never get here");
+				case 'b' -> annotate(ctx, Accidental.flat);
+				case 'n' -> annotate(ctx, Accidental.natural);
+				case '#' -> annotate(ctx, Accidental.sharp);
+				default -> throw new RuntimeException("Should never get here");
 			}
 		}
 

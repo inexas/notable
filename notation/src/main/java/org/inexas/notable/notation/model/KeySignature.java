@@ -148,42 +148,27 @@ public class KeySignature extends Element implements Annotation {
 	}
 
 	/**
-	 * Generate a lookup table that, given a number, can be used look up which
-	 * position the note should appear on the 'global' staff. The global staff's
+	 * Generate a lookup table that, given a position, can be used look up which
+	 * y coordinate the note should appear on the canvas. The global staff's
 	 * position 0 is A0 and each white note on the piano keyboard occupies the
-	 * next note.
+	 * next position.
 	 * <p>
-	 * The table will go from A0..C8, i.e. 7 octaves plus one. In fact the notes
-	 * C0..G#0 are never used as they are outside the range of a piano but we'll
-	 * create them anyway to make the table easier to use - it can be entered
-	 * directly with the note number
+	 * The table maps A0..C8, i.e. 7 octaves plus one. The notes C0..G#0 are
+	 * never used as they are outside the range of a piano but we create them
+	 * anyway to make the table easier to use - it can be entered
+	 * directly with the note position
 	 *
 	 * @param staff    The destination staff of the notes
 	 * @param baseline Canvas y position of the bottom line of the staff
 	 * @param spacing  Half the line spacing: line to space, to line, ...
-	 * @return A position lookup table
+	 * @return A table to covert position to canvas y coordinate
 	 */
 	public double[] yLookup(final Staff staff, final double baseline, final double spacing) {
-		final double[] returnValue = new double[8 * 12 + 1];
+		final double[] returnValue = new double[8 * 7 + 1];
 
-		int position = -1;
 		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			if(isNatural[i % 12]) {
-				position++;
-			}
-			// There are 56 possible positions if we imagine the piano keyboard
-			// starting with C0
-			returnValue[i] = 56 - position;
+			returnValue[i] = (staff.lowLinePosition - i) * spacing + baseline;
 		}
-
-		// Correct for staff base line
-		final double correction = returnValue[staff.lowLineNumber];
-		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			returnValue[i] = (returnValue[i] - correction)
-					* spacing
-					+ baseline;
-		}
-
 		return returnValue;
 	}
 }

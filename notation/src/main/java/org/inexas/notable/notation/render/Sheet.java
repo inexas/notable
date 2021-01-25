@@ -123,8 +123,8 @@ public class Sheet extends VBox {
 	}
 
 	private void calculateRange() {
-		int minNote = score.staff.lowLineNumber;
-		int maxNote = score.staff.highLineNumber;
+		int minNote = score.staff.lowLinePosition;
+		int maxNote = score.staff.highLinePosition;
 		for(final Event event : score.getFirstPart().getFirstPhrase().events) {
 			final int position = ((Note) event).position;
 			if(position < minNote) {

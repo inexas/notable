@@ -308,6 +308,11 @@ public class ToMikiVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(final Accidental accidental) {
+		sb.append(accidental.miki);
+	}
+
+	@Override
 	public String toString() {
 		return sb.toString();
 	}
@@ -315,6 +320,7 @@ public class ToMikiVisitor implements Visitor {
 	private void visitEvent(final Event event) {
 		// Annotations proceed the Event...
 		final Map<Class<? extends Annotation>, Annotation> annotations = event.annotations;
+		final Accidental accidental = (Accidental) event.annotations.remove(Accidental.class);
 		final Articulation articulation = (Articulation) annotations.remove(Articulation.class);
 		for(final Annotation annotation : annotations.values()) {
 			annotation.accept(this);
@@ -323,6 +329,9 @@ public class ToMikiVisitor implements Visitor {
 		// Now the event itself
 		space();
 		sb.append(event.getLabel());
+		if(accidental != null) {
+			visit(accidental);
+		}
 		visitDuration(event);
 
 		// Now any Articulation...
