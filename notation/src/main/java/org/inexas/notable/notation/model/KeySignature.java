@@ -167,7 +167,7 @@ public class KeySignature extends Element implements Annotation {
 		final double[] returnValue = new double[8 * 7 + 1];
 
 		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			returnValue[i] = (staff.lowLinePosition - i) * spacing + baseline;
+			returnValue[i] = baseline + (staff.lowLinePosition - i) * spacing;
 		}
 		return returnValue;
 	}

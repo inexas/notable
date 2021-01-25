@@ -63,7 +63,7 @@ public class Staff extends Element {
 	}
 
 	@Override
-	public void accept(@SuppressWarnings("ClassEscapesDefinedScope") final Visitor visitor) {
+	public void accept(final Visitor visitor) {
 		visitor.visit(this);
 	}
 
@@ -108,5 +108,51 @@ public class Staff extends Element {
 				highestNote = position;
 			}
 		}
+	}
+
+	/**
+	 * Given a note count the number of leger lines that will be needed
+	 * to render it.
+	 * <p>
+	 * For a chord, call the method for each note. It's no big deal if
+	 * the same leger line is rendered more than once.
+	 *
+	 * @param note The position of the note to test
+	 * @return The count of leger lines. Either 0 - no leger lines needed,
+	 * a positive number then a count of lines above the staff or a negative
+	 * number - a count of lines below the staff
+	 */
+	public int countLedgerLines(final int note) {
+		final int returnValue;
+
+		if(lowestNote == -1) {  // No notes accounted for yet
+			returnValue = 0;
+		} else {
+			if(note > highLinePosition) {
+				returnValue = (note - highLinePosition) / 2;
+			} else if(note < lowLinePosition) {
+				returnValue = -(lowLinePosition - note) / 2;
+			} else {
+				returnValue = 0;
+			}
+		}
+
+		return returnValue;
+	}
+
+	/**
+	 * @return Space needed to accommodate notes above the staff in positions, ie.
+	 * A5 needs 2 positions
+	 */
+	public int positionsAbove() {
+		return highestNote == -1 ? 0 : Math.max(highestNote - highLinePosition, 0);
+	}
+
+	/**
+	 * @return Space needed to accommodate notes below the staff in positions, ie.
+	 * C4 needs 2 positions
+	 */
+	public int positionsBelow() {
+		return lowestNote == -1 ? 0 : Math.max(lowLinePosition - lowestNote, 0);
 	}
 }

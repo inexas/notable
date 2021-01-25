@@ -22,4 +22,22 @@ public class LegerLinesTest {
 		assertEquals(Note.C4, staff.lowestNote);
 		assertEquals(Note.G5, staff.highestNote);
 	}
+
+	@Test
+	void baselineAdjustment() {
+		Staff staff;
+		double[] yLookup;
+
+		staff = MikiParser.fromString("E").score.staff;
+		yLookup = KeySignature.C.yLookup(staff, 0, 10);
+		assertEquals(0, yLookup[Note.E4]);
+
+		staff = MikiParser.fromString("o5 G").score.staff;
+		yLookup = KeySignature.C.yLookup(staff, 0, 10);
+		assertEquals(10, yLookup[Note.E4]);
+
+		staff = MikiParser.fromString("o5 B").score.staff;
+		yLookup = KeySignature.C.yLookup(staff, 0, 10);
+		assertEquals(30, yLookup[Note.E4]);
+	}
 }

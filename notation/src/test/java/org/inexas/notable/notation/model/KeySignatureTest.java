@@ -40,5 +40,15 @@ public class KeySignatureTest {
 		assertEquals(300, yLookup[0]);
 		assertEquals(290, yLookup[1]);
 		assertEquals(280, yLookup[2]);
+		assertEquals(0, yLookup[Note.E4]);
+	}
+
+	@Test
+	void yLookup1() {
+		final Staff staff = new Staff(Staff.Type.treble, KeySignature.C);
+
+		final double[] yLookup = KeySignature.C.yLookup(staff, 120, 5);
+		assertEquals(80, yLookup[Note.F5]);
+		assertEquals(120, yLookup[Note.E4]);
 	}
 }

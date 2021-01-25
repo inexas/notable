@@ -25,75 +25,63 @@ public class Sheet extends VBox {
 
 		// Draw staff...
 
-		// Gather some useful variables...
+		// Gather some useful constants...
+		final Staff staff = score.staff;
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
-		final double noteHeight = staffSpaceHeight / 2;
-		final double x = metrics.sideMargin;
-		final double y = metrics.topAndBottomMargin;
+		final double positionHeight = staffSpaceHeight / 2;
+		final double xOrigin = metrics.sideMargin;
+		final double yOrigin = metrics.topAndBottomMargin;
 		final double width = metrics.paperWidth - 2 * metrics.sideMargin;
-		final double height = staffSpaceHeight * 4;
+		final double topLine = yOrigin + staff.positionsAbove() * positionHeight;
+		final double staffHeight = staffSpaceHeight * 4;
+		final double baseLine = topLine + staffHeight;
+		final KeySignature key = score.key;
+		final double[] yLookup = KeySignature.C.yLookup(staff, baseLine, positionHeight);
 
-		// y coordinate of lines and spaces...
-		final double topLine = y;
-
-		// Account for leger lines
-		final KeySignature keySignature = score.key;
-
-
-		final double baseLine = topLine + staffSpaceHeight * 4;
-
-		gc.setLineWidth(metrics.staffLineThickness * 7.7);
+		// Draw staff...
 
 		// Horizontal lines...
-		double tmp = y;
+		gc.setLineWidth(metrics.staffLineThickness * 7.7);
+		double y = topLine;
 		for(int i = 0; i < 5; i++) {
-			gc.strokeLine(x, tmp, x + width, tmp);
-			tmp += staffSpaceHeight;
+			gc.strokeLine(xOrigin, y, xOrigin + width, y);
+			y += staffSpaceHeight;
 		}
 
-		// Vertical lines
-		gc.strokeLine(x, y, x, y + height);
-		gc.strokeLine(x + width, y, x + width, y + height);
-
-		gc.setFont(metrics.bravura);
-
-		double cursor = x;
+		// Vertical lines...
+		gc.strokeLine(xOrigin, topLine, xOrigin, topLine + staffHeight);
+		gc.strokeLine(xOrigin + width, yOrigin, xOrigin + width, yOrigin + staffHeight);
 
 		// G Clef
-		cursor += 5;
-		gc.fillText(Glyph.gClef.c, cursor, y + 3 * staffSpaceHeight);
-		cursor += Glyph.gClef.width * 10;
+		double xCursor = xOrigin + 5;
+		gc.setFont(metrics.bravura);
+		gc.fillText(Glyph.gClef.c, xCursor, topLine + 3 * staffSpaceHeight);
+		xCursor += Glyph.gClef.width * 10;
 
 		// Key signature...
-		if(keySignature.accidentalCount > 0) {
+		if(key.accidentalCount > 0) {
 			final int[] lines = {8, 5, 9, 6, 3, 7, 4};
-			final Glyph accidental = keySignature.isSharp() ?
-					Glyph.accidentalSharp : Glyph.accidentalFlat;
-			for(int i = 0; i < keySignature.accidentalCount; i++) {
-				final double y1 = baseLine - noteHeight * lines[i];
-				gc.fillText(accidental.c, cursor, y1);
-				cursor += accidental.width * 8;
+			final Glyph accidental = key.isSharp() ? Glyph.accidentalSharp : Glyph.accidentalFlat;
+			for(int i = 0; i < key.accidentalCount; i++) {
+				final double y1 = baseLine - positionHeight * lines[i];
+				gc.fillText(accidental.c, xCursor, y1);
+				xCursor += accidental.width * 8;
 			}
-			cursor += 7;
+			xCursor += 7;
 		}
 
-		// Time signature
+		// Time signature...
 		final Glyph numerator = Glyph.timeSignature[score.timeSignature.numerator];
 		final Glyph denominator = Glyph.timeSignature[score.timeSignature.denominator];
-		gc.fillText(numerator.c, cursor, y + staffSpaceHeight);
-		gc.fillText(denominator.c, cursor, y + 3 * staffSpaceHeight);
-		cursor += numerator.width * 20;
+		gc.fillText(numerator.c, xCursor, yOrigin + staffSpaceHeight);
+		gc.fillText(denominator.c, xCursor, yOrigin + 3 * staffSpaceHeight);
+		xCursor += numerator.width * 20;
 
-		// Notes
-		final double usableWidth = width - (cursor - metrics.sideMargin);
+		// Notes...
 
 		// Four measures, 32 clicks per
+		final double usableWidth = width - (xCursor - metrics.sideMargin);
 		final double perClick = usableWidth / (4 * 32);
-
-		final double[] yLookup = KeySignature.C.yLookup(
-				score.staff,
-				baseLine,
-				staffSpaceHeight / 2);
 
 		final List<Event> events = score.getFirstPart().getFirstPhrase().events;
 		boolean first = true;
@@ -104,34 +92,39 @@ public class Sheet extends VBox {
 			} else {
 				final Barline barline = event.get(Barline.class);
 				if(barline != null) {
-					gc.strokeLine(cursor - 8, topLine, cursor - 8, baseLine);
+					gc.strokeLine(xCursor - 8, yOrigin, xCursor - 8, baseLine);
 				}
 			}
 
 			final Duration duration = event.duration;
 			if(event instanceof Note) {
 				final Note note = (Note) event;
+
+				// Draw leger lines...
+				final int count = staff.countLedgerLines(note.position);
+				if(count > 0) {
+					double yLine = yLookup[staff.highLinePosition + 2];
+					for(int i = 0; i < count; i++) {
+						gc.strokeLine(xCursor - 4, yLine, xCursor + 16, yLine);
+						yLine -= staffSpaceHeight;
+					}
+				} else if(count < 0) {
+					double yLine = yLookup[staff.lowLinePosition - 2];
+					for(int i = 0; i < -count; i++) {
+						gc.strokeLine(xCursor - 4, yLine, xCursor + 16, yLine);
+						yLine += staffSpaceHeight;
+					}
+				}
+
+				// Draw note...
 				final Glyph glyph = Glyph.get(note);
-				gc.fillText(glyph.c, cursor, yLookup[note.position]);
+				gc.fillText(glyph.c, xCursor, yLookup[note.position]);
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
 				final Glyph glyph = Glyph.get(rest);
 			}
-			cursor += duration.clicks * perClick;
+			xCursor += duration.clicks * perClick;
 			// todo Ghost, Tuplet, Ghost, Chords
-		}
-	}
-
-	private void calculateRange() {
-		int minNote = score.staff.lowLinePosition;
-		int maxNote = score.staff.highLinePosition;
-		for(final Event event : score.getFirstPart().getFirstPhrase().events) {
-			final int position = ((Note) event).position;
-			if(position < minNote) {
-				minNote = position;
-			} else if(position > maxNote) {
-				maxNote = position;
-			}
 		}
 	}
 }

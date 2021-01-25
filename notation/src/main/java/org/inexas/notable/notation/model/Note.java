@@ -179,8 +179,10 @@ public class Note extends Event {
 	public final static int G5 = position(5, G);
 	final static int A0 = position(0, A);
 	final static int A3 = position(3, A);
+	final static int A5 = position(5, A);
 	final static int B0 = position(0, B);
 	final static int B3 = position(3, B);
+	final static int B5 = position(5, B);
 
 	private static final String[] tonicName = {"C", "D", "E", "F", "G", "A", "B"};
 
