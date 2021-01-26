@@ -5,7 +5,7 @@ import org.inexas.notable.notation.model.*;
 import java.util.*;
 
 /**
- * Seee https://w3c.github.io/smufl/gitbook/tables/individual-notes.html
+ * See https://w3c.github.io/smufl/gitbook/tables/individual-notes.html
  */
 public class Glyph {
 	// Clefs
@@ -21,6 +21,18 @@ public class Glyph {
 	public static Glyph note8thDown = new Glyph("note8thDown");
 	public static Glyph note16thUp = new Glyph("note16thUp");
 	public static Glyph note16thDown = new Glyph("note16thDown");
+
+	// Note components
+	public static Glyph noteheadWhole = new Glyph("noteheadWhole");
+	public static Glyph noteheadHalf = new Glyph("noteheadHalf");
+	public static Glyph noteheadBlack = new Glyph("noteheadBlack");
+	public static Glyph pictDeadNoteStem = new Glyph("pictDeadNoteStem");
+	public static Glyph stem = new Glyph("stem");
+	public static Glyph flag8thUp = new Glyph("flag8thUp");
+	public static Glyph flag8thDown = new Glyph("flag8thDown");
+	public static Glyph flag16thUp = new Glyph("flag16thUp");
+	public static Glyph flag16thDown = new Glyph("flag16thDown");
+
 
 	// Rests
 	public static Glyph restWhole = new Glyph("restWhole");
@@ -83,8 +95,8 @@ public class Glyph {
 	public final String description;
 	public final String codepoint;
 	public final String c;
-	private final double xNE;
-	private final double yNE;
+	final double xNE;
+	final double yNE;
 	private final double xSW;
 	private final double ySW;
 	private final double height;

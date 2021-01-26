@@ -20,11 +20,18 @@ public class FontMetadataFile extends MetadataFile {
 	// Glyph Bounding Boxes
 	public Map<String, Map<String, Double[]>> glyphBBoxes;
 
+	public static Map<String, Double> getEngravingDefaults(final double factor) {
+		final Map<String, Double> returnValue = new HashMap<>();
+
+		return returnValue;
+	}
+
 	// Glyphs With Alternates
 	public static class Alternate {
 		public String codepoint;
 		public String name;
 	}
+
 	public Map<String, Map<String, List<Alternate>>> glyphsWithAlternates;
 
 	// Glyphs With Anchors
@@ -36,6 +43,7 @@ public class FontMetadataFile extends MetadataFile {
 		public String[] componentGlyphs;
 		public String description;
 	}
+
 	public Map<String, Ligature> ligatures;
 
 	// Optional Glyphs
@@ -44,6 +52,7 @@ public class FontMetadataFile extends MetadataFile {
 		public String codepoint;
 		public String description;
 	}
+
 	public Map<String, OptionalGlyph> optionalGlyphs;
 
 	// Sets
@@ -53,11 +62,13 @@ public class FontMetadataFile extends MetadataFile {
 		public String description;
 		public String name;
 	}
+
 	public static class Variation {
 		public String description;
 		public GlyphVariation[] glyphs;
 		public String type;
 	}
+
 	public Map<String, Variation> sets;
 
 	public void printEngravingDefaults() {

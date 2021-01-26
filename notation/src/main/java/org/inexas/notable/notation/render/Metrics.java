@@ -168,79 +168,96 @@ public class Metrics {
 
 	private final double aspectRatio = 1.414;   // A4 aspect ratio
 	/**
+	 * This factor cam be used to ca
+	 * private final double factor = 0.5729;
+	 * /**
 	 * Width of paper in pixels
 	 */
-	final double paperWidth = 1000;
+	final double paperWidth;
 	/**
 	 * Height of paper in pixels
 	 */
-	final double paperHeight = paperWidth * aspectRatio;
+	final double paperHeight;
 	/**
-	 * Side margin width of paper in pixels
+	 * Side margin width in pixels
 	 */
-	final double sideMargin = 50;      // Left and right
+	final double sideMargin;
 	/**
-	 * Top and bottom margins width of paper in pixels
+	 * Top and bottom margins in pixels
 	 */
-	final double topAndBottomMargin = (int) (sideMargin * aspectRatio);
+	final double topMargin;
+	/**
+	 * Width of full width staff in pixels
+	 */
+	final double width;
 	/**
 	 * The height of space between staff lines. Staff lines don't occupy
 	 * extra space on the staff, they just overlay the line that joins two
 	 * spaces.
 	 */
-	final double staffSpaceHeight = 10;
+	final double staffSpaceHeight;
+
+	/**
+	 * Height of a five line staff, 4 x staffSpaceHeight
+	 */
+	private final int staffHeight;
 
 	// Font defaults
 	final Font bravura;
-	private final Font bravuraText;
 
-	public final static Metrics instance = new Metrics();
 
-	private Metrics() {
-		// Load fonts
-		bravura = loadFont("Bravura.otf", 36);
-		bravuraText = loadFont("BravuraText.otf", 36);
+	Metrics(final int paperWidth, final int sideMargin, final int staffSpaceHeight) {
+		this.paperWidth = paperWidth;
+		this.sideMargin = sideMargin;
+		this.staffSpaceHeight = staffSpaceHeight;
 
-		assert "Bravura".equals(FontMetadataFile.instance.fontName);
+		paperHeight = paperWidth * aspectRatio;
+		topMargin = (int) (this.sideMargin * aspectRatio);
+		width = paperWidth - 2 * sideMargin;
+
+		staffHeight = staffSpaceHeight * 4;
+
+		bravura = loadFont(staffHeight);
 
 		// Load engraving defaults...
+		final double factor = 0.5729 * staffHeight;
 
 		final Map<String, Double> engravingDefaults = FontMetadataFile.instance.engravingDefaults;
-		arrowShaftThickness = engravingDefaults.get("arrowShaftThickness");
-		barlineSeparation = engravingDefaults.get("barlineSeparation");
-		beamSpacing = engravingDefaults.get("beamSpacing");
-		beamThickness = engravingDefaults.get("beamThickness");
-		bracketThickness = engravingDefaults.get("bracketThickness");
-		dashedBarlineDashLength = engravingDefaults.get("dashedBarlineDashLength");
-		dashedBarlineGapLength = engravingDefaults.get("dashedBarlineGapLength");
-		dashedBarlineThickness = engravingDefaults.get("dashedBarlineThickness");
-		hairpinThickness = engravingDefaults.get("hairpinThickness");
-		legerLineExtension = engravingDefaults.get("legerLineExtension");
-		legerLineThickness = engravingDefaults.get("legerLineThickness");
-		lyricLineThickness = engravingDefaults.get("lyricLineThickness");
-		octaveLineThickness = engravingDefaults.get("octaveLineThickness");
-		pedalLineThickness = engravingDefaults.get("pedalLineThickness");
-		repeatBarlineDotSeparation = engravingDefaults.get("repeatBarlineDotSeparation");
-		repeatEndingLineThickness = engravingDefaults.get("repeatEndingLineThickness");
-		slurEndpointThickness = engravingDefaults.get("slurEndpointThickness");
-		slurMidpointThickness = engravingDefaults.get("slurMidpointThickness");
-		staffLineThickness = engravingDefaults.get("staffLineThickness");
-		stemThickness = engravingDefaults.get("stemThickness");
-		subBracketThickness = engravingDefaults.get("subBracketThickness");
-		textEnclosureThickness = engravingDefaults.get("textEnclosureThickness");
-		thickBarlineThickness = engravingDefaults.get("thickBarlineThickness");
-		thinBarlineThickness = engravingDefaults.get("thinBarlineThickness");
-		tieEndpointThickness = engravingDefaults.get("tieEndpointThickness");
-		tieMidpointThickness = engravingDefaults.get("tieMidpointThickness");
-		tupletBracketThickness = engravingDefaults.get("tupletBracketThickness");
+		arrowShaftThickness = engravingDefaults.get("arrowShaftThickness") * staffSpaceHeight;
+		barlineSeparation = engravingDefaults.get("barlineSeparation") * staffSpaceHeight;
+		beamSpacing = engravingDefaults.get("beamSpacing") * staffSpaceHeight;
+		beamThickness = engravingDefaults.get("beamThickness") * staffSpaceHeight;
+		bracketThickness = engravingDefaults.get("bracketThickness") * staffSpaceHeight;
+		dashedBarlineDashLength = engravingDefaults.get("dashedBarlineDashLength") * staffSpaceHeight;
+		dashedBarlineGapLength = engravingDefaults.get("dashedBarlineGapLength") * staffSpaceHeight;
+		dashedBarlineThickness = engravingDefaults.get("dashedBarlineThickness") * staffSpaceHeight;
+		hairpinThickness = engravingDefaults.get("hairpinThickness") * staffSpaceHeight;
+		legerLineExtension = engravingDefaults.get("legerLineExtension") * staffSpaceHeight;
+		legerLineThickness = engravingDefaults.get("legerLineThickness") * staffSpaceHeight;
+		lyricLineThickness = engravingDefaults.get("lyricLineThickness") * staffSpaceHeight;
+		octaveLineThickness = engravingDefaults.get("octaveLineThickness") * staffSpaceHeight;
+		pedalLineThickness = engravingDefaults.get("pedalLineThickness") * staffSpaceHeight;
+		repeatBarlineDotSeparation = engravingDefaults.get("repeatBarlineDotSeparation") * staffSpaceHeight;
+		repeatEndingLineThickness = engravingDefaults.get("repeatEndingLineThickness") * staffSpaceHeight;
+		slurEndpointThickness = engravingDefaults.get("slurEndpointThickness") * staffSpaceHeight;
+		slurMidpointThickness = engravingDefaults.get("slurMidpointThickness") * staffSpaceHeight;
+		staffLineThickness = engravingDefaults.get("staffLineThickness") * staffSpaceHeight;
+		stemThickness = engravingDefaults.get("stemThickness") * staffSpaceHeight;
+		subBracketThickness = engravingDefaults.get("subBracketThickness") * staffSpaceHeight;
+		textEnclosureThickness = engravingDefaults.get("textEnclosureThickness") * staffSpaceHeight;
+		thickBarlineThickness = engravingDefaults.get("thickBarlineThickness") * staffSpaceHeight;
+		thinBarlineThickness = engravingDefaults.get("thinBarlineThickness") * staffSpaceHeight;
+		tieEndpointThickness = engravingDefaults.get("tieEndpointThickness") * staffSpaceHeight;
+		tieMidpointThickness = engravingDefaults.get("tieMidpointThickness") * staffSpaceHeight;
+		tupletBracketThickness = engravingDefaults.get("tupletBracketThickness") * staffSpaceHeight;
 	}
 
-	private Font loadFont(final String pathName, final int size) {
+	private Font loadFont(final int size) {
 		final Font returnValue;
 
 		try {
 			final ClassLoader classLoader = FontMetadataFile.class.getClassLoader();
-			final InputStream is = classLoader.getResourceAsStream(pathName);
+			final InputStream is = classLoader.getResourceAsStream("Bravura.otf");
 			returnValue = Font.loadFont(is, size);
 		} catch(final Exception e) {
 			throw new RuntimeException("Error loading font", e);
@@ -248,7 +265,4 @@ public class Metrics {
 
 		return returnValue;
 	}
-
-	final static String gClef = "\uE050";
-	final static String fClef = "\uE062";
 }

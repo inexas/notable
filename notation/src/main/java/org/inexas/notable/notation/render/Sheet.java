@@ -10,7 +10,10 @@ import java.util.*;
  * Conventions used
  */
 public class Sheet extends VBox {
-	final Metrics metrics = Metrics.instance;
+	private final static int paperWidth = 1000;
+	private final static int margin = 50;
+	private final static int staffSpaceHeight = 10;
+	final static Metrics metrics = new Metrics(paperWidth, margin, staffSpaceHeight);
 	private final Canvas canvas;
 	private final Score score;
 
@@ -30,7 +33,7 @@ public class Sheet extends VBox {
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
 		final double positionHeight = staffSpaceHeight / 2;
 		final double xOrigin = metrics.sideMargin;
-		final double yOrigin = metrics.topAndBottomMargin;
+		final double yOrigin = metrics.topMargin;
 		final double width = metrics.paperWidth - 2 * metrics.sideMargin;
 		final double topLine = yOrigin + staff.positionsAbove() * positionHeight;
 		final double staffHeight = staffSpaceHeight * 4;

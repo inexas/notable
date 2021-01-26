@@ -9,7 +9,7 @@ class MetricsTest {
 
 	@BeforeAll
 	public static void setup() {
-		metrics = Metrics.instance;
+		metrics = null; //Metrics.instance;
 	}
 
 	@Test
