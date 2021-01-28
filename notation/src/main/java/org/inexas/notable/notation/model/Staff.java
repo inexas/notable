@@ -28,6 +28,10 @@ public class Staff extends Element {
 		}
 	}
 
+	int[] getAccidentals() {
+		return null;
+	}
+
 	public final Type type;
 
 	/**
