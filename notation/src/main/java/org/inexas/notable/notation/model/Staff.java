@@ -28,6 +28,7 @@ public class Staff extends Element {
 		}
 	}
 
+	// No change
 	int[] getAccidentals() {
 		return null;
 	}
