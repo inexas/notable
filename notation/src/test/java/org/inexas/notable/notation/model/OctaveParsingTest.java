@@ -23,45 +23,45 @@ public class OctaveParsingTest {
 
 	@Test
 	void autoOctaveSelection() {
-		assertEquals(Note.F2, getNotes("C -- F").get(1).position);
+		assertEquals(Note.F2, getNotes("C -- F").get(1).slot);
 
 		final List<Note> notes = getNotes("C C");
-		assertEquals(Note.C4, notes.get(0).position);
-		assertEquals(Note.C4, notes.get(1).position);
+		assertEquals(Note.C4, notes.get(0).slot);
+		assertEquals(Note.C4, notes.get(1).slot);
 
-		assertEquals(Note.D4, getNotes("C D").get(1).position);
-		assertEquals(Note.E4, getNotes("C E").get(1).position);
-		assertEquals(Note.F4, getNotes("C F").get(1).position);
-		assertEquals(Note.G3, getNotes("C G").get(1).position);
+		assertEquals(Note.D4, getNotes("C D").get(1).slot);
+		assertEquals(Note.E4, getNotes("C E").get(1).slot);
+		assertEquals(Note.F4, getNotes("C F").get(1).slot);
+		assertEquals(Note.G3, getNotes("C G").get(1).slot);
 
-		assertEquals(Note.B3, getNotes("C B").get(1).position);
-		assertEquals(Note.A3, getNotes("C A").get(1).position);
-		assertEquals(Note.G3, getNotes("C G").get(1).position);
-		assertEquals(Note.F4, getNotes("C F").get(1).position);
+		assertEquals(Note.B3, getNotes("C B").get(1).slot);
+		assertEquals(Note.A3, getNotes("C A").get(1).slot);
+		assertEquals(Note.G3, getNotes("C G").get(1).slot);
+		assertEquals(Note.F4, getNotes("C F").get(1).slot);
 
-		assertEquals(Note.C5, getNotes("C + C").get(1).position);
-		assertEquals(Note.C6, getNotes("C ++ C").get(1).position);
-		assertEquals(Note.C6, getNotes("C + + C").get(1).position);
+		assertEquals(Note.C5, getNotes("C + C").get(1).slot);
+		assertEquals(Note.C6, getNotes("C ++ C").get(1).slot);
+		assertEquals(Note.C6, getNotes("C + + C").get(1).slot);
 
-		assertEquals(Note.D4, getNotes("C + D").get(1).position);
-		assertEquals(Note.D5, getNotes("C ++ D").get(1).position);
-		assertEquals(Note.D6, getNotes("C +++ D").get(1).position);
+		assertEquals(Note.D4, getNotes("C + D").get(1).slot);
+		assertEquals(Note.D5, getNotes("C ++ D").get(1).slot);
+		assertEquals(Note.D6, getNotes("C +++ D").get(1).slot);
 
-		assertEquals(Note.C3, getNotes("C - C").get(1).position);
-		assertEquals(Note.C2, getNotes("C -- C").get(1).position);
-		assertEquals(Note.C2, getNotes("C - - C").get(1).position);
+		assertEquals(Note.C3, getNotes("C - C").get(1).slot);
+		assertEquals(Note.C2, getNotes("C -- C").get(1).slot);
+		assertEquals(Note.C2, getNotes("C - - C").get(1).slot);
 
-		assertEquals(Note.F3, getNotes("C - F").get(1).position);
-		assertEquals(Note.F2, getNotes("C -- F").get(1).position);
-		assertEquals(Note.F1, getNotes("C --- F").get(1).position);
+		assertEquals(Note.F3, getNotes("C - F").get(1).slot);
+		assertEquals(Note.F2, getNotes("C -- F").get(1).slot);
+		assertEquals(Note.F1, getNotes("C --- F").get(1).slot);
 	}
 
 	@Test
 	void subsequentNotes() {
 		final List<Note> notes = getNotes("C + C C");
-		assertEquals(Note.C4, notes.get(0).position);
-		assertEquals(Note.C5, notes.get(1).position);
-		assertEquals(Note.C5, notes.get(2).position);
+		assertEquals(Note.C4, notes.get(0).slot);
+		assertEquals(Note.C5, notes.get(1).slot);
+		assertEquals(Note.C5, notes.get(2).slot);
 	}
 
 	@Test

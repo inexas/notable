@@ -21,7 +21,7 @@ public class Experiment extends Application {
 
 		final MikiParser parser = MikiParser.fromString(
 //				"R1 | R2 R4 R8 R8 | R16");
-				"X C +G G | A8* B C A G2 | F4* F E E | D D C2");
+				"key Cb C C +G G | A8* B C A G2 | F4* F E E | D D o7 C2");
 		final Sheet sheet = new Sheet(parser.score);
 
 		final Metrics metrics = sheet.metrics;

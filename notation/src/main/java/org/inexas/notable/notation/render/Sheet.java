@@ -10,10 +10,7 @@ import java.util.*;
  * Conventions used
  */
 public class Sheet extends VBox {
-	private final static int paperWidth = 1000;
-	private final static int margin = 50;
-	private final static int staffSpaceHeight = 10;
-	final static Metrics metrics = new Metrics(paperWidth, margin, staffSpaceHeight);
+	final static Metrics metrics = new Metrics(Metrics.M);
 	private final Canvas canvas;
 	private final Score score;
 
@@ -30,63 +27,60 @@ public class Sheet extends VBox {
 
 		// Gather some useful constants...
 		final Staff staff = score.staff;
+		final Metrics.Y y = metrics.new Y(staff);
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
-		final double positionHeight = staffSpaceHeight / 2;
+		final double slotHeight = metrics.slotHeight;
 		final double xOrigin = metrics.sideMargin;
-		final double yOrigin = metrics.topMargin;
-		final double width = metrics.paperWidth - 2 * metrics.sideMargin;
-		final double topLine = yOrigin + staff.positionsAbove() * positionHeight;
-		final double staffHeight = staffSpaceHeight * 4;
-		final double baseLine = topLine + staffHeight;
+		final double width = metrics.width;
 		final KeySignature key = score.key;
-		final double[] yLookup = KeySignature.C.yLookup(staff, baseLine, positionHeight);
-		final double yRest = yLookup[staff.lowLinePosition + 4];
-		final double yWholeRest = yLookup[staff.lowLinePosition + 6];
+
+		// Temporary variables used to avoid repetive local calcuation
+		double _x, _y;
 
 		// Draw staff...
 
 		// Horizontal lines...
-		gc.setLineWidth(metrics.staffLineThickness * 7.7);
-		double y = topLine;
+		gc.setLineWidth(metrics.staffLineThickness);
+		_x = xOrigin + width;
+		_y = y.l4;
 		for(int i = 0; i < 5; i++) {
-			gc.strokeLine(xOrigin, y, xOrigin + width, y);
-			y += staffSpaceHeight;
+			gc.strokeLine(xOrigin, _y, _x, _y);
+			_y += staffSpaceHeight;
 		}
 
-		// Vertical lines...
-		gc.strokeLine(xOrigin, topLine, xOrigin, topLine + staffHeight);
-		gc.strokeLine(xOrigin + width, yOrigin, xOrigin + width, yOrigin + staffHeight);
+		// Left and right barlines...
+		gc.strokeLine(xOrigin, y.l4, xOrigin, y.l0);
+		gc.strokeLine(xOrigin + width, y.l4, xOrigin + width, y.l0);
 
 		// G Clef
-		double xCursor = xOrigin + 5;
-		gc.setFont(metrics.bravura);
-		gc.fillText(Glyph.gClef.c, xCursor, topLine + 3 * staffSpaceHeight);
-		xCursor += Glyph.gClef.width * 10;
+		double xCursor = xOrigin + metrics.barlineAdvance;
+		gc.setFont(metrics.font);
+		gc.fillText(metrics.gClef.c, xCursor, y.l4 + 3 * staffSpaceHeight);
+		xCursor += metrics.gClef.advance;
 
 		// Key signature...
 		if(key.accidentalCount > 0) {
 			final int[] lines = {8, 5, 9, 6, 3, 7, 4};
-			final Glyph accidental = key.isSharp() ? Glyph.accidentalSharp : Glyph.accidentalFlat;
+			final Glyph accidental = key.isSharp() ? metrics.accidentalSharp : metrics.accidentalFlat;
 			for(int i = 0; i < key.accidentalCount; i++) {
-				final double y1 = baseLine - positionHeight * lines[i];
+				final double y1 = y.l0 - slotHeight * lines[i];
 				gc.fillText(accidental.c, xCursor, y1);
-				xCursor += accidental.width * 8;
+				xCursor += accidental.advance;
 			}
-			xCursor += 7;
 		}
 
 		// Time signature...
-		final Glyph numerator = Glyph.timeSignature[score.timeSignature.numerator];
-		final Glyph denominator = Glyph.timeSignature[score.timeSignature.denominator];
-		gc.fillText(numerator.c, xCursor, yOrigin + staffSpaceHeight);
-		gc.fillText(denominator.c, xCursor, yOrigin + 3 * staffSpaceHeight);
-		xCursor += numerator.width * 20;
+		final Glyph numerator = metrics.timeSignature[score.timeSignature.numerator];
+		final Glyph denominator = metrics.timeSignature[score.timeSignature.denominator];
+		gc.fillText(numerator.c, xCursor, y.l3);
+		gc.fillText(denominator.c, xCursor, y.l1);
+		xCursor += numerator.width;
 
 		// Notes...
 
 		// Four measures, 32 clicks per
 		final double usableWidth = width - (xCursor - metrics.sideMargin);
-		final double perClick = usableWidth / (4 * 32);
+		final double perClick = usableWidth / (4.0 * 32.0);
 
 		final List<Event> events = score.getFirstPart().getFirstPhrase().events;
 		boolean first = true;
@@ -97,7 +91,8 @@ public class Sheet extends VBox {
 			} else {
 				final Barline barline = event.get(Barline.class);
 				if(barline != null) {
-					gc.strokeLine(xCursor - 8, yOrigin, xCursor - 8, baseLine);
+					_x = xCursor - metrics.barlineAdvance;
+					gc.strokeLine(_x, y.l4, _x, y.l0);
 				}
 			}
 
@@ -106,29 +101,34 @@ public class Sheet extends VBox {
 				final Note note = (Note) event;
 
 				// Draw leger lines...
-				final int count = staff.countLedgerLines(note.position);
-				if(count > 0) {
-					double yLine = yLookup[staff.highLinePosition + 2];
-					for(int i = 0; i < count; i++) {
-						gc.strokeLine(xCursor - 4, yLine, xCursor + 16, yLine);
-						yLine -= staffSpaceHeight;
-					}
-				} else if(count < 0) {
-					double yLine = yLookup[staff.lowLinePosition - 2];
-					for(int i = 0; i < -count; i++) {
-						gc.strokeLine(xCursor - 4, yLine, xCursor + 16, yLine);
-						yLine += staffSpaceHeight;
+				final int count = staff.countLedgerLines(note.slot);
+				if(count != 0) {
+					gc.setLineWidth(metrics.legerLineThickness);
+					_x = xCursor - metrics.legerLineExtension;
+					final double _x1 = _x + metrics.legerLineLength;
+					if(count > 0) { // Above...
+						_y = y.l4 - staffSpaceHeight;
+						for(int i = 0; i < count; i++) {
+							gc.strokeLine(_x, _y, _x1, _y);
+							_y -= staffSpaceHeight;
+						}
+					} else { // Below..
+						_y = y.l0 + staffSpaceHeight;
+						for(int i = 0; i < -count; i++) {
+							gc.strokeLine(_x, _y, _x1, _y);
+							_y += staffSpaceHeight;
+						}
 					}
 				}
 
 				// Draw note...
-				final Glyph glyph = Glyph.get(note);
-				gc.fillText(glyph.c, xCursor, yLookup[note.position]);
+				final Glyph glyph = metrics.get(note);
+				gc.fillText(glyph.c, xCursor, y.index[note.slot]);
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
-				final Glyph glyph = Glyph.get(rest);
-				y = rest.duration.clicks == 32 ? yWholeRest : yRest;
-				gc.fillText(glyph.c, xCursor, y);
+				final Glyph glyph = metrics.get(rest);
+				_y = rest.duration.clicks == 32 ? y.wholeRest : y.rest;
+				gc.fillText(glyph.c, xCursor, _y);
 			}
 			xCursor += duration.clicks * perClick;
 		}

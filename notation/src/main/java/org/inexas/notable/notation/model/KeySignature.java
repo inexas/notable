@@ -146,29 +146,4 @@ public class KeySignature extends Element implements Annotation {
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
 	}
-
-	/**
-	 * Generate a lookup table that, given a position, can be used look up which
-	 * y coordinate the note should appear on the canvas. The global staff's
-	 * position 0 is A0 and each white note on the piano keyboard occupies the
-	 * next position.
-	 * <p>
-	 * The table maps A0..C8, i.e. 7 octaves plus one. The notes C0..G#0 are
-	 * never used as they are outside the range of a piano but we create them
-	 * anyway to make the table easier to use - it can be entered
-	 * directly with the note position
-	 *
-	 * @param staff    The destination staff of the notes
-	 * @param baseline Canvas y position of the bottom line of the staff
-	 * @param spacing  Half the line spacing: line to space, to line, ...
-	 * @return A table to covert position to canvas y coordinate
-	 */
-	public double[] yLookup(final Staff staff, final double baseline, final double spacing) {
-		final double[] returnValue = new double[8 * 7 + 1];
-
-		for(int i = 0; i <= Note.MAXIMUM; i++) {
-			returnValue[i] = baseline + (staff.lowLinePosition - i) * spacing;
-		}
-		return returnValue;
-	}
 }

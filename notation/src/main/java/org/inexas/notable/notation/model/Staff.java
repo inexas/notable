@@ -11,36 +11,33 @@ public class Staff extends Element {
 	public enum Type {
 		alto(Note.C3, Note.G4),
 		bass(Note.G2, Note.A3),
-		grand(Note.G2, Note.F5),
 		tenor(Note.D3, Note.E4),
 		treble(Note.E4, Note.F5);
 		/**
-		 * Note position of the lowest line in the key of C
+		 * Note slot of the lowest line
 		 */
-		int cLow;
+		int low;
 		/**
-		 * Note position of the highest line in the key of C
+		 * Note slot of the highest line
 		 */
-		int cHigh;
+		int high;
 
-		Type(final int cLow, final int cHigh) {
-			this.cLow = cLow;
-			this.cHigh = cHigh;
+		Type(final int low, final int high) {
+			this.low = low;
+			this.high = high;
 		}
 	}
 
-	public static final Staff trebleC = new Staff(Type.treble, KeySignature.C);
 	public final Type type;
-	private final KeySignature key;
 
 	/**
-	 * Note position on bottom line adjusted for key
+	 * Note slot on bottom line. For a treble staff this would be E4
 	 */
-	public final int lowLinePosition;
+	public final int low;
 	/**
-	 * Note position on top line adjusted for key
+	 * Note slot on top line. For a treble staff this would be F5
 	 */
-	public final int highLinePosition;
+	final int high;
 
 	/**
 	 * Lowest note encountered, -1 means no notes so far
@@ -49,17 +46,16 @@ public class Staff extends Element {
 	/**
 	 * Highest note encountered, -1 means no notes so far
 	 */
-	public int highestNote = -1;
+	int highestNote = -1;
 
-	public Staff(final String name, final KeySignature key) throws IllegalArgumentException {
-		this(Type.valueOf(name), key);
+	public Staff(final String name) throws IllegalArgumentException {
+		this(Type.valueOf(name));
 	}
 
-	public Staff(final Type type, final KeySignature key) {
+	public Staff(final Type type) {
 		this.type = type;
-		this.key = key;
-		lowLinePosition = type.cLow;
-		highLinePosition = type.cHigh;
+		low = type.low;
+		high = type.high;
 	}
 
 	@Override
@@ -69,7 +65,7 @@ public class Staff extends Element {
 
 	@Override
 	public int hashCode() {
-		return type.hashCode() ^ key.hashCode();
+		return type.hashCode();
 	}
 
 	@Override
@@ -82,8 +78,10 @@ public class Staff extends Element {
 			if(object == null || getClass() != object.getClass()) {
 				returnValue = false;
 			} else {
-				final Staff staff = (Staff) object;
-				returnValue = type.equals(staff.type) && key.equals(staff.key);
+				final Staff rhs = (Staff) object;
+				returnValue = type.equals(rhs.type)
+						&& lowestNote == rhs.lowestNote
+						&& highestNote == rhs.highestNote;
 			}
 		}
 
@@ -94,18 +92,18 @@ public class Staff extends Element {
 	 * This is fed all the notes in a section so that we can calculate
 	 * the lowest and highest notes
 	 *
-	 * @param position A note to account for
+	 * @param slot A note to account for
 	 */
-	public void accountFor(final int position) {
-		assert Note.isValid(position);
+	public void accountFor(final int slot) {
+		assert Note.isValid(slot);
 
 		if(lowestNote == -1) {
-			lowestNote = highestNote = position;
+			lowestNote = highestNote = slot;
 		} else {
-			if(position < lowestNote) {
-				lowestNote = position;
-			} else if(position > highestNote) {
-				highestNote = position;
+			if(slot < lowestNote) {
+				lowestNote = slot;
+			} else if(slot > highestNote) {
+				highestNote = slot;
 			}
 		}
 	}
@@ -117,9 +115,9 @@ public class Staff extends Element {
 	 * For a chord, call the method for each note. It's no big deal if
 	 * the same leger line is rendered more than once.
 	 *
-	 * @param note The position of the note to test
+	 * @param note The slot of the note to test
 	 * @return The count of leger lines. Either 0 - no leger lines needed,
-	 * a positive number then a count of lines above the staff or a negative
+	 * a slot number then a count of lines above the staff or a negative
 	 * number - a count of lines below the staff
 	 */
 	public int countLedgerLines(final int note) {
@@ -128,10 +126,10 @@ public class Staff extends Element {
 		if(lowestNote == -1) {  // No notes accounted for yet
 			returnValue = 0;
 		} else {
-			if(note > highLinePosition) {
-				returnValue = (note - highLinePosition) / 2;
-			} else if(note < lowLinePosition) {
-				returnValue = -(lowLinePosition - note) / 2;
+			if(note > high) {
+				returnValue = (note - high) / 2;
+			} else if(note < low) {
+				returnValue = -(low - note) / 2;
 			} else {
 				returnValue = 0;
 			}
@@ -141,18 +139,18 @@ public class Staff extends Element {
 	}
 
 	/**
-	 * @return Space needed to accommodate notes above the staff in positions, ie.
-	 * A5 needs 2 positions
+	 * @return Space needed to accommodate notes above the staff in slots, ie.
+	 * A5 needs 2 slots
 	 */
-	public int positionsAbove() {
-		return highestNote == -1 ? 0 : Math.max(highestNote - highLinePosition, 0);
+	public int slotsAbove() {
+		return highestNote == -1 ? 0 : Math.max(highestNote - high, 0);
 	}
 
 	/**
-	 * @return Space needed to accommodate notes below the staff in positions, ie.
-	 * C4 needs 2 positions
+	 * @return Space needed to accommodate notes below the staff in slots, ie.
+	 * C4 needs 2 slots
 	 */
-	public int positionsBelow() {
-		return lowestNote == -1 ? 0 : Math.max(lowLinePosition - lowestNote, 0);
+	public int slotsBelow() {
+		return lowestNote == -1 ? 0 : Math.max(low - lowestNote, 0);
 	}
 }

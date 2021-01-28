@@ -33,7 +33,7 @@ public class ToMikiVisitor implements Visitor {
 		paragraph();
 
 		final Staff staff = score.staff;
-		if(!staff.equals(Staff.trebleC)) {
+		if(!staff.type.equals(Staff.Type.treble)) {
 			visit(staff);
 		}
 

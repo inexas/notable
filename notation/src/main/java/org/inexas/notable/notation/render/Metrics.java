@@ -2,6 +2,7 @@ package org.inexas.notable.notation.render;
 
 
 import javafx.scene.text.*;
+import org.inexas.notable.notation.model.*;
 
 import java.io.*;
 import java.util.*;
@@ -11,8 +12,16 @@ import java.util.*;
  * <p>
  * See: https://w3c.github.io/smufl/gitbook/specification/engravingdefaults.html
  */
-@SuppressWarnings("unused")
 public class Metrics {
+	// Rendering sizes
+	@SuppressWarnings("unused")
+	public final static double S = 32;
+	@SuppressWarnings("unused")
+	final static double M = 48;
+	@SuppressWarnings("unused")
+	public final static double L = 80;
+	@SuppressWarnings("unused")
+	public final static double XL = 120;
 
 	// Load engraving defaults...
 
@@ -26,7 +35,7 @@ public class Metrics {
 	 * measured from the right-hand edge of the left barline to the
 	 * left-hand edge of the right barline.
 	 */
-	private final double barlineSeparation;
+	final double barlineSeparation;
 	/**
 	 * The distance between the inner edge of the primary and outer
 	 * edge of subsequent secondary beams e.g. between beams on 16th notes
@@ -54,7 +63,7 @@ public class Metrics {
 	 * The thickness of a dashed barline
 	 */
 	private final double dashedBarlineThickness;
-	/**
+	/*
 	 * The thickness of the horizontal line drawn between two
 	 * vertical lines, known as the H-bar, in a
 	 * multi-bar rest.
@@ -63,7 +72,7 @@ public class Metrics {
 	 * 0.16 in as a guess so I have no idea what the real value
 	 * should be. Correct it if you find a reasonable value.
 	 */
-	final double hBarThickness = 0.16;
+	//final double hBarThickness = 0.16;
 	/**
 	 * The thickness of a crescendo/diminuendo hairpin
 	 */
@@ -74,12 +83,16 @@ public class Metrics {
 	 * size, e.g. when scaled down as a grace note - notes may
 	 * vary in width so how much wider than the note
 	 */
-	private final double legerLineExtension;
+	final double legerLineExtension;
 	/**
 	 * The thickness of a leger line (normally somewhat thicker
 	 * than a staff line)
 	 */
-	private final double legerLineThickness;
+	final double legerLineThickness;
+	/**
+	 * The total length of leger liness
+	 */
+	final double legerLineLength;
 	/**
 	 * The thickness of the lyric extension line to indicate a
 	 * melisma in vocal music
@@ -139,7 +152,7 @@ public class Metrics {
 	 * each of the lines of a double barline
 	 */
 	private final double thinBarlineThickness;
-	/**
+	/*
 	 * The default distance between a pair of thin and thick
 	 * barlines when locked together, e.g. between the thin and
 	 * thick barlines making a final barline, or between
@@ -148,7 +161,7 @@ public class Metrics {
 	 * <p>
 	 * Note I didn't find a value for this one so 2 is wrong for sure
 	 */
-	final double thinThickBarlineSeparation = 2;
+	// final double thinThickBarlineSeparation = 2;
 	/**
 	 * The thickness of the end of a tie
 	 */
@@ -162,7 +175,6 @@ public class Metrics {
 	 * numbers
 	 */
 	private final double tupletBracketThickness;
-
 
 	// Page dimensions...
 
@@ -197,62 +209,204 @@ public class Metrics {
 	 */
 	final double staffSpaceHeight;
 
+	final double slotHeight;
+
+	/**
+	 * Minimum amount of white space following barline
+	 */
+	final double barlineAdvance;
+
+
 	/**
 	 * Height of a five line staff, 4 x staffSpaceHeight
 	 */
-	private final int staffHeight;
+	final double staffHeight;
 
-	// Font defaults
-	final Font bravura;
+	final Font font;
+
+	// Clefs
+	public Glyph gClef;
+
+	// Notes
+	public final Glyph noteWhole;
+	public final Glyph noteHalfUp;
+	public final Glyph noteHalfDown;
+	public final Glyph noteQuarterUp;
+	public final Glyph noteQuarterDown;
+	public final Glyph note8thUp;
+	public final Glyph note8thDown;
+	public final Glyph note16thUp;
+	public final Glyph note16thDown;
+
+	// Note components
+	public final Glyph noteheadWhole;
+	public final Glyph noteheadHalf;
+	public final Glyph noteheadBlack;
+	public final Glyph pictDeadNoteStem;
+	public final Glyph stem;
+	public final Glyph flag8thUp;
+	public final Glyph flag8thDown;
+	public final Glyph flag16thUp;
+	public final Glyph flag16thDown;
 
 
-	Metrics(final int paperWidth, final int sideMargin, final int staffSpaceHeight) {
-		this.paperWidth = paperWidth;
-		this.sideMargin = sideMargin;
-		this.staffSpaceHeight = staffSpaceHeight;
+	// Rests
+	public final Glyph restWhole;
+	public final Glyph restHalf;
+	public final Glyph restQuarter;
+	public final Glyph rest8th;
+	public final Glyph rest16th;
 
+	// Accidentals
+	public Glyph accidentalFlat;
+	public Glyph accidentalNatural;
+	public Glyph accidentalSharp;
+
+	// Time signatures
+	public Glyph[] timeSignature;
+
+
+	private Map<String, Double> tmpEngravingDefaults;
+
+	Metrics(final double staffHeight) {
+		this.staffHeight = staffHeight;
+		paperWidth = 20.0 * staffHeight;  // 20 because it looks OK
 		paperHeight = paperWidth * aspectRatio;
-		topMargin = (int) (this.sideMargin * aspectRatio);
-		width = paperWidth - 2 * sideMargin;
-
-		staffHeight = staffSpaceHeight * 4;
-
-		bravura = loadFont(staffHeight);
+		sideMargin = staffHeight / 2.0;
+		topMargin = sideMargin * aspectRatio;
+		staffSpaceHeight = staffHeight / 4.0;
+		slotHeight = staffHeight / 8.0;
+		width = paperWidth - 2.0 * sideMargin;
+		barlineAdvance = slotHeight;
 
 		// Load engraving defaults...
-		final double factor = 0.5729 * staffHeight;
+		tmpEngravingDefaults = FontMetadataFile.instance.engravingDefaults;
+		arrowShaftThickness = load("arrowShaftThickness");
+		barlineSeparation = load("barlineSeparation");
+		beamSpacing = load("beamSpacing");
+		beamThickness = load("beamThickness");
+		bracketThickness = load("bracketThickness");
+		dashedBarlineDashLength = load("dashedBarlineDashLength");
+		dashedBarlineGapLength = load("dashedBarlineGapLength");
+		dashedBarlineThickness = load("dashedBarlineThickness");
+		hairpinThickness = load("hairpinThickness");
+		legerLineExtension = load("legerLineExtension");
+		legerLineThickness = load("legerLineThickness");
+		lyricLineThickness = load("lyricLineThickness");
+		octaveLineThickness = load("octaveLineThickness");
+		pedalLineThickness = load("pedalLineThickness");
+		repeatBarlineDotSeparation = load("repeatBarlineDotSeparation");
+		repeatEndingLineThickness = load("repeatEndingLineThickness");
+		slurEndpointThickness = load("slurEndpointThickness");
+		slurMidpointThickness = load("slurMidpointThickness");
+		staffLineThickness = load("staffLineThickness");
+		stemThickness = load("stemThickness");
+		subBracketThickness = load("subBracketThickness");
+		textEnclosureThickness = load("textEnclosureThickness");
+		thickBarlineThickness = load("thickBarlineThickness");
+		thinBarlineThickness = load("thinBarlineThickness");
+		tieEndpointThickness = load("tieEndpointThickness");
+		tieMidpointThickness = load("tieMidpointThickness");
+		tupletBracketThickness = load("tupletBracketThickness");
+		tmpEngravingDefaults = null; // Thanks for the memory!
 
-		final Map<String, Double> engravingDefaults = FontMetadataFile.instance.engravingDefaults;
-		arrowShaftThickness = engravingDefaults.get("arrowShaftThickness") * staffSpaceHeight;
-		barlineSeparation = engravingDefaults.get("barlineSeparation") * staffSpaceHeight;
-		beamSpacing = engravingDefaults.get("beamSpacing") * staffSpaceHeight;
-		beamThickness = engravingDefaults.get("beamThickness") * staffSpaceHeight;
-		bracketThickness = engravingDefaults.get("bracketThickness") * staffSpaceHeight;
-		dashedBarlineDashLength = engravingDefaults.get("dashedBarlineDashLength") * staffSpaceHeight;
-		dashedBarlineGapLength = engravingDefaults.get("dashedBarlineGapLength") * staffSpaceHeight;
-		dashedBarlineThickness = engravingDefaults.get("dashedBarlineThickness") * staffSpaceHeight;
-		hairpinThickness = engravingDefaults.get("hairpinThickness") * staffSpaceHeight;
-		legerLineExtension = engravingDefaults.get("legerLineExtension") * staffSpaceHeight;
-		legerLineThickness = engravingDefaults.get("legerLineThickness") * staffSpaceHeight;
-		lyricLineThickness = engravingDefaults.get("lyricLineThickness") * staffSpaceHeight;
-		octaveLineThickness = engravingDefaults.get("octaveLineThickness") * staffSpaceHeight;
-		pedalLineThickness = engravingDefaults.get("pedalLineThickness") * staffSpaceHeight;
-		repeatBarlineDotSeparation = engravingDefaults.get("repeatBarlineDotSeparation") * staffSpaceHeight;
-		repeatEndingLineThickness = engravingDefaults.get("repeatEndingLineThickness") * staffSpaceHeight;
-		slurEndpointThickness = engravingDefaults.get("slurEndpointThickness") * staffSpaceHeight;
-		slurMidpointThickness = engravingDefaults.get("slurMidpointThickness") * staffSpaceHeight;
-		staffLineThickness = engravingDefaults.get("staffLineThickness") * staffSpaceHeight;
-		stemThickness = engravingDefaults.get("stemThickness") * staffSpaceHeight;
-		subBracketThickness = engravingDefaults.get("subBracketThickness") * staffSpaceHeight;
-		textEnclosureThickness = engravingDefaults.get("textEnclosureThickness") * staffSpaceHeight;
-		thickBarlineThickness = engravingDefaults.get("thickBarlineThickness") * staffSpaceHeight;
-		thinBarlineThickness = engravingDefaults.get("thinBarlineThickness") * staffSpaceHeight;
-		tieEndpointThickness = engravingDefaults.get("tieEndpointThickness") * staffSpaceHeight;
-		tieMidpointThickness = engravingDefaults.get("tieMidpointThickness") * staffSpaceHeight;
-		tupletBracketThickness = engravingDefaults.get("tupletBracketThickness") * staffSpaceHeight;
+		// Load the glyphs
+		font = loadFont(staffHeight);
+
+		// Clefs
+		gClef = new Glyph("gClef", staffSpaceHeight, 1.2);
+		// Notes
+		noteWhole = loadGlyph("noteWhole");
+		noteHalfUp = loadGlyph("noteHalfUp");
+		noteHalfDown = loadGlyph("noteHalfDown");
+		noteQuarterUp = loadGlyph("noteQuarterUp");
+		noteQuarterDown = loadGlyph("noteQuarterDown");
+		note8thUp = loadGlyph("note8thUp");
+		note8thDown = loadGlyph("note8thDown");
+		note16thUp = loadGlyph("note16thUp");
+		note16thDown = loadGlyph("note16thDown");
+
+		legerLineLength = legerLineExtension + noteQuarterUp.width + legerLineExtension;
+
+		// Note components
+		noteheadWhole = loadGlyph("noteheadWhole");
+		noteheadHalf = loadGlyph("noteheadHalf");
+		noteheadBlack = loadGlyph("noteheadBlack");
+		pictDeadNoteStem = loadGlyph("pictDeadNoteStem");
+		stem = loadGlyph("stem");
+		flag8thUp = loadGlyph("flag8thUp");
+		flag8thDown = loadGlyph("flag8thDown");
+		flag16thUp = loadGlyph("flag16thUp");
+		flag16thDown = loadGlyph("flag16thDown");
+
+
+		// Rests
+		restWhole = loadGlyph("restWhole");
+		restHalf = loadGlyph("restHalf");
+		restQuarter = loadGlyph("restQuarter");
+		rest8th = loadGlyph("rest8th");
+		rest16th = loadGlyph("rest16th");
+
+		// Accidentals
+		accidentalFlat = new Glyph("accidentalFlat", staffSpaceHeight, 1.2);
+		accidentalNatural = loadGlyph("accidentalNatural");
+		accidentalSharp = loadGlyph("accidentalSharp");
+
+		// Time signatures
+		timeSignature = new Glyph[]{
+				null,
+				loadGlyph("timeSig1"),
+				loadGlyph("timeSig2"),
+				loadGlyph("timeSig3"),
+				loadGlyph("timeSig4"),
+				loadGlyph("timeSig5"),
+				loadGlyph("timeSig6"),
+				loadGlyph("timeSig7"),
+				loadGlyph("timeSig8"),
+				loadGlyph("timeSig9")
+		};
 	}
 
-	private Font loadFont(final int size) {
+	private Glyph loadGlyph(final String name) {
+		return new Glyph(name, staffSpaceHeight, 1);
+	}
+
+	private double load(final String variable) {
+		return tmpEngravingDefaults.get(variable) * staffSpaceHeight;
+	}
+
+	public Glyph get(final Note note) {
+		final Glyph returnValue;
+
+		switch(note.duration.clicks) {
+			case 32 -> returnValue = noteWhole;
+			case 16 -> returnValue = noteHalfUp;
+			case 8 -> returnValue = noteQuarterUp;
+			case 4 -> returnValue = note8thUp;
+			case 2 -> returnValue = note16thUp;
+			default -> throw new RuntimeException("Note not supported: " + note);
+		}
+
+		return returnValue;
+	}
+
+	public Glyph get(final Rest rest) {
+		final Glyph returnValue;
+
+		switch(rest.duration.clicks) {
+			case 32 -> returnValue = restWhole;
+			case 16 -> returnValue = restHalf;
+			case 8 -> returnValue = restQuarter;
+			case 4 -> returnValue = rest8th;
+			case 2 -> returnValue = rest16th;
+			default -> throw new RuntimeException("Rest not supported: " + rest);
+		}
+
+		return returnValue;
+	}
+
+
+	private Font loadFont(final double size) {
 		final Font returnValue;
 
 		try {
@@ -264,5 +418,52 @@ public class Metrics {
 		}
 
 		return returnValue;
+	}
+
+
+	Y getY(final Staff staff) {
+		return new Y(staff);
+	}
+
+	class Y {
+		final double[] index = new double[8 * 7 + 1];
+
+		Y(final Staff staff) {
+			double y = topMargin
+					+ (staff.slotsAbove() // Notes above the staff
+					+ 8 // Slots in the staff
+					+ staff.low)  // Slots below the staff
+					* slotHeight;
+			for(int i = 0; i <= Note.MAXIMUM; i++) {
+				index[i] = y;
+				y -= slotHeight;
+			}
+
+			l0 = index[staff.low];
+			s0 = index[staff.low + 1];
+			l1 = index[staff.low + 2];
+			s1 = index[staff.low + 3];
+			l2 = index[staff.low + 4];
+			s2 = index[staff.low + 5];
+			l3 = index[staff.low + 6];
+			s3 = index[staff.low + 7];
+			l4 = index[staff.low + 8];
+
+			wholeRest = l3;
+			rest = l3;
+		}
+
+		double l4;
+		double s3;
+		double l3;
+		public double s2;
+		double l2;
+		double s1;
+		double l1;
+		double s0;
+		double l0;
+
+		double wholeRest;
+		public double rest;
 	}
 }

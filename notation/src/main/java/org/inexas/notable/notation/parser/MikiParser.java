@@ -146,7 +146,7 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterStaff(final MusicParser.StaffContext ctx) {
 		final String text = ctx.getStop().getText();
-		final Staff staff = new Staff(text, currentKey);
+		final Staff staff = new Staff(text);
 		if(settingScoreDefaults) {
 			score.staff = staff;
 		} else {
@@ -496,7 +496,7 @@ public class MikiParser extends MusicBaseListener {
 		}
 
 		if(event instanceof Note) {
-			lastNote = ((Note) event).position;
+			lastNote = ((Note) event).slot;
 			score.staff.accountFor(lastNote);
 		}
 

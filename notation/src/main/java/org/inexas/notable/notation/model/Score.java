@@ -18,7 +18,7 @@ public class Score extends Element implements Visited {
 	public String header;
 	public PickupMeasure pickupMeasure;
 	public KeySignature key = KeySignature.C;
-	public Staff staff = new Staff(Staff.Type.treble, key);
+	public Staff staff = new Staff(Staff.Type.treble);
 	/**
 	 * The default and time signature for the Score. This also controls the
 	 * default Duration, so a time signature of 1/4 will set the starting

@@ -17,7 +17,7 @@ import java.util.*;
 public class Note extends Event {
 	final static int BASE = 7;
 	private final static int MINIMUM = 5;
-	final static int MAXIMUM = 56;
+	public final static int MAXIMUM = 56;
 
 	static class SearchSpace {
 		private static final int[] lookup = {0, 1, 2, 3, -3, -2, -1};
@@ -249,7 +249,7 @@ public class Note extends Event {
 	 * the note as a combination of the octave x BASE + note index where
 	 * C is 0, C# is 1 etc.
 	 */
-	public final int position;
+	public final int slot;
 
 	private Note(
 			final int position,
@@ -257,7 +257,7 @@ public class Note extends Event {
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
 		super(toName(position), duration, annotations);
 
-		this.position = position;
+		slot = position;
 		octave = position / BASE;
 		tonic = position % BASE;
 	}
@@ -265,7 +265,7 @@ public class Note extends Event {
 	// todo I think I can get rid of the copy constructors
 	private Note(final Note toCopy) {
 		super(toCopy);
-		position = toCopy.position;
+		slot = toCopy.slot;
 		tonic = toCopy.tonic;
 		octave = toCopy.octave;
 	}
