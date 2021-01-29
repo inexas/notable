@@ -23,19 +23,19 @@ public class Staff extends Element {
 				new int[]{Note.F5, Note.C5, Note.G5, Note.D5, Note.A4, Note.E5, Note.B4},
 				new int[]{Note.B4, Note.E5, Note.A4, Note.D5, Note.G4, Note.C5, Note.F4});
 		/**
-		 * Note slot of the lowest line
+		 * Slot number of the lowest line, A0 is 0
 		 */
-		int low;
+		int lowSlot;
 		/**
-		 * Note slot of the highest line
+		 * Slot number of the highest line, A0 is 0
 		 */
-		int high;
+		int highSlot;
 		int[] sharps;
 		int[] flats;
 
-		Type(final int low, final int high, final int[] sharps, final int[] flats) {
-			this.low = low;
-			this.high = high;
+		Type(final int lowSlot, final int highSlot, final int[] sharps, final int[] flats) {
+			this.lowSlot = lowSlot;
+			this.highSlot = highSlot;
 			this.sharps = sharps;
 			this.flats = flats;
 		}
@@ -46,11 +46,11 @@ public class Staff extends Element {
 	/**
 	 * Note slot on bottom line. For a treble staff this would be E4
 	 */
-	public final int low;
+	public final int lowSlot;
 	/**
 	 * Note slot on top line. For a treble staff this would be F5
 	 */
-	final int high;
+	final int highSlot;
 
 	/**
 	 * Lowest note encountered, -1 means no notes so far
@@ -67,8 +67,8 @@ public class Staff extends Element {
 
 	public Staff(final Type type) {
 		this.type = type;
-		low = type.low;
-		high = type.high;
+		lowSlot = type.lowSlot;
+		highSlot = type.highSlot;
 	}
 
 	@Override
@@ -139,10 +139,10 @@ public class Staff extends Element {
 		if(lowestNote == -1) {  // No notes accounted for yet
 			returnValue = 0;
 		} else {
-			if(note > high) {
-				returnValue = (note - high) / 2;
-			} else if(note < low) {
-				returnValue = -(low - note) / 2;
+			if(note > highSlot) {
+				returnValue = (note - highSlot) / 2;
+			} else if(note < lowSlot) {
+				returnValue = -(lowSlot - note) / 2;
 			} else {
 				returnValue = 0;
 			}
@@ -156,7 +156,7 @@ public class Staff extends Element {
 	 * A5 needs 2 slots
 	 */
 	public int slotsAbove() {
-		return highestNote == -1 ? 0 : Math.max(highestNote - high, 0);
+		return highestNote == -1 ? 0 : Math.max(highestNote - highSlot, 0);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class Staff extends Element {
 	 * C4 needs 2 slots
 	 */
 	public int slotsBelow() {
-		return lowestNote == -1 ? 0 : Math.max(low - lowestNote, 0);
+		return lowestNote == -1 ? 0 : Math.max(lowSlot - lowestNote, 0);
 	}
 
 	/**

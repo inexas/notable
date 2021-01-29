@@ -21,7 +21,7 @@ public class Metrics {
 	@SuppressWarnings("unused")
 	public final static double L = 80;
 	@SuppressWarnings("unused")
-	public final static double XL = 120;
+	final static double XL = 120;
 
 	// Load engraving defaults...
 
@@ -145,8 +145,12 @@ public class Metrics {
 	/**
 	 * The thickness of a stem
 	 */
-	@SuppressWarnings("unused")
-	private final double stemThickness;
+	final double stemThickness;
+	/**
+	 * Length of stem on standalone notes
+	 */
+	final double stemLength;
+
 	/**
 	 * The thickness of the vertical line of a sub-bracket grouping
 	 * staves belonging to the same instrument together
@@ -250,23 +254,12 @@ public class Metrics {
 	public Glyph fClef; // Bass
 	public Glyph gClef; // Treble
 
-	// Notes
-	public final Glyph noteWhole;
-	public final Glyph noteHalfUp;
-	public final Glyph noteHalfDown;
-	public final Glyph noteQuarterUp;
-	public final Glyph noteQuarterDown;
-	public final Glyph note8thUp;
-	public final Glyph note8thDown;
-	public final Glyph note16thUp;
-	public final Glyph note16thDown;
-
 	// Note components
 	public final Glyph noteheadWhole;
 	public final Glyph noteheadHalf;
 	public final Glyph noteheadBlack;
 	public final Glyph pictDeadNoteStem;
-	public final Glyph stem;
+	//	public final Glyph stem;
 	public final Glyph flag8thUp;
 	public final Glyph flag8thDown;
 	public final Glyph flag16thUp;
@@ -340,30 +333,19 @@ public class Metrics {
 		fClef = loadGlyph("fClef");
 		gClef = loadGlyph("gClef");
 
-		// Notes
-		noteWhole = loadGlyph("noteWhole");
-		noteHalfUp = loadGlyph("noteHalfUp");
-		noteHalfDown = loadGlyph("noteHalfDown");
-		noteQuarterUp = loadGlyph("noteQuarterUp");
-		noteQuarterDown = loadGlyph("noteQuarterDown");
-		note8thUp = loadGlyph("note8thUp");
-		note8thDown = loadGlyph("note8thDown");
-		note16thUp = loadGlyph("note16thUp");
-		note16thDown = loadGlyph("note16thDown");
-
-		legerLineLength = legerLineExtension + noteQuarterUp.width + legerLineExtension;
-
 		// Note components
 		noteheadWhole = loadGlyph("noteheadWhole");
 		noteheadHalf = loadGlyph("noteheadHalf");
 		noteheadBlack = loadGlyph("noteheadBlack");
 		pictDeadNoteStem = loadGlyph("pictDeadNoteStem");
-		stem = loadGlyph("stem");
+
+		stemLength = slotHeight * 7.0;
 		flag8thUp = loadGlyph("flag8thUp");
 		flag8thDown = loadGlyph("flag8thDown");
 		flag16thUp = loadGlyph("flag16thUp");
 		flag16thDown = loadGlyph("flag16thDown");
 
+		legerLineLength = legerLineExtension + noteheadBlack.width + legerLineExtension;
 
 		// Rests
 		restWhole = loadGlyph("restWhole");
@@ -404,12 +386,29 @@ public class Metrics {
 		final Glyph returnValue;
 
 		switch(note.duration.clicks) {
-			case 32 -> returnValue = noteWhole;
-			case 16 -> returnValue = noteHalfUp;
-			case 8 -> returnValue = noteQuarterUp;
-			case 4 -> returnValue = note8thUp;
-			case 2 -> returnValue = note16thUp;
-			default -> throw new RuntimeException("Note not supported: " + note);
+			case 32 -> returnValue = noteheadWhole;
+			case 16 -> returnValue = noteheadHalf;
+			default -> returnValue = noteheadBlack;
+		}
+
+		return returnValue;
+	}
+
+	Glyph getFlag(final int clicks, final int relativeSlot) {
+		final Glyph returnValue;
+
+		if(relativeSlot < 4) { // Stem up...
+			switch(clicks) {
+				case 4 -> returnValue = flag8thUp;
+				case 2 -> returnValue = flag16thUp;
+				default -> returnValue = null;
+			}
+		} else { // Stem down
+			switch(clicks) {
+				case 4 -> returnValue = flag8thDown;
+				case 2 -> returnValue = flag16thDown;
+				default -> returnValue = null;
+			}
 		}
 
 		return returnValue;
@@ -457,22 +456,22 @@ public class Metrics {
 			double y = topMargin
 					+ (staff.slotsAbove() // Notes above the staff
 					+ 8 // Slots in the staff
-					+ staff.low)  // Slots below the staff
+					+ staff.lowSlot)  // Slots below the staff
 					* slotHeight;
 			for(int i = 0; i <= Note.MAXIMUM; i++) {
 				index[i] = y;
 				y -= slotHeight;
 			}
 
-			l0 = index[staff.low];
-			s0 = index[staff.low + 1];
-			l1 = index[staff.low + 2];
-			s1 = index[staff.low + 3];
-			l2 = index[staff.low + 4];
-			s2 = index[staff.low + 5];
-			l3 = index[staff.low + 6];
-			s3 = index[staff.low + 7];
-			l4 = index[staff.low + 8];
+			l0 = index[staff.lowSlot];
+			s0 = index[staff.lowSlot + 1];
+			l1 = index[staff.lowSlot + 2];
+			s1 = index[staff.lowSlot + 3];
+			l2 = index[staff.lowSlot + 4];
+			s2 = index[staff.lowSlot + 5];
+			l3 = index[staff.lowSlot + 6];
+			s3 = index[staff.lowSlot + 7];
+			l4 = index[staff.lowSlot + 8];
 
 			wholeRest = l3;
 			rest = l2;

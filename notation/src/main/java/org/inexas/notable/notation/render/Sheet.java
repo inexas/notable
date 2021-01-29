@@ -2,6 +2,7 @@ package org.inexas.notable.notation.render;
 
 import javafx.scene.canvas.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.*;
 import org.inexas.notable.notation.model.*;
 
 import java.util.*;
@@ -10,7 +11,7 @@ import java.util.*;
  * Conventions used
  */
 public class Sheet extends VBox {
-	final static Metrics metrics = new Metrics(Metrics.M);
+	final static Metrics metrics = new Metrics(Metrics.XL);
 	private final Canvas canvas;
 	private final Score score;
 
@@ -22,6 +23,7 @@ public class Sheet extends VBox {
 
 	public void draw() {
 		final GraphicsContext gc = canvas.getGraphicsContext2D();
+		gc.setFill(Color.BLACK);
 
 		// Draw staff...
 
@@ -139,9 +141,35 @@ public class Sheet extends VBox {
 					}
 				}
 
-				// Draw note...
+				// Draw note head...
 				glyph = metrics.get(note);
-				gc.fillText(glyph.c, xCursor, y.index[note.slot]);
+				_y = y.index[note.slot];
+				gc.fillText(glyph.c, xCursor, _y);
+				// Stem...
+				if(note.duration.clicks < 32) {
+					gc.setLineWidth(metrics.stemThickness);
+					final int relativeSlot = note.slot - staff.lowSlot;
+					final double tilt = glyph.height / 5;
+					if(relativeSlot < 4) {
+						// Stem up...
+						_x = xCursor + glyph.width - metrics.stemThickness / 2.0;
+						gc.strokeLine(_x, _y - metrics.stemLength, _x, _y - tilt);
+						// Flag?
+						glyph = metrics.getFlag(note.duration.clicks, relativeSlot);
+						if(glyph != null) {
+							gc.fillText(glyph.c, _x, _y - metrics.stemLength);
+						}
+					} else {
+						// Stem down...
+						_x = xCursor + metrics.stemThickness / 2.0;
+						gc.strokeLine(_x, _y + tilt, _x, _y + metrics.stemLength);
+						// Flag?
+						glyph = metrics.getFlag(note.duration.clicks, relativeSlot);
+						if(glyph != null) {
+							gc.fillText(glyph.c, _x, _y + metrics.stemLength);
+						}
+					}
+				}
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
 				glyph = metrics.get(rest);
@@ -150,5 +178,9 @@ public class Sheet extends VBox {
 			}
 			xCursor += duration.clicks * perClick;
 		}
+	}
+
+	void drawNote(final Note note) {
+
 	}
 }

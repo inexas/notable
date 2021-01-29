@@ -13,13 +13,14 @@ public class StaffTest {
 		final Staff.Type type = staff.type;
 
 		assertEquals(Staff.Type.treble, type);
-		assertEquals(type.low, staff.low);
-		assertEquals(type.high, staff.high);
+		assertEquals(type.lowSlot, staff.lowSlot);
+		assertEquals(type.highSlot, staff.highSlot);
 
 		assertEquals(-1, staff.lowestNote);
 		assertEquals(-1, staff.highestNote);
 	}
 
+	@SuppressWarnings("ObviousNullCheck")
 	@Test
 	void types() {
 		final Staff staff = new Staff(Staff.Type.treble);
@@ -32,14 +33,14 @@ public class StaffTest {
 	@Test
 	void countLegerLines1() {
 		Staff staff = MikiParser.fromString(" + C").score.staff;
-		assertEquals(Note.E4, staff.low);
-		assertEquals(Note.F5, staff.high);
+		assertEquals(Note.E4, staff.lowSlot);
+		assertEquals(Note.F5, staff.highSlot);
 		assertEquals(Note.C5, staff.lowestNote);
 		assertEquals(Note.C5, staff.highestNote);
 
 		staff = MikiParser.fromString("C o5 G").score.staff;
-		assertEquals(Note.E4, staff.low);
-		assertEquals(Note.F5, staff.high);
+		assertEquals(Note.E4, staff.lowSlot);
+		assertEquals(Note.F5, staff.highSlot);
 		assertEquals(Note.C4, staff.lowestNote);
 		assertEquals(Note.G5, staff.highestNote);
 	}
