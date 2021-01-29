@@ -10,16 +10,23 @@ public class StaffTest {
 	@Test
 	void basics() {
 		final Staff staff = new Staff(Staff.Type.treble);
-
 		final Staff.Type type = staff.type;
 
 		assertEquals(Staff.Type.treble, type);
-
 		assertEquals(type.low, staff.low);
 		assertEquals(type.high, staff.high);
 
 		assertEquals(-1, staff.lowestNote);
 		assertEquals(-1, staff.highestNote);
+	}
+
+	@Test
+	void types() {
+		final Staff staff = new Staff(Staff.Type.treble);
+		assertNotNull(new Staff(Staff.Type.alto));
+		assertNotNull(new Staff(Staff.Type.bass));
+		assertNotNull(new Staff(Staff.Type.tenor));
+		assertNotNull(new Staff(Staff.Type.treble));
 	}
 
 	@Test
@@ -83,6 +90,13 @@ public class StaffTest {
 		assertEquals(1, staff.slotsBelow());
 		staff.accountFor(Note.C4);
 		assertEquals(2, staff.slotsBelow());
+		staff.accountFor(Note.B3);
+		assertEquals(3, staff.slotsBelow());
+	}
+
+	@Test
+	void accidentals() {
+		final Staff staff = new Staff(Staff.Type.treble);
 		staff.accountFor(Note.B3);
 		assertEquals(3, staff.slotsBelow());
 	}

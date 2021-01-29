@@ -25,16 +25,16 @@ public class NoteTest {
 	@Test
 	void testNoteNumberConversion() {
 		// Range checks
-		assertThrows(AssertionError.class, () -> Note.position(0, -1));
-		assertThrows(AssertionError.class, () -> Note.position(0, 8));
-		assertThrows(AssertionError.class, () -> Note.position(0, 4));
-		assertThrows(AssertionError.class, () -> Note.position(8, 1));
-		assertEquals(5, Note.position(0, 5));
-		assertEquals(56, Note.position(8, 0));
+		assertThrows(AssertionError.class, () -> Note.slot(0, -1));
+		assertThrows(AssertionError.class, () -> Note.slot(0, 8));
+		assertThrows(AssertionError.class, () -> Note.slot(0, 4));
+		assertThrows(AssertionError.class, () -> Note.slot(8, 1));
+		assertEquals(5, Note.slot(0, 5));
+		assertEquals(56, Note.slot(8, 0));
 
 		// Calculation
 		assertEquals(4, Note.octave(28));
-		assertEquals(28, Note.position(4, "C"));
+		assertEquals(28, Note.slot(4, "C"));
 	}
 
 	@Test

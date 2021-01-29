@@ -40,28 +40,34 @@ public class Metrics {
 	 * The distance between the inner edge of the primary and outer
 	 * edge of subsequent secondary beams e.g. between beams on 16th notes
 	 */
+	@SuppressWarnings("unused")
 	private final double beamSpacing;
 
 	/**
 	 * The thickness of a beam
 	 */
+	@SuppressWarnings("unused")
 	private final double beamThickness;
 	/**
 	 * The thickness of the vertical line of a bracket grouping
 	 * staves together
 	 */
+	@SuppressWarnings("unused")
 	private final double bracketThickness;
 	/**
 	 * The length of the dashes to be used in a dashed barline
 	 */
+	@SuppressWarnings("unused")
 	private final double dashedBarlineDashLength;
 	/**
 	 * The length of the gap between dashes in a dashed barline
 	 */
+	@SuppressWarnings("unused")
 	private final double dashedBarlineGapLength;
 	/**
 	 * The thickness of a dashed barline
 	 */
+	@SuppressWarnings("unused")
 	private final double dashedBarlineThickness;
 	/*
 	 * The thickness of the horizontal line drawn between two
@@ -76,6 +82,7 @@ public class Metrics {
 	/**
 	 * The thickness of a crescendo/diminuendo hairpin
 	 */
+	@SuppressWarnings("unused")
 	private final double hairpinThickness;
 	/**
 	 * The amount by which a leger line should extend either side
@@ -90,39 +97,46 @@ public class Metrics {
 	 */
 	final double legerLineThickness;
 	/**
-	 * The total length of leger liness
+	 * The total length of leger lines
 	 */
 	final double legerLineLength;
 	/**
 	 * The thickness of the lyric extension line to indicate a
 	 * melisma in vocal music
 	 */
+	@SuppressWarnings("unused")
 	private final double lyricLineThickness;
 	/**
 	 * The thickness of the dashed line used for an octave line
 	 */
+	@SuppressWarnings("unused")
 	private final double octaveLineThickness;
 	/**
 	 * The thickness of the line used for piano pedaling
 	 */
+	@SuppressWarnings("unused")
 	private final double pedalLineThickness;
 	/**
 	 * The default horizontal distance between the dots and the inner
 	 * barline of a repeat barline, measured from the edge of the dots
 	 * to the edge of the barline.
 	 */
+	@SuppressWarnings("unused")
 	private final double repeatBarlineDotSeparation;
 	/**
 	 * The thickness of the brackets drawn to indicate repeat endings
 	 */
+	@SuppressWarnings("unused")
 	private final double repeatEndingLineThickness;
 	/**
 	 * The thickness of the end of a slur
 	 */
+	@SuppressWarnings("unused")
 	private final double slurEndpointThickness;
 	/**
 	 * The thickness of the mid-point of a slur (i.e. its thickest point)
 	 */
+	@SuppressWarnings("unused")
 	private final double slurMidpointThickness;
 	/**
 	 * The thickness of each staff line
@@ -131,26 +145,31 @@ public class Metrics {
 	/**
 	 * The thickness of a stem
 	 */
+	@SuppressWarnings("unused")
 	private final double stemThickness;
 	/**
 	 * The thickness of the vertical line of a sub-bracket grouping
 	 * staves belonging to the same instrument together
 	 */
+	@SuppressWarnings("unused")
 	private final double subBracketThickness;
 	/**
 	 * The thickness of a box drawn around text instructions (e.g.
 	 * rehearsal marks)
 	 */
+	@SuppressWarnings("unused")
 	private final double textEnclosureThickness;
 	/**
 	 * The thickness of a thick barline, e.g. in a final barline
 	 * or a repeat barline
 	 */
+	@SuppressWarnings("unused")
 	private final double thickBarlineThickness;
 	/**
 	 * The thickness of a thin barline, e.g. a normal barline, or
 	 * each of the lines of a double barline
 	 */
+	@SuppressWarnings("unused")
 	private final double thinBarlineThickness;
 	/*
 	 * The default distance between a pair of thin and thick
@@ -165,15 +184,18 @@ public class Metrics {
 	/**
 	 * The thickness of the end of a tie
 	 */
+	@SuppressWarnings("unused")
 	private final double tieEndpointThickness;
 	/**
 	 * The thickness of the mid-point of a tie
 	 */
+	@SuppressWarnings("unused")
 	private final double tieMidpointThickness;
 	/**
 	 * The thickness of the brackets drawn either side of tuplet
 	 * numbers
 	 */
+	@SuppressWarnings("unused")
 	private final double tupletBracketThickness;
 
 	// Page dimensions...
@@ -216,7 +238,6 @@ public class Metrics {
 	 */
 	final double barlineAdvance;
 
-
 	/**
 	 * Height of a five line staff, 4 x staffSpaceHeight
 	 */
@@ -225,7 +246,9 @@ public class Metrics {
 	final Font font;
 
 	// Clefs
-	public Glyph gClef;
+	public Glyph cClef; // Alto and Tenor
+	public Glyph fClef; // Bass
+	public Glyph gClef; // Treble
 
 	// Notes
 	public final Glyph noteWhole;
@@ -248,7 +271,6 @@ public class Metrics {
 	public final Glyph flag8thDown;
 	public final Glyph flag16thUp;
 	public final Glyph flag16thDown;
-
 
 	// Rests
 	public final Glyph restWhole;
@@ -314,7 +336,10 @@ public class Metrics {
 		font = loadFont(staffHeight);
 
 		// Clefs
-		gClef = new Glyph("gClef", staffSpaceHeight, 1.2);
+		cClef = loadGlyph("cClef");
+		fClef = loadGlyph("fClef");
+		gClef = loadGlyph("gClef");
+
 		// Notes
 		noteWhole = loadGlyph("noteWhole");
 		noteHalfUp = loadGlyph("noteHalfUp");
@@ -368,7 +393,7 @@ public class Metrics {
 	}
 
 	private Glyph loadGlyph(final String name) {
-		return new Glyph(name, staffSpaceHeight, 1);
+		return new Glyph(name, staffSpaceHeight, 1.3);
 	}
 
 	private double load(final String variable) {
@@ -450,7 +475,7 @@ public class Metrics {
 			l4 = index[staff.low + 8];
 
 			wholeRest = l3;
-			rest = l3;
+			rest = l2;
 		}
 
 		double l4;

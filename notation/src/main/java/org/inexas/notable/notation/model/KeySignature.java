@@ -11,22 +11,7 @@ import java.util.*;
 import static org.inexas.notable.notation.model.KeySignature.State.*;
 
 public class KeySignature extends Element implements Annotation {
-	public enum State {chromatic, natural, sharp, flat}
-
-	private final State keyState;
-	private final State[] tonicState = new State[12];
-
-	//  0  1  2  3  4  5  6  7  8  9  10 11
-	//  C  C# D  D# E  F  F# G  G# A  A# B
-	//                                   F  C  G  D  A  E  B
-	private static final int[] sharps = {5, 0, 7, 2, 9, 4, 11};
-	//                                  B   E  A  D  G  C  F
-	private static final int[] flats = {11, 4, 9, 2, 7, 0, 5};
-
-	private final boolean[] isNatural = {
-			// C         D            E     F            G            A            B
-			true, false, true, false, true, true, false, true, false, true, false, true
-	};
+	public enum State {natural, sharp, flat}
 
 	/**
 	 * This allows the KeySignature to be looked up by the key
@@ -34,23 +19,21 @@ public class KeySignature extends Element implements Annotation {
 	 */
 	private final static Map<String, KeySignature> map = new HashMap<>();
 
-	public final String name;
-	public final int accidentalCount;
-	public static KeySignature C = new KeySignature(natural, 0, "C", 0);
-	private static final KeySignature S7 = new KeySignature(sharp, 7, "C#", 1);
-	private static final KeySignature F5 = new KeySignature(flat, 5, "Db", 1);
-	private static final KeySignature S2 = new KeySignature(sharp, 2, "D", 2);
-	private static final KeySignature F3 = new KeySignature(flat, 3, "Eb", 3);
-	private static final KeySignature S4 = new KeySignature(sharp, 4, "E", 4);
-	private static final KeySignature F1 = new KeySignature(flat, 1, "F", 5);
-	private static final KeySignature S6 = new KeySignature(sharp, 6, "F#", 6);
-	private static final KeySignature F6 = new KeySignature(flat, 6, "Gb", 6);
-	private static final KeySignature S1 = new KeySignature(sharp, 1, "G", 7);
-	private static final KeySignature F4 = new KeySignature(flat, 4, "Ab", 8);
-	private static final KeySignature S3 = new KeySignature(sharp, 3, "A", 9);
-	private static final KeySignature F2 = new KeySignature(flat, 2, "Bb", 10);
-	private static final KeySignature S5 = new KeySignature(sharp, 5, "B", 11);
-	private static final KeySignature F7 = new KeySignature(flat, 7, "Cb", 11);
+	public static KeySignature C = new KeySignature(natural, 0, "C");
+	private static final KeySignature S7 = new KeySignature(sharp, 7, "C#");
+	private static final KeySignature F5 = new KeySignature(flat, 5, "Db");
+	private static final KeySignature S2 = new KeySignature(sharp, 2, "D");
+	private static final KeySignature F3 = new KeySignature(flat, 3, "Eb");
+	private static final KeySignature S4 = new KeySignature(sharp, 4, "E");
+	private static final KeySignature F1 = new KeySignature(flat, 1, "F");
+	private static final KeySignature S6 = new KeySignature(sharp, 6, "F#");
+	private static final KeySignature F6 = new KeySignature(flat, 6, "Gb");
+	private static final KeySignature S1 = new KeySignature(sharp, 1, "G");
+	private static final KeySignature F4 = new KeySignature(flat, 4, "Ab");
+	private static final KeySignature S3 = new KeySignature(sharp, 3, "A");
+	private static final KeySignature F2 = new KeySignature(flat, 2, "Bb");
+	private static final KeySignature S5 = new KeySignature(sharp, 5, "B");
+	private static final KeySignature F7 = new KeySignature(flat, 7, "Cb");
 
 	static {
 		map.put("C", C);
@@ -63,6 +46,7 @@ public class KeySignature extends Element implements Annotation {
 		map.put("F#", S6);
 		map.put("C#", S7);
 
+		// Figure out how to handle A# and the like
 		map.put("F", F1);
 		map.put("Bb", F2);
 		map.put("Eb", F3);
@@ -94,56 +78,33 @@ public class KeySignature extends Element implements Annotation {
 		return map.get(name);
 	}
 
+	public final String name;
+	public final int accidentalCount;
+	private final State state;
+
 	private KeySignature(
 			final State keyState,
 			final int accidentalCount,
-			final String name,
-			final int offset) {
-		this.keyState = keyState;
+			final String name) {
+		state = keyState;
 		this.accidentalCount = accidentalCount;
 		this.name = name;
-
-		// Mark all the chromatic (non-diatonic) and diatonic notes...
-		for(int i = 0; i < 12; i++) {
-			final int index = (offset + i) % 12;
-			//  0  1  2  3  4  5  6  7  8  9  10 11
-			//  C  C# D  D# E  F  F# G  G# A  A# B
-			//  T     T     T  T     T     T     T
-			switch(i) {
-				case 0, 2, 4, 5, 7, 9, 11 -> tonicState[index] = natural;
-				default -> tonicState[index] = chromatic;
-			}
-		}
-
-		// Now correct all the sharps/flats
-		final int[] altered = keyState == sharp ? sharps : flats;
-		for(int i = 0; i < accidentalCount; i++) {
-			final int index = (altered[i] + offset) % 12;
-			tonicState[index] = keyState;
-		}
-	}
-
-	private State getTonicState(final int number) {
-		assert Note.isValid(number);
-		return tonicState[number % 12];
-	}
-
-	/**
-	 * @return true if this key is sharp, e.g. C#
-	 */
-	public boolean isSharp() {
-		return keyState == sharp;
-	}
-
-	/**
-	 * @return true if this key is flat, e.g. Cb
-	 */
-	public boolean isFlat() {
-		return keyState == flat;
 	}
 
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	public boolean isFlat() {
+		return state == flat;
+	}
+
+	public boolean isNatural() {
+		return state == natural;
+	}
+
+	public boolean isSharp() {
+		return state == sharp;
 	}
 }

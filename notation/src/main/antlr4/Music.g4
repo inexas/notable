@@ -45,7 +45,6 @@ tempo: TEMPO ( FRACTION '=' COUNT | STRING_LITERAL ) ;
 
 key: KEY NOTE ;
 
-// todo The Q was a +, I should be able to rewrite it so it works
 time: TIME ( FRACTION | COMMON | CUT ) ;
 
 /**

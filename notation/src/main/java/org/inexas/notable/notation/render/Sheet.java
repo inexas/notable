@@ -29,13 +29,13 @@ public class Sheet extends VBox {
 		final Staff staff = score.staff;
 		final Metrics.Y y = metrics.new Y(staff);
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
-		final double slotHeight = metrics.slotHeight;
 		final double xOrigin = metrics.sideMargin;
 		final double width = metrics.width;
 		final KeySignature key = score.key;
 
 		// Temporary variables used to avoid repetive local calcuation
 		double _x, _y;
+		Glyph glyph;
 
 		// Draw staff...
 
@@ -52,19 +52,37 @@ public class Sheet extends VBox {
 		gc.strokeLine(xOrigin, y.l4, xOrigin, y.l0);
 		gc.strokeLine(xOrigin + width, y.l4, xOrigin + width, y.l0);
 
-		// G Clef
+		// Clef
 		double xCursor = xOrigin + metrics.barlineAdvance;
 		gc.setFont(metrics.font);
-		gc.fillText(metrics.gClef.c, xCursor, y.l4 + 3 * staffSpaceHeight);
+		switch(staff.type) {
+			case alto -> {
+				glyph = metrics.cClef;
+				_y = y.l2;
+			}
+			case bass -> {
+				glyph = metrics.fClef;
+				_y = y.l3;
+			}
+			case tenor -> {
+				glyph = metrics.cClef;
+				_y = y.l3;
+			}
+			case treble -> {
+				glyph = metrics.gClef;
+				_y = y.l1;
+			}
+			default -> throw new RuntimeException("Unknown type: " + staff.type);
+		}
+		gc.fillText(glyph.c, xCursor, _y);
 		xCursor += metrics.gClef.advance;
 
 		// Key signature...
 		if(key.accidentalCount > 0) {
-			final int[] lines = {8, 5, 9, 6, 3, 7, 4};
+			final int[] accidentals = staff.getAccidentals(key);
 			final Glyph accidental = key.isSharp() ? metrics.accidentalSharp : metrics.accidentalFlat;
 			for(int i = 0; i < key.accidentalCount; i++) {
-				final double y1 = y.l0 - slotHeight * lines[i];
-				gc.fillText(accidental.c, xCursor, y1);
+				gc.fillText(accidental.c, xCursor, y.index[accidentals[i]]);
 				xCursor += accidental.advance;
 			}
 		}
@@ -74,7 +92,7 @@ public class Sheet extends VBox {
 		final Glyph denominator = metrics.timeSignature[score.timeSignature.denominator];
 		gc.fillText(numerator.c, xCursor, y.l3);
 		gc.fillText(denominator.c, xCursor, y.l1);
-		xCursor += numerator.width;
+		xCursor += numerator.advance;
 
 		// Notes...
 
@@ -122,11 +140,11 @@ public class Sheet extends VBox {
 				}
 
 				// Draw note...
-				final Glyph glyph = metrics.get(note);
+				glyph = metrics.get(note);
 				gc.fillText(glyph.c, xCursor, y.index[note.slot]);
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
-				final Glyph glyph = metrics.get(rest);
+				glyph = metrics.get(rest);
 				_y = rest.duration.clicks == 32 ? y.wholeRest : y.rest;
 				gc.fillText(glyph.c, xCursor, _y);
 			}
