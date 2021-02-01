@@ -15,7 +15,7 @@ import java.util.*;
 public class Phrase extends Element {
 	public final static String IMPLICIT = "#IMPLICIT#";
 	public final Score score;
-	public final List<Event> events = new ArrayList<>();
+	public List<Event> events = new ArrayList<>();
 	public final String name;
 	public final Part part;
 

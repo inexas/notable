@@ -8,6 +8,8 @@ import org.inexas.notable.notation.parser.*;
 
 /**
  * Connect notes in either a tie or a slur
+ * <p>
+ * todo Think again on this, shouldn't we separate out a tie, beam and slur?
  */
 public class Bind extends Line {
 

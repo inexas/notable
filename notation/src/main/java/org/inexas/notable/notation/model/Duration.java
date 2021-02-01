@@ -9,39 +9,29 @@ import java.util.*;
 public class Duration {
 	private final static Map<String, Duration> lookupByMiki = new HashMap<>();
 	private final static Map<Integer, Duration> lookupByDenominator = new HashMap<>();
-	public final static Duration quarter = new Duration(
-			"quarter", "4", 4, 8, null);
-	public final static Duration thirtySecond = new Duration(
-			"thirtySecond", "32", 32, 1, null);
-	public final static Duration sixteenth = new Duration(
-			"sixteenth", "16", 16, 2, null);
-	@SuppressWarnings("unused")
-	public final static Duration sixteenthDot = new Duration(
-			"sixteenthDot", "16,", 16, 3, sixteenth);
-	public final static Duration eighth = new Duration(
-			"eighth", "8", 8, 4, null);
-	@SuppressWarnings("unused")
-	public final static Duration eighthDot = new Duration(
-			"eighthDot", "8,", 8, 6, eighth);
-	@SuppressWarnings("unused")
-	public final static Duration eighthDotDot = new Duration(
-			"eighthDotDot", "8,,", 8, 7, eighth);
-	@SuppressWarnings("unused")
-	public final static Duration quarterDot = new Duration(
-			"quarterDot", "4,", 4, 12, quarter);
-	@SuppressWarnings("unused")
-	public final static Duration quarterDotDot = new Duration(
-			"quarterDotDot", "4,,", 4, 14, quarter);
-	public final static Duration half = new Duration(
-			"half", "2", 2, 16, null);
-	@SuppressWarnings("unused")
-	public final static Duration halfDot = new Duration(
-			"halfDot", "2,", 2, 24, half);
-	@SuppressWarnings("unused")
-	public final static Duration halfDotDot = new Duration(
-			"halfDotDot", "2,,", 2, 28, half);
-	public final static Duration whole = new Duration(
-			"whole", "1", 1, 32, null);
+
+	public final static Duration thirtySecond = new Duration("thirtySecond", 32, 0, null);
+
+	public final static Duration sixteenth = new Duration("sixteenth", 16, 0, null);
+	public final static Duration sixteenthDot = new Duration("sixteenthDot", 16, 1, sixteenth);
+
+	public final static Duration eighth = new Duration("eighth", 8, 0, null);
+	public final static Duration eighthDot = new Duration("eighthDot", 8, 1, eighth);
+	public final static Duration eighthDotDot = new Duration("eighthDotDot", 8, 2, eighth);
+
+	public final static Duration quarter = new Duration("quarter", 4, 0, null);
+	public final static Duration quarterDot = new Duration("quarterDot", 4, 1, quarter);
+	public final static Duration quarterDotDot = new Duration("quarterDotDot", 4, 2, quarter);
+	final static Duration quarterDotDotDot = new Duration("quarterDotDotDot", 4, 3, quarter);
+
+	public final static Duration half = new Duration("half", 2, 0, null);
+	public final static Duration halfDot = new Duration("halfDot", 2, 1, half);
+	public final static Duration halfDotDot = new Duration("halfDotDot", 2, 2, half);
+	final static Duration halfDotDotDot = new Duration("halfDotDotDot", 2, 3, half);
+	final static Duration halfDotDotDotDot = new Duration("halfDotDotDotDot", 2, 4, half);
+
+	public final static Duration whole = new Duration("whole", 1, 0, null);
+
 	/**
 	 * This array is used to lookup the combination of notes that will add up to
 	 * given total of 1/32's. For example, durations[3] will return the Duration(s)
@@ -49,40 +39,58 @@ public class Duration {
 	 * fraction first by convention. Maximum of two notes, either 0, 1 or two dots.
 	 */
 	private final static Duration[][] durations = new Duration[][]{
-			{},                                         // 0
-			{thirtySecond},                             // 1
-			{sixteenth},                                // 2
-			{thirtySecond, sixteenth},                  // 3
-			{eighth},                                   // 4
-			{thirtySecond, eighth},                     // 5
-			{sixteenth, eighth},                        // 6
-			{thirtySecond, sixteenth, eighth},          // 7
-			{quarter},                                  // 8
-			{thirtySecond, quarter},                    // 9
-			{sixteenth, quarter},                       // 10
-			{thirtySecond, sixteenth, quarter},         // 11
-			{eighth, quarter},                          // 12
-			{thirtySecond, eighth, quarter},            // 13
-			{sixteenth, eighth, quarter},               // 14
-			{thirtySecond, sixteenth, eighth, quarter}, // 15
-			{half},                                     // 16
-			{thirtySecond, half},                       // 17
-			{sixteenth, half},                          // 18
-			{thirtySecond, sixteenth, half},            // 19
-			{eighth, half},                             // 20
-			{thirtySecond, eighth, half},               // 21
-			{sixteenth, eighth, half},                  // 22
-			{thirtySecond, sixteenth, eighth, half},    // 23
-			{quarter, half},                            // 24
-			{thirtySecond, quarter, half},              // 25
-			{sixteenth, quarter, half},                 // 26
-			{thirtySecond, sixteenth, quarter, half},   // 27
-			{eighth, quarter, half},                    // 28
-			{thirtySecond, eighth, quarter, half},      // 29
-			{sixteenth, quarter, half},                 // 30
-			{thirtySecond, sixteenth, quarter, half},   // 31
-			{whole}                                     // 32
+			{},                             // 0
+			{thirtySecond},                 // 1
+			{sixteenth},                    // 2
+			{sixteenthDot},                 // 3
+			{eighth},                       // 4
+			{thirtySecond, eighth},         // 5
+			{eighthDot},                    // 6
+			{eighthDotDot},                 // 7
+			{quarter},                      // 8
+			{thirtySecond, quarter},        // 9
+			{sixteenth, quarter},           // 10
+			{sixteenthDot, quarter},        // 11
+			{quarterDot},                   // 12
+			{thirtySecond, quarterDot},     // 13
+			{quarterDotDot},                // 14
+			{quarterDotDotDot},             // 15
+			{half},                         // 16
+			{thirtySecond, half},           // 17
+			{sixteenth, half},              // 18
+			{sixteenthDot, half},           // 19
+			{eighth, half},                 // 20
+			{thirtySecond, eighth, half},   // 21
+			{eighthDot, half},              // 22
+			{eighthDotDot, half},           // 23
+			{halfDot},                      // 24
+			{thirtySecond, halfDot},        // 25
+			{sixteenth, halfDot},           // 26
+			{sixteenthDot, halfDot},        // 27
+			{halfDotDot},                   // 28
+			{thirtySecond, halfDotDot},     // 29
+			{halfDotDotDot},                // 30
+			{halfDotDotDotDot},             // 31
+			{whole}                         // 32
 	};
+
+	static {
+		lookupByDenominator.put(1, Duration.whole);
+		lookupByDenominator.put(2, Duration.half);
+		lookupByDenominator.put(4, Duration.quarter);
+		lookupByDenominator.put(8, Duration.eighth);
+		lookupByDenominator.put(16, Duration.sixteenth);
+		lookupByDenominator.put(32, Duration.thirtySecond);
+	}
+
+	/**
+	 * E.g. quarter, half, ...
+	 */
+	final String name;
+	/**
+	 * E.g. 2 = half, 4 = quarter, ...
+	 */
+	public final int denominator;
 	/**
 	 * The duration in 1/32nds, i.e. a quarter note' duration is 8 clicks
 	 */
@@ -90,69 +98,57 @@ public class Duration {
 	/**
 	 * Duration applies to this and all subsequent Events
 	 */
-	@SuppressWarnings("WeakerAccess")
 	public final boolean setDefault;
-	/**
-	 * E.g. quarter, half, ...
-	 */
-	@SuppressWarnings("WeakerAccess")
-	final String name;
-	/**
-	 * E.g. 2 = half, 4 = quarter, ...
-	 */
-	public final int denominator;
 	/**
 	 * E.g. "2" for half
 	 */
 	public final String miki;
 	/**
-	 * true if this Duration is dotted, e.g. 8,
+	 * Number of dots, e.g. "4.." has two
 	 */
-	public final boolean dotted;
+	public final int dots;
 	/**
 	 * Points to the non-dotted version, e.g. for "8," the root is "8"
 	 */
-	@SuppressWarnings("WeakerAccess")
 	final Duration root;
-	private Duration(
-			final String name,
-			final String miki,
-			final int denominator,
-			final int clicks,
-			final Duration root) {
+
+	private Duration(final String name, final int denominator, final int dots, final Duration root) {
 		this.name = name;
 		this.denominator = denominator;
-		this.miki = miki;
-		if(miki.charAt(miki.length() - 1) == ',') {
-			dotted = true;
-		} else {
-			dotted = false;
-			lookupByDenominator.put(denominator, this);
-		}
-		this.clicks = clicks;
+		this.dots = dots;
 		this.root = root == null ? this : root;
+
+		clicks = applyDots(denominator, dots);
+		miki = denominator + "....".substring(4 - dots);
 		setDefault = false;
-
 		lookupByMiki.put(miki, this);
-
-		// Create the setDefault version
-		new Duration(this);
+		new Duration(this); // Create the setDefault version
 	}
+
 	private Duration(final Duration toCopy) {
 		name = toCopy.name;
 		miki = toCopy.miki + '*';
 		denominator = toCopy.denominator;
 		clicks = toCopy.clicks;
 		root = toCopy.root;
-		dotted = toCopy.dotted;
+		dots = toCopy.dots;
 		setDefault = true;
 		lookupByMiki.put(miki, this);
 	}
 
+	/**
+	 * @param denominator A denominator, e.g. 4 for a quarter note
+	 * @return The corresponding Duration or null if not found
+	 */
 	public static Duration getByDenominator(final int denominator) {
 		return lookupByDenominator.get(denominator);
 	}
 
+	/**
+	 * @param miki A miki string, e.g. "4.*"" for a dotted
+	 *             quarter note that should become the default Duration
+	 * @return The corresponding Duration or null if not found
+	 */
 	public static Duration getByMiki(final String miki) {
 		final Duration result = lookupByMiki.get(miki);
 		if(result == null) {
@@ -173,13 +169,17 @@ public class Duration {
 		return durations[clicks];
 	}
 
-	public static boolean isDenominator(final int candidate) {
-		return candidate == 1 ||
-				candidate == 2 ||
-				candidate == 4 ||
-				candidate == 8 ||
-				candidate == 16 ||
-				candidate == 32;
+	private static int applyDots(final int denominator, final int dots) {
+		int returnValue;
+
+		int clicks = 32 / denominator;
+		returnValue = clicks;
+		for(int i = 0; i < dots; i++) {
+			clicks = clicks / 2;
+			returnValue += clicks;
+		}
+
+		return returnValue;
 	}
 
 	@Override

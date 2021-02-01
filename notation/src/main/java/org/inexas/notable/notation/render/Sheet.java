@@ -11,9 +11,15 @@ import java.util.*;
  * Conventions used
  */
 public class Sheet extends VBox {
-	final static Metrics metrics = new Metrics(Metrics.XL);
+	final static Metrics metrics = new Metrics(Metrics.L);
 	private final Canvas canvas;
 	private final Score score;
+	private List<Event> events;
+	private Staff staff;
+	private Metrics.Y y;
+	private double xCursor;
+	private GraphicsContext gc;
+
 
 	public Sheet(final Score score) {
 		this.score = score;
@@ -22,20 +28,21 @@ public class Sheet extends VBox {
 	}
 
 	public void draw() {
-		final GraphicsContext gc = canvas.getGraphicsContext2D();
+		gc = canvas.getGraphicsContext2D();
 		gc.setFill(Color.BLACK);
+		gc.setStroke(Color.BLACK);
 
 		// Draw staff...
 
 		// Gather some useful constants...
-		final Staff staff = score.staff;
-		final Metrics.Y y = metrics.new Y(staff);
+		staff = score.staff;
+		y = metrics.new Y(staff);
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
 		final double xOrigin = metrics.sideMargin;
 		final double width = metrics.width;
 		final KeySignature key = score.key;
 
-		// Temporary variables used to avoid repetive local calcuation
+		// Temporary variables used to avoid repetitive local calculation
 		double _x, _y;
 		Glyph glyph;
 
@@ -55,7 +62,7 @@ public class Sheet extends VBox {
 		gc.strokeLine(xOrigin + width, y.l4, xOrigin + width, y.l0);
 
 		// Clef
-		double xCursor = xOrigin + metrics.barlineAdvance;
+		xCursor = xOrigin + metrics.barlineAdvance;
 		gc.setFont(metrics.font);
 		switch(staff.type) {
 			case alto -> {
@@ -102,9 +109,11 @@ public class Sheet extends VBox {
 		final double usableWidth = width - (xCursor - metrics.sideMargin);
 		final double perClick = usableWidth / (4.0 * 32.0);
 
-		final List<Event> events = score.getFirstPart().getFirstPhrase().events;
+		events = score.getFirstPart().getFirstPhrase().events;
 		boolean first = true;
-		for(final Event event : events) {
+		for(int i = 0; i < events.size(); i++) {
+			final Event event = events.get(i);
+
 			// Are there Barlines?
 			if(first) {
 				first = false;
@@ -117,6 +126,9 @@ public class Sheet extends VBox {
 			}
 
 			final Duration duration = event.duration;
+			if(event.annotations.containsKey(Beam.class)) {
+				drawBeamedNotes(i);
+			}
 			if(event instanceof Note) {
 				final Note note = (Note) event;
 
@@ -128,13 +140,13 @@ public class Sheet extends VBox {
 					final double _x1 = _x + metrics.legerLineLength;
 					if(count > 0) { // Above...
 						_y = y.l4 - staffSpaceHeight;
-						for(int i = 0; i < count; i++) {
+						for(int j = 0; j < count; j++) {
 							gc.strokeLine(_x, _y, _x1, _y);
 							_y -= staffSpaceHeight;
 						}
 					} else { // Below..
 						_y = y.l0 + staffSpaceHeight;
-						for(int i = 0; i < -count; i++) {
+						for(int j = 0; j < -count; j++) {
 							gc.strokeLine(_x, _y, _x1, _y);
 							_y += staffSpaceHeight;
 						}
@@ -142,7 +154,7 @@ public class Sheet extends VBox {
 				}
 
 				// Draw note head...
-				glyph = metrics.get(note);
+				glyph = metrics.getNoteHeadGlyph(note);
 				_y = y.index[note.slot];
 				gc.fillText(glyph.c, xCursor, _y);
 				// Stem...
@@ -172,7 +184,7 @@ public class Sheet extends VBox {
 				}
 			} else if(event instanceof Rest) {
 				final Rest rest = (Rest) event;
-				glyph = metrics.get(rest);
+				glyph = metrics.getNoteHeadGlyph(rest);
 				_y = rest.duration.clicks == 32 ? y.wholeRest : y.rest;
 				gc.fillText(glyph.c, xCursor, _y);
 			}
@@ -180,7 +192,53 @@ public class Sheet extends VBox {
 		}
 	}
 
-	void drawNote(final Note note) {
+	private void drawBeamedNotes(final int startOffset) {
+		final Beam beam = events.get(startOffset).get(Beam.class);
+		final int count = beam.count;
+		final int endOffset = startOffset + beam.count;
 
+		// Fact find...
+		final int midSlot = staff.lowSlot + 4;    // Slot number of middle line
+		int highestSlot = Integer.MAX_VALUE;
+		int lowestSlot = Integer.MIN_VALUE;
+		final int[] slots = new int[count];
+		int total = 0;
+		for(int i = 0; i < count; i++) {
+			final Note note = (Note) events.get(startOffset + i);
+			final int slot = note.slot;
+			slots[i] = slot;
+			final int relativeSlot = slot - midSlot;
+			if(relativeSlot > lowestSlot) {
+				lowestSlot = relativeSlot;
+			}
+			if(relativeSlot < highestSlot) {
+				highestSlot = relativeSlot;
+			}
+			total += relativeSlot;
+		}
+
+		// Figure out stem lengths
+		final boolean stemUp = total <= 0;
+
+		for(int i = startOffset; i < endOffset; i++) {
+			final Note note = (Note) events.get(i);
+
+			// Draw leger lines
+
+			// Draw note...
+			// Head glyph
+			// Origin x, y
+			// Stem: up, down, none
+			// Leger line count
+
+			// Draw beam
+			final Glyph glyph = metrics.getNoteHeadGlyph(note);
+			final double _y = y.index[note.slot];
+			gc.fillText(glyph.c, xCursor, _y);
+
+			// Draw stem
+		}
+
+		// Draw Draw beam
 	}
 }

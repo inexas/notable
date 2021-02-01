@@ -157,23 +157,6 @@ public class BasicParserTest {
 	}
 
 	@Test
-	void testDuration() {
-		assertEquals("32", Duration.thirtySecond.miki);
-		assertEquals("16", Duration.sixteenth.miki);
-		assertEquals("16,", Duration.sixteenthDot.miki);
-		assertEquals("8", Duration.eighth.miki);
-		assertEquals("8,", Duration.eighthDot.miki);
-		assertEquals("8,,", Duration.eighthDotDot.miki);
-		assertEquals("4", Duration.quarter.miki);
-		assertEquals("4,", Duration.quarterDot.miki);
-		assertEquals("4,,", Duration.quarterDotDot.miki);
-		assertEquals("2", Duration.half.miki);
-		assertEquals("2,", Duration.halfDot.miki);
-		assertEquals("2,,", Duration.halfDotDot.miki);
-		assertEquals("1", Duration.whole.miki);
-	}
-
-	@Test
 	void testDynamic() {
 		assertEquals("fff", Dynamic.fff.name);
 		assertEquals("ff", Dynamic.ff.name);
@@ -225,8 +208,8 @@ public class BasicParserTest {
 	void testTuplet() {
 		assertEquals("[t A8* B C] A B R ||\n", toMiki("[t A8* B C] A B"));
 		assertEquals("[t A B C] A B C ||\n", toMiki("[t A B C] A B C"));
-		assertEquals("[t A B C]8 A8 B8 C8 R2 ||\n", toMiki("[t A B C]8 A B C"));
-		assertEquals("[t A B C]8* A B C R2 ||\n", toMiki("[t A B C]8* A B C"));
+		assertEquals("[t A B C]8* A (B C) R2 ||\n", toMiki("[t A B C]8* A B C"));
+		assertEquals("[t A B C]8 A B C R8 ||\n", toMiki("[t A B C]8 A B C"));
 	}
 
 

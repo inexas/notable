@@ -50,7 +50,7 @@ class MetricsTest {
 
 		assertEquals(height, glyph.height);
 		assertEquals(width, glyph.width);
-		final double advance = width * 1.2;
+		final double advance = width * 1.3;
 		assertEquals(advance, glyph.advance);
 	}
 

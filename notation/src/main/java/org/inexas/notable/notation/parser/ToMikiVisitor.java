@@ -17,6 +17,7 @@ public class ToMikiVisitor implements Visitor {
 	private Duration currentDuration = Duration.quarter;
 	private boolean seenEvent;
 	private Duration saveDuration;
+	private int beamCount;
 
 	@Override
 	public void enter(final Score score) {
@@ -313,6 +314,13 @@ public class ToMikiVisitor implements Visitor {
 	}
 
 	@Override
+	public void visit(final Beam beam) {
+		space();
+		sb.append('(');
+		beamCount = beam.count;
+	}
+
+	@Override
 	public String toString() {
 		return sb.toString();
 	}
@@ -337,6 +345,13 @@ public class ToMikiVisitor implements Visitor {
 		// Now any Articulation...
 		if(articulation != null) {
 			articulation.accept(this);
+		}
+
+		// End beam
+		if(beamCount > 0) {
+			if(--beamCount == 0) {
+				sb.append(')');
+			}
 		}
 		seenEvent = true;
 	}
@@ -392,7 +407,7 @@ public class ToMikiVisitor implements Visitor {
 	 * Write a new line if the last written character was not a newline
 	 */
 	private void newline() {
-		if(inLine()) {
+		if(honorWhitespace()) {
 			sb.append(NL);
 		}
 	}
@@ -414,21 +429,24 @@ public class ToMikiVisitor implements Visitor {
 		} // else at start of file
 	}
 
-	private boolean inLine() {
+	private void space() {
+		if(honorWhitespace()) {
+			sb.append(' ');
+		}
+	}
+
+	/**
+	 * @return True if we should honor the request to add whitespace
+	 */
+	private boolean honorWhitespace() {
 		final boolean result;
 		if(sb.length() > 0) {
 			final char c = sb.charAt(sb.length() - 1);
-			result = c != NL && c != '[';
+			result = c != NL && c != '[' && c != '(';
 		} else {
 			result = false;
 		}
 		return result;
-	}
-
-	private void space() {
-		if(inLine()) {
-			sb.append(' ');
-		}
 	}
 
 	private void add(final int i) {
@@ -437,10 +455,10 @@ public class ToMikiVisitor implements Visitor {
 
 	private void visitDuration(final Event event) {
 		final Duration duration = event.duration;
+		// No need to write anything if it's the default
 		if(!(currentDuration.equals(duration))) {
-			sb.append(duration.denominator);
+			sb.append(duration.miki);
 			if(duration.setDefault) {
-				sb.append('*');
 				currentDuration = duration;
 			}
 		}

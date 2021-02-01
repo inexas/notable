@@ -19,7 +19,7 @@ public class Metrics {
 	@SuppressWarnings("unused")
 	final static double M = 48;
 	@SuppressWarnings("unused")
-	public final static double L = 80;
+	final static double L = 80;
 	@SuppressWarnings("unused")
 	final static double XL = 120;
 
@@ -225,7 +225,7 @@ public class Metrics {
 	 */
 	final double topMargin;
 	/**
-	 * Width of full width staff in pixels
+	 * Width available to staff in pixels
 	 */
 	final double width;
 	/**
@@ -235,7 +235,7 @@ public class Metrics {
 	 */
 	final double staffSpaceHeight;
 
-	final double slotHeight;
+	private final double slotHeight;
 
 	/**
 	 * Minimum amount of white space following barline
@@ -382,7 +382,34 @@ public class Metrics {
 		return tmpEngravingDefaults.get(variable) * staffSpaceHeight;
 	}
 
-	public Glyph get(final Note note) {
+	Glyph getItemGlyph(final Layout.Item.Type type, final Duration duration) {
+		Glyph returnValue = null;
+
+		final int clicks = duration.clicks;
+		switch(type) {
+			case Note -> {
+				switch(clicks) {
+					case 32 -> returnValue = noteheadWhole;
+					case 16 -> returnValue = noteheadHalf;
+					default -> returnValue = noteheadBlack;
+				}
+			}
+			case Rest -> {
+				// todo Handle double dots
+				switch(clicks) {
+					case 32 -> returnValue = restWhole;
+					case 16 -> returnValue = restHalf;
+					case 8, 12 -> returnValue = restQuarter;
+					case 4, 6 -> returnValue = rest8th;
+					case 2 -> returnValue = rest16th;
+					default -> throw new RuntimeException("Rest not supported: " + duration.clicks);
+				}
+			}
+		}
+		return returnValue;
+	}
+
+	Glyph getNoteHeadGlyph(final Note note) {
 		final Glyph returnValue;
 
 		switch(note.duration.clicks) {
@@ -414,19 +441,11 @@ public class Metrics {
 		return returnValue;
 	}
 
-	public Glyph get(final Rest rest) {
+	Glyph getNoteHeadGlyph(final Rest rest) {
 		final Glyph returnValue;
 
-		switch(rest.duration.clicks) {
-			case 32 -> returnValue = restWhole;
-			case 16 -> returnValue = restHalf;
-			case 8 -> returnValue = restQuarter;
-			case 4 -> returnValue = rest8th;
-			case 2 -> returnValue = rest16th;
-			default -> throw new RuntimeException("Rest not supported: " + rest);
-		}
 
-		return returnValue;
+		return null;
 	}
 
 
@@ -477,17 +496,17 @@ public class Metrics {
 			rest = l2;
 		}
 
-		double l4;
-		double s3;
-		double l3;
-		public double s2;
-		double l2;
-		double s1;
-		double l1;
-		double s0;
-		double l0;
+		final double l4;
+		final double s3;
+		final double l3;
+		public final double s2;
+		final double l2;
+		final double s1;
+		final double l1;
+		final double s0;
+		final double l0;
 
-		double wholeRest;
-		public double rest;
+		final double wholeRest;
+		public final double rest;
 	}
 }

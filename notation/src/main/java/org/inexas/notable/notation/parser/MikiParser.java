@@ -21,15 +21,15 @@ public class MikiParser extends MusicBaseListener {
 			"([Mm])?");         // Major/minor
 	private final static Pattern notePattern = Pattern.compile("" +
 			"([A-GRX])" +       // Tonic, including rest & ghost
+			"([0-9]+.*\\*?)?" + // Duration
 			"([b#n])?" +        // Accidental
-			"([0-9]+,*\\*?)?" + // Duration
 			"([._!fg]+)?");     // Articulation
 	private final static Pattern noteGroupEndPattern = Pattern.compile("" +
 			"]" +               // Closing ]
-			"([0-9]+,*\\*?)?" + // Duration
-			"([._!fg]+)?");     // Articulation
+			"([._!fg]+)?" +     // Articulation
+			"([0-9]+.*\\*?)?"); // Duration
 	// To collect Annotations for the current or next Event
-	private final Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
+	private Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
 	private final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
 	private Phrase currentPhrase;
 	/**
@@ -95,6 +95,10 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void exitScore(final MusicParser.ScoreContext ctx) {
 		padToEnd();
+		final BeamStylizer stylizer = new BeamStylizer(timeSignature.getMeasureSize());
+		currentPhrase.events = stylizer.process(currentPhrase.events);
+		final RestStylizer restStylizer = new RestStylizer(timeSignature.getMeasureSize());
+		currentPhrase.events = restStylizer.process(currentPhrase.events);
 	}
 
 	@Override
@@ -121,18 +125,23 @@ public class MikiParser extends MusicBaseListener {
 
 	@Override
 	public void enterPhrase(final MusicParser.PhraseContext ctx) {
-		String name = ctx.getStop().getText();
-		name = StringU.stripQuotes(name);
+		final String text = StringU.stripQuotes(ctx.getStop().getText());
 
-		final int colon = name.indexOf(':');
+		// phrase "OptionalPartName:PhraseName"
+		final int colon = text.indexOf(':');
+		final String phraseName;
 		if(colon >= 0) {
-			final String partName = name.substring(0, colon);
+			final String partName = text.substring(0, colon);
 			currentPart = score.getPart(partName);
-			name = name.substring(colon + 1);
+			phraseName = text.substring(colon + 1);
+		} else {
+			phraseName = text;
 		}
-		currentPhrase = currentPart.getPhrase(name);
+		currentPhrase = currentPart.getPhrase(phraseName);
+		// Reset
 		events = currentPhrase.events;
 		settingScoreDefaults = false;
+		annotationMap.clear();
 		lastNote = Note.C4;
 		clicksSoFar = 0;
 	}
@@ -140,7 +149,6 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void exitPhrase(final MusicParser.PhraseContext ctx) {
 		padToEnd();
-		currentPhrase = null;
 	}
 
 	@Override
@@ -303,19 +311,17 @@ public class MikiParser extends MusicBaseListener {
 	}
 
 	@Override
-	public void enterRest(final MusicParser.RestContext ctx) {
-		buildEvent(ctx);
-	}
-
-	@Override
-	public void enterGhost(final MusicParser.GhostContext ctx) {
-		buildEvent(ctx);
-	}
-
-	@Override
 	public void enterChord(final MusicParser.ChordContext ctx) {
 		events = new ArrayList<>();
 		inNoteGroup = true;
+	}
+
+	@Override
+	public void enterBind(final MusicParser.BindContext ctx) {
+		// todo There's a stack of work to do here, different types of bind,
+		// how far they can extend, ...
+		final Beam beam = Beam.beams[ctx.getChildCount() - 2];
+		annotate(ctx, beam);
 	}
 
 	@Override
@@ -343,18 +349,18 @@ public class MikiParser extends MusicBaseListener {
 			if(!matcher.matches()) {
 				throw new RuntimeException("Recognizer/event parser mismatch");
 			}
-			if(matcher.group(2) != null) {
+
+			if(matcher.group(1) != null) {
 				messages.warn(ctx, "Tuplet articulation not supported, ignored: " + text);
 			}
 
-			// Group 1: Duration...
-			final String group1 = matcher.group(1);
-			if(group1 != null) {
-				duration = Duration.getByMiki(group1);
-				if(!duration.setDefault) {
-					saveDuration = currentDuration;
+			// Group 2: Duration...
+			final String group2 = matcher.group(2);
+			if(group2 != null) {
+				duration = Duration.getByMiki(group2);
+				if(duration.setDefault) {
+					currentDuration = duration;
 				}
-				currentDuration = duration;
 			} else {
 				// No duration but an erroneous articulation
 				duration = currentDuration;
@@ -381,9 +387,6 @@ public class MikiParser extends MusicBaseListener {
 		final NamedChord namedChord = NamedChord.parse(text, currentDuration, annotationMap);
 		final Event event = account(namedChord, ctx);
 		events.add(event);
-		if(namedChord.duration.setDefault) {
-			currentDuration = namedChord.duration;
-		}
 	}
 
 	@Override
@@ -412,23 +415,22 @@ public class MikiParser extends MusicBaseListener {
 			throw new RuntimeException("Recognizer/event parser mismatch");
 		}
 
-		// Group 1: Duration...
+		// Group 2: Articulation...
 		final String group1 = matcher.group(1);
-		if(group1 == null) {
+		if(group1 != null) {
+			final Articulation articulation = Articulation.getByMiki(group1);
+			annotate(ctx, articulation);
+		}
+
+		// Group 2: Duration...
+		final String group2 = matcher.group(2);
+		if(group2 == null) {
 			duration = currentDuration;
 		} else {
-			duration = Duration.getByMiki(group1);
+			duration = Duration.getByMiki(group2);
 			if(duration.setDefault) {
 				currentDuration = duration;
 			}
-		}
-		// todo Take care of duration overflow
-
-		// Group 2: Articulation...
-		final String group2 = matcher.group(2);
-		if(group2 != null) {
-			final Articulation articulation = Articulation.getByMiki(group2);
-			annotate(ctx, articulation);
 		}
 
 		result = new Chord(duration, events, annotationMap);
@@ -450,26 +452,26 @@ public class MikiParser extends MusicBaseListener {
 		// Group 1: Tonic...
 		final String tonic = matcher.group(1);
 
-		// Group 2: Accidental...
+		// Group 2: Duration...
+		final Duration duration;
 		final String group2 = matcher.group(2);
-		if(group2 != null) {
-			switch(group2.charAt(0)) {
+		if(group2 == null) {
+			duration = currentDuration;
+		} else {
+			duration = Duration.getByMiki(group2);
+			if(duration.setDefault) {
+				currentDuration = duration;
+			}
+		}
+
+		// Group 2: Accidental...
+		final String group3 = matcher.group(3);
+		if(group3 != null) {
+			switch(group3.charAt(0)) {
 				case 'b' -> annotate(ctx, Accidental.flat);
 				case 'n' -> annotate(ctx, Accidental.natural);
 				case '#' -> annotate(ctx, Accidental.sharp);
 				default -> throw new RuntimeException("Should never get here");
-			}
-		}
-
-		// Group 3: Duration...
-		final Duration duration;
-		final String group3 = matcher.group(3);
-		if(group3 == null) {
-			duration = currentDuration;
-		} else {
-			duration = Duration.getByMiki(group3);
-			if(duration.setDefault) {
-				currentDuration = duration;
 			}
 		}
 
@@ -481,8 +483,13 @@ public class MikiParser extends MusicBaseListener {
 		}
 
 		final char c = tonic.charAt(0);
-		final Map<Class<? extends Annotation>, Annotation> annotations = inNoteGroup ?
-				mtAnnotationMap : annotationMap;
+		final Map<Class<? extends Annotation>, Annotation> annotations;
+		if(inNoteGroup || annotationMap.isEmpty()) {
+			annotations = mtAnnotationMap;
+		} else {
+			annotations = annotationMap;
+			annotationMap = new HashMap<>();
+		}
 		if(c == 'R') {
 			event = new Rest(duration, annotations);
 		} else if(c == 'X') {

@@ -75,18 +75,12 @@ fingering: FINGERING ;
 
 event
 	:	note
-	|	rest
-	|	ghost
 	|	namedChord
 	|	chord
 	|	tuplet
 ;
 
 note: NOTE ;
-
-rest: REST ;
-
-ghost: GHOST ;
 
 chord: START_CHORD (octave* note)+ END_NOTE_GROUP ;
 
@@ -141,7 +135,7 @@ NAMED_CHORD:
 	Accidental?
 	Mode?
 	( [-/+]? '7'? ('add' OneOrMore)? ('sus' OneOrMore)? ('i' OneOrMore)? )
-	']' ( Duration Default? )? Articulation?
+	']' Articulation? ( Duration Default? )?
 ;
 
 // Before NOTE
@@ -164,15 +158,11 @@ NOTE:
 	Accidental?
 	Mode? (
 		// Note events
-		(( Duration Default? )? Articulation? ) |
+		( Articulation? ( Duration Default? )? ) |
 		// Chord names
 		( [-/+]? '7'? ('add' OneOrMore)? ('sus' OneOrMore)? ('i' OneOrMore)? )
 	)
 ;
-
-REST: RestName ( Duration Default? )? ;
-
-GHOST: GhostName ( Duration Default? )? ;
 
 TIME: 'time' ;
 
@@ -233,13 +223,9 @@ fragment Count:	('0' | OneOrMore ) ;
 
 fragment OneOrMore: [1-9][0-9]* ;
 
-fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) ','* ;
+fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) '.'* ;
 
-fragment Tonic: [A-G] ;
-
-fragment RestName: [R] ;
-
-fragment GhostName: [X] ;
+fragment Tonic: [A-GRX] ;
 
 fragment Accidental: [#bn] ;
 

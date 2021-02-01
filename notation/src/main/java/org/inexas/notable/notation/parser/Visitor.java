@@ -72,4 +72,6 @@ public interface Visitor {
 	void visit(NamedChord namedChord);
 
 	void visit(Accidental accidental);
+
+	void visit(Beam beam);
 }
