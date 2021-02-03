@@ -32,6 +32,7 @@ public class NamedChord extends Event {
 	public final int add;
 	public final int sus;
 	public final int inversion;
+
 	private NamedChord(final NamedChord toCopy) {
 		super(toCopy);
 		tonic = toCopy.tonic;
@@ -54,7 +55,7 @@ public class NamedChord extends Event {
 			final int add,
 			final int sus,
 			final int inversion) {
-		super(name, duration, annotations);
+		super(name, -1, duration, annotations);
 		this.tonic = tonic;
 		this.mode = mode;
 		this.dimAug = dimAug;

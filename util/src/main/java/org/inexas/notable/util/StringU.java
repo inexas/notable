@@ -12,7 +12,7 @@ public class StringU {
 		return string.substring(1, string.length() - 1);
 	}
 
-	public static String toCommaSeparatedList(
+	static String toCommaSeparatedList(
 			final List<Object> list,
 			final String elementDelimiter) {
 		final StringBuilder result = new StringBuilder();
@@ -20,7 +20,7 @@ public class StringU {
 		return result.toString();
 	}
 
-	public static void toCommaSeparatedList(
+	private static void toCommaSeparatedList(
 			final List<Object> list,
 			final String elementDelimiter,
 			final StringBuilder result) {
@@ -34,7 +34,7 @@ public class StringU {
 		}
 	}
 
-	public static String toCommaSeparatedList(
+	static String toCommaSeparatedList(
 			final Map<String, Object> map,
 			final String keyValueDelimiter,
 			final String elementDelimiter) {
@@ -43,7 +43,7 @@ public class StringU {
 		return result.toString();
 	}
 
-	public static void toCommaSeparatedList(
+	private static void toCommaSeparatedList(
 			final Map<String, Object> map,
 			final String keyValueDelimiter,
 			final String elementDelimiter,
@@ -78,9 +78,30 @@ public class StringU {
 			result.append(object.toString());
 			result.append('"');
 		} else if(object instanceof Boolean) {
-			result.append(((Boolean)object).toString());
+			result.append(((Boolean) object).toString());
 		} else {
 			result.append(object.toString());
 		}
+	}
+
+	/**
+	 * Given a string, trim it and if there's nothing left, return null.
+	 *
+	 * @param string
+	 * @return Null or trimmed text
+	 */
+	public static String nullOrText(final String string) {
+		final String returnValue;
+
+		if(string == null) {
+			returnValue = null;
+		} else {
+			final String tmp = string.trim();
+			returnValue = tmp.length() == 0 ? null : tmp;
+
+			return returnValue;
+		}
+
+		return returnValue;
 	}
 }

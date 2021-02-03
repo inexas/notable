@@ -20,9 +20,7 @@ public class Experiment extends Application {
 		primaryStage.setY(10);
 
 		final MikiParser parser = MikiParser.fromString(
-//				"R1 | R2 R4 R8 R8 | R16");
-//				"key A C C +G G | A8* B C A G2 | F4* F E E | D D C2");
-				"C8* C D4 D2 | o5 C8* C4 A4 R16 R4 A16");
+				"E");
 		final Sheet sheet = new Sheet(parser.score);
 
 		final Metrics metrics = Sheet.metrics;

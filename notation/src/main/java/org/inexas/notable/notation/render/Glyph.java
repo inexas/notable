@@ -16,9 +16,20 @@ public class Glyph {
 	final double ySW;
 	final double height;
 	final double width;
-	final double advance;
+	/**
+	 * The amount of space in pixels to be left of the glyph clear
+	 */
+	final double lBearing;
+	/**
+	 * The amount of space in pixels to be right of the glyph clear
+	 */
+	final double rBearing;
 
-	Glyph(final String name, final double sizeFactor, final double advanceFactor) {
+	Glyph(
+			final String name,
+			final double scaleFactor,
+			final double lBearingEm,
+			final double rBearingEm) {
 		this.name = name;
 
 		// Identity
@@ -27,21 +38,24 @@ public class Glyph {
 
 		codepoint = identity.codepoint;
 
+		// U+1D100 to character...
 		c = Character.toString(Integer.parseInt(identity.codepoint.substring(2), 16));
 
 		description = identity.description;
 
 		// Bounding box
 		final Map<String, Double[]> box = FontMetadataFile.instance.glyphBBoxes.get(name);
-		xNE = box.get("bBoxNE")[0];
-		yNE = box.get("bBoxNE")[1];
-		xSW = box.get("bBoxSW")[0];
-		ySW = box.get("bBoxSW")[1];
+		xNE = box.get("bBoxNE")[0] * scaleFactor;
+		yNE = box.get("bBoxNE")[1] * scaleFactor;
+		xSW = box.get("bBoxSW")[0] * scaleFactor;
+		ySW = box.get("bBoxSW")[1] * scaleFactor;
 
-		// Size
-		height = (yNE - ySW) * sizeFactor;
-		width = (xNE - xSW) * sizeFactor;
-		advance = width * advanceFactor;
+		// Bounding box dimensions
+		height = (yNE - ySW);
+		width = (xNE - xSW);
+
+		lBearing = width * lBearingEm;
+		rBearing = width * rBearingEm;
 	}
 
 	@Override
@@ -54,6 +68,8 @@ public class Glyph {
 				", ySW=" + ySW +
 				", h=" + height +
 				", w=" + width +
+				", l=" + lBearing +
+				", r=" + rBearing +
 				'}';
 	}
 }

@@ -16,9 +16,16 @@ public abstract class Event extends Element implements Visited {
 	public final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
 	// todo This should be final
 	public Duration duration;
+	/**
+	 * The note 'slot' is a slot between 9 and 96 that represents
+	 * the note as a combination of the octave x BASE + note index where
+	 * C is 0, C# is 1 etc.
+	 */
+	public final int slot;
 
 	Event(
 			final String name,
+			final int slot,
 			final Duration duration,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
 		assert name != null : "name cannot be null";
@@ -27,6 +34,7 @@ public abstract class Event extends Element implements Visited {
 
 		this.name = name;
 		this.duration = duration;
+		this.slot = slot;
 		this.annotations.putAll(annotations);
 	}
 
@@ -34,10 +42,12 @@ public abstract class Event extends Element implements Visited {
 		assert duration != null;
 		this.duration = duration;
 		name = null;
+		slot = -1;
 	}
 
 	Event(final Event toCopy) {
 		name = toCopy.name;
+		slot = toCopy.slot;
 		duration = toCopy.duration;
 		// todo Copy annotations? If not, why not
 	}

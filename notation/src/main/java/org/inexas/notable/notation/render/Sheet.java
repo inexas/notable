@@ -62,7 +62,6 @@ public class Sheet extends VBox {
 		gc.strokeLine(xOrigin + width, y.l4, xOrigin + width, y.l0);
 
 		// Clef
-		xCursor = xOrigin + metrics.barlineAdvance;
 		gc.setFont(metrics.font);
 		switch(staff.type) {
 			case alto -> {
@@ -83,8 +82,9 @@ public class Sheet extends VBox {
 			}
 			default -> throw new RuntimeException("Unknown type: " + staff.type);
 		}
+		xCursor = xOrigin + glyph.lBearing;
 		gc.fillText(glyph.c, xCursor, _y);
-		xCursor += metrics.gClef.advance;
+		xCursor += metrics.gClef.rBearing;
 
 		// Key signature...
 		if(key.accidentalCount > 0) {
@@ -92,7 +92,7 @@ public class Sheet extends VBox {
 			final Glyph accidental = key.isSharp() ? metrics.accidentalSharp : metrics.accidentalFlat;
 			for(int i = 0; i < key.accidentalCount; i++) {
 				gc.fillText(accidental.c, xCursor, y.index[accidentals[i]]);
-				xCursor += accidental.advance;
+				xCursor += accidental.rBearing;
 			}
 		}
 
@@ -101,7 +101,7 @@ public class Sheet extends VBox {
 		final Glyph denominator = metrics.timeSignature[score.timeSignature.denominator];
 		gc.fillText(numerator.c, xCursor, y.l3);
 		gc.fillText(denominator.c, xCursor, y.l1);
-		xCursor += numerator.advance;
+		xCursor += numerator.rBearing;
 
 		// Notes...
 
@@ -183,9 +183,9 @@ public class Sheet extends VBox {
 					}
 				}
 			} else if(event instanceof Rest) {
-				final Rest rest = (Rest) event;
-				glyph = metrics.getNoteHeadGlyph(rest);
-				_y = rest.duration.clicks == 32 ? y.wholeRest : y.rest;
+				glyph = metrics.getItemGlyph(event);
+				// todo This should be automatic
+				_y = event.duration.clicks == 32 ? y.wholeRest : y.rest;
 				gc.fillText(glyph.c, xCursor, _y);
 			}
 			xCursor += duration.clicks * perClick;

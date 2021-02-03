@@ -12,7 +12,7 @@ import java.util.*;
  * Tuplet, e.g. Triplet
  */
 public class Tuplet extends Event implements Annotation {
-	final List<Event> events;
+	public final List<Event> events;
 
 	public Tuplet(final Duration duration, final List<Event> events) {
 		super(duration);

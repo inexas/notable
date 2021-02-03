@@ -13,7 +13,7 @@ public class Ghost extends Event {
 	public Ghost(
 			final Duration duration,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
-		super("x", duration, annotations);
+		super("X", -1, duration, annotations);
 	}
 
 	private Ghost(final Ghost toCopy) {

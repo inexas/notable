@@ -11,7 +11,7 @@ import java.util.*;
 public class Rest extends Event {
 
 	public Rest(final Duration duration, final Map<Class<? extends Annotation>, Annotation> annotations) {
-		super("R", duration, annotations);
+		super("R", -1, duration, annotations);
 	}
 
 	private Rest(final Rest toCopy) {

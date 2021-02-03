@@ -147,7 +147,7 @@ public class Note extends Event {
 	public final static int F = 3;
 	public final static int G = 4;
 	public final static int A = 5;
-	public final static int B = 6;
+	final static int B = 6;
 
 	final static int C2 = slot(2, C);
 	final static int C3 = slot(3, C);
@@ -244,20 +244,13 @@ public class Note extends Event {
 	 */
 	public final int tonic;
 
-	/**
-	 * The note 'slot' is a slot between 9 and 96 that represents
-	 * the note as a combination of the octave x BASE + note index where
-	 * C is 0, C# is 1 etc.
-	 */
-	public final int slot;
 
 	private Note(
 			final int slot,
 			final Duration duration,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
-		super(toName(slot), duration, annotations);
+		super(toName(slot), slot, duration, annotations);
 
-		this.slot = slot;
 		octave = slot / BASE;
 		tonic = slot % BASE;
 	}
@@ -265,7 +258,6 @@ public class Note extends Event {
 	// todo I think I can get rid of the copy constructors
 	private Note(final Note toCopy) {
 		super(toCopy);
-		slot = toCopy.slot;
 		tonic = toCopy.tonic;
 		octave = toCopy.octave;
 	}

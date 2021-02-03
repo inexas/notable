@@ -241,6 +241,7 @@ public class Metrics {
 	 * Minimum amount of white space following barline
 	 */
 	final double barlineAdvance;
+	// todo Review barlineAdvance - is this the best way?
 
 	/**
 	 * Height of a five line staff, 4 x staffSpaceHeight
@@ -258,8 +259,9 @@ public class Metrics {
 	public final Glyph noteheadWhole;
 	public final Glyph noteheadHalf;
 	public final Glyph noteheadBlack;
-	public final Glyph pictDeadNoteStem;
-	//	public final Glyph stem;
+	public final Glyph noteheadXBlack;
+	public final Glyph noteheadXWhole;
+
 	public final Glyph flag8thUp;
 	public final Glyph flag8thDown;
 	public final Glyph flag16thUp;
@@ -329,17 +331,18 @@ public class Metrics {
 		font = loadFont(staffHeight);
 
 		// Clefs
-		cClef = loadGlyph("cClef");
-		fClef = loadGlyph("fClef");
-		gClef = loadGlyph("gClef");
+		cClef = loadGlyph("cClef", 1.5, 1.5);
+		fClef = loadGlyph("fClef", 1.5, 1.5);
+		gClef = loadGlyph("gClef", 1.5, 1.5);
 
 		// Note components
-		noteheadWhole = loadGlyph("noteheadWhole");
-		noteheadHalf = loadGlyph("noteheadHalf");
-		noteheadBlack = loadGlyph("noteheadBlack");
-		pictDeadNoteStem = loadGlyph("pictDeadNoteStem");
+		noteheadWhole = loadGlyph("noteheadWhole", 0.0, 1.8);
+		noteheadHalf = loadGlyph("noteheadHalf", 0.0, 1.8);
+		noteheadBlack = loadGlyph("noteheadBlack", 0.0, 1.8);
+		noteheadXBlack = loadGlyph("noteheadXBlack", 0.0, 1.8);
+		noteheadXWhole = loadGlyph("noteheadXWhole", 0.0, 1.8);
 
-		stemLength = slotHeight * 7.0;
+		stemLength = slotHeight * 6.5;
 		flag8thUp = loadGlyph("flag8thUp");
 		flag8thDown = loadGlyph("flag8thDown");
 		flag16thUp = loadGlyph("flag16thUp");
@@ -348,16 +351,16 @@ public class Metrics {
 		legerLineLength = legerLineExtension + noteheadBlack.width + legerLineExtension;
 
 		// Rests
-		restWhole = loadGlyph("restWhole");
-		restHalf = loadGlyph("restHalf");
-		restQuarter = loadGlyph("restQuarter");
-		rest8th = loadGlyph("rest8th");
-		rest16th = loadGlyph("rest16th");
+		restWhole = loadGlyph("restWhole", 0.0, 1.8);
+		restHalf = loadGlyph("restHalf", 0.0, 1.8);
+		restQuarter = loadGlyph("restQuarter", 0.0, 1.8);
+		rest8th = loadGlyph("rest8th", 0.0, 1.8);
+		rest16th = loadGlyph("rest16th", 0.0, 1.8);
 
 		// Accidentals
-		accidentalFlat = new Glyph("accidentalFlat", staffSpaceHeight, 1.2);
-		accidentalNatural = loadGlyph("accidentalNatural");
-		accidentalSharp = loadGlyph("accidentalSharp");
+		accidentalFlat = loadGlyph("accidentalFlat", 0.0, 1.2);
+		accidentalNatural = loadGlyph("accidentalNatural", 0.0, 1.2);
+		accidentalSharp = loadGlyph("accidentalSharp", 0.0, 1.2);
 
 		// Time signatures
 		timeSignature = new Glyph[]{
@@ -375,37 +378,46 @@ public class Metrics {
 	}
 
 	private Glyph loadGlyph(final String name) {
-		return new Glyph(name, staffSpaceHeight, 1.3);
+		return new Glyph(name, staffSpaceHeight, 0.0, 0.0);
+	}
+
+	private Glyph loadGlyph(final String name, final double lBearingEm, final double rBearingEm) {
+		return new Glyph(name, staffSpaceHeight, lBearingEm, rBearingEm);
 	}
 
 	private double load(final String variable) {
 		return tmpEngravingDefaults.get(variable) * staffSpaceHeight;
 	}
 
-	Glyph getItemGlyph(final Layout.Item.Type type, final Duration duration) {
-		Glyph returnValue = null;
+	Glyph getItemGlyph(final Event event) {
+		final Glyph returnValue;
 
-		final int clicks = duration.clicks;
-		switch(type) {
-			case Note -> {
-				switch(clicks) {
-					case 32 -> returnValue = noteheadWhole;
-					case 16 -> returnValue = noteheadHalf;
-					default -> returnValue = noteheadBlack;
-				}
+		final int clicks = event.duration.clicks;
+		if(event instanceof Note) {
+			if(clicks >= 32) {
+				returnValue = noteheadWhole;
+			} else if(clicks >= 16) {
+				returnValue = noteheadHalf;
+			} else {
+				returnValue = noteheadBlack;
 			}
-			case Rest -> {
-				// todo Handle double dots
-				switch(clicks) {
-					case 32 -> returnValue = restWhole;
-					case 16 -> returnValue = restHalf;
-					case 8, 12 -> returnValue = restQuarter;
-					case 4, 6 -> returnValue = rest8th;
-					case 2 -> returnValue = rest16th;
-					default -> throw new RuntimeException("Rest not supported: " + duration.clicks);
-				}
+		} else if(event instanceof Rest) {
+			if(clicks >= 32) {
+				returnValue = restWhole;
+			} else if(clicks >= 16) {
+				returnValue = restHalf;
+			} else if(clicks >= 8) {
+				returnValue = restQuarter;
+			} else if(clicks >= 4) {
+				returnValue = rest8th;
+			} else {
+				returnValue = rest16th;
 			}
+		} else {
+			assert event instanceof Ghost : event.getClass().getSimpleName();
+			returnValue = clicks >= 16 ? noteheadXWhole : noteheadXBlack;
 		}
+
 		return returnValue;
 	}
 
@@ -440,14 +452,6 @@ public class Metrics {
 
 		return returnValue;
 	}
-
-	Glyph getNoteHeadGlyph(final Rest rest) {
-		final Glyph returnValue;
-
-
-		return null;
-	}
-
 
 	private Font loadFont(final double size) {
 		final Font returnValue;
