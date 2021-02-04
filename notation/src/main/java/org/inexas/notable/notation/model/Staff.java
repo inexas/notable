@@ -6,8 +6,6 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-import java.util.*;
-
 public class Staff extends Element {
 	public enum Type {
 		alto(Note.F3, Note.G4,
@@ -165,17 +163,5 @@ public class Staff extends Element {
 	 */
 	public int slotsBelow() {
 		return lowestNote == -1 ? 0 : Math.max(lowSlot - lowestNote, 0);
-	}
-
-	/**
-	 * @param key The key
-	 * @return The list of slots that should be marked with an accidental
-	 * * for a give key
-	 */
-	public int[] getAccidentals(final KeySignature key) {
-		return Arrays.copyOfRange(
-				key.isFlat() ? type.flats : type.sharps,
-				0,
-				key.accidentalCount);
 	}
 }

@@ -1,10 +1,11 @@
 package org.inexas.notable.notation.render;
 
+import javafx.scene.canvas.*;
 import org.inexas.notable.notation.model.*;
-import org.inexas.notable.util.*;
 
 class DFirstPage extends DPage {
 	DPart[] parts;
+	private DPara para;
 
 	DFirstPage(final Layout layout) {
 		final Score score = layout.score;
@@ -15,10 +16,11 @@ class DFirstPage extends DPage {
 			final DPart dPart = new DPart(layout, part, singleton);
 			parts[index++] = dPart;
 		}
+		para = new DPara(layout);
 	}
 
 	@Override
-	void draw() {
-		throw new ImplementMeException();
+	void draw(final GraphicsContext gc) {
+		para.draw(gc);
 	}
 }

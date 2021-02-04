@@ -142,7 +142,7 @@ public class Note extends Event {
 	}
 
 	public final static int C = 0;
-	public final static int D = 1;
+	final static int D = 1;
 	public final static int E = 2;
 	public final static int F = 3;
 	public final static int G = 4;
@@ -166,20 +166,20 @@ public class Note extends Event {
 	final static int E5 = slot(5, E);
 	final static int F1 = slot(1, F);
 	final static int F2 = slot(2, F);
-	final static int F3 = slot(3, F);
-	final static int F4 = slot(4, F);
+	public final static int F3 = slot(3, F);
+	public final static int F4 = slot(4, F);
 	public final static int F5 = slot(5, F);
-	final static int G2 = slot(2, G);
+	public final static int G2 = slot(2, G);
 	final static int G3 = slot(3, G);
-	final static int G4 = slot(4, G);
+	public final static int G4 = slot(4, G);
 	final static int G5 = slot(5, G);
 	final static int A0 = slot(0, A);
 	final static int A2 = slot(2, A);
-	final static int A3 = slot(3, A);
+	public final static int A3 = slot(3, A);
 	final static int A4 = slot(4, A);
 	final static int A5 = slot(5, A);
 	final static int B0 = slot(0, B);
-	final static int B3 = slot(3, B);
+	public final static int B3 = slot(3, B);
 	final static int B2 = slot(2, B);
 	final static int B4 = slot(4, B);
 	final static int B5 = slot(5, B);

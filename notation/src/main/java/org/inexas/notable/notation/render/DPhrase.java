@@ -25,11 +25,11 @@ class DPhrase {
 			if(event instanceof Note ||
 					event instanceof Rest ||
 					event instanceof Ghost) {
-				dEvent = new DSingleEvent(layout, event);
+//				dEvent = new DSingleEvent(layout, event);
 			} else {
-				dEvent = new DMultiEvent(event);
+//				dEvent = new DMultiEvent(event);
 			}
-			events[i] = dEvent;
+//			events[i] = dEvent;
 		}
 	}
 }

@@ -12,6 +12,6 @@ public class ImplementMeException extends RuntimeException {
 
 	private static String generateMessage() {
 		final StackTraceElement caller = Thread.currentThread().getStackTrace()[3];
-		return "Implement me: " + caller.getClassName() + '.' + caller.getMethodName();
+		return "Implement me: " + caller.getClassName() + '.' + caller.getMethodName() + "()";
 	}
 }

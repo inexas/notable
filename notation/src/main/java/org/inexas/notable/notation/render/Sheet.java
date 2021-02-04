@@ -11,7 +11,7 @@ import java.util.*;
  * Conventions used
  */
 public class Sheet extends VBox {
-	final static Metrics metrics = new Metrics(Metrics.L);
+	private final static Metrics metrics = new Metrics(Metrics.L);
 	private final Canvas canvas;
 	private final Score score;
 	private List<Event> events;
@@ -88,7 +88,7 @@ public class Sheet extends VBox {
 
 		// Key signature...
 		if(key.accidentalCount > 0) {
-			final int[] accidentals = staff.getAccidentals(key);
+			final int[] accidentals = key.getAccidentals(key);
 			final Glyph accidental = key.isSharp() ? metrics.accidentalSharp : metrics.accidentalFlat;
 			for(int i = 0; i < key.accidentalCount; i++) {
 				gc.fillText(accidental.c, xCursor, y.index[accidentals[i]]);

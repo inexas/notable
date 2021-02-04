@@ -1,11 +1,24 @@
 package org.inexas.notable.notation.render;
 
-import org.inexas.notable.notation.model.*;
+import javafx.scene.canvas.*;
+import javafx.scene.text.*;
 
-abstract class DEvent extends Drawable {
-	final int clicks;
+class DEvent extends Drawable {
+	private final Font font;
+	private final Glyph glyph;
 
-	DEvent(final Event event) {
-		clicks = event.duration.clicks;
+	DEvent(
+			final double originX, final double originY,
+			final Glyph glyph,
+			final Layout layout) {
+		super(originX, originY);
+		this.glyph = glyph;
+		font = layout.m.font;
+	}
+
+	@Override
+	void draw(final GraphicsContext gc) {
+		gc.setFont(font);
+		gc.fillText(glyph.c, originX, originY);
 	}
 }

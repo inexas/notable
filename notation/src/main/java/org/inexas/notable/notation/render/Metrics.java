@@ -1,11 +1,14 @@
 package org.inexas.notable.notation.render;
 
 
+import javafx.geometry.*;
 import javafx.scene.text.*;
 import org.inexas.notable.notation.model.*;
 
 import java.io.*;
 import java.util.*;
+
+import static javafx.scene.text.Font.*;
 
 /**
  * Metrics stores the engraving defaults used for rendering.
@@ -15,7 +18,7 @@ import java.util.*;
 public class Metrics {
 	// Rendering sizes
 	@SuppressWarnings("unused")
-	public final static double S = 32;
+	final static double S = 32;
 	@SuppressWarnings("unused")
 	final static double M = 48;
 	@SuppressWarnings("unused")
@@ -235,7 +238,7 @@ public class Metrics {
 	 */
 	final double staffSpaceHeight;
 
-	private final double slotHeight;
+	final double slotHeight;
 
 	/**
 	 * Minimum amount of white space following barline
@@ -248,7 +251,14 @@ public class Metrics {
 	 */
 	final double staffHeight;
 
+	/**
+	 * The space left and right of a label that should be left clear
+	 */
+	final double labelBearing;
+
 	final Font font;
+	final Font textFont;
+	private final Text boundsText;
 
 	// Clefs
 	public Glyph cClef; // Alto and Tenor
@@ -287,7 +297,7 @@ public class Metrics {
 
 	Metrics(final double staffHeight) {
 		this.staffHeight = staffHeight;
-		paperWidth = 20.0 * staffHeight;  // 20 because it looks OK
+		paperWidth = 20.0 * staffHeight;  // 20 because it looks OK, OK?
 		paperHeight = paperWidth * aspectRatio;
 		sideMargin = staffHeight / 2.0;
 		topMargin = sideMargin * aspectRatio;
@@ -295,6 +305,7 @@ public class Metrics {
 		slotHeight = staffHeight / 8.0;
 		width = paperWidth - 2.0 * sideMargin;
 		barlineAdvance = slotHeight;
+		labelBearing = staffSpaceHeight;
 
 		// Load engraving defaults...
 		tmpEngravingDefaults = FontMetadataFile.instance.engravingDefaults;
@@ -329,11 +340,14 @@ public class Metrics {
 
 		// Load the glyphs
 		font = loadFont(staffHeight);
+		boundsText = new Text();
+		textFont = font("serif", slotHeight * 3.0);
+		boundsText.setFont(textFont);
 
 		// Clefs
-		cClef = loadGlyph("cClef", 1.5, 1.5);
-		fClef = loadGlyph("fClef", 1.5, 1.5);
-		gClef = loadGlyph("gClef", 1.5, 1.5);
+		cClef = loadGlyph("cClef", 0.2, 0.3);
+		fClef = loadGlyph("fClef", 0.2, 0.3);
+		gClef = loadGlyph("gClef", 0.2, 0.3);
 
 		// Note components
 		noteheadWhole = loadGlyph("noteheadWhole", 0.0, 1.8);
@@ -470,6 +484,17 @@ public class Metrics {
 
 	Y getY(final Staff staff) {
 		return new Y(staff);
+	}
+
+	double[] WidthHeight(final String text) {
+		final double[] returnValue = new double[2];
+
+		boundsText.setText(text);
+		final Bounds bounds = boundsText.getLayoutBounds();
+		returnValue[0] = bounds.getWidth();
+		returnValue[1] = bounds.getHeight();
+
+		return returnValue;
 	}
 
 	class Y {

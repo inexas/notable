@@ -2,7 +2,10 @@ package org.inexas.notable.notation.render;
 
 import javafx.application.*;
 import javafx.scene.*;
+import javafx.scene.canvas.*;
+import javafx.scene.layout.*;
 import javafx.stage.*;
+import org.inexas.notable.notation.model.*;
 import org.inexas.notable.notation.parser.*;
 
 public class Experiment extends Application {
@@ -12,21 +15,32 @@ public class Experiment extends Application {
 	}
 
 	@Override
-	public void start(final Stage primaryStage) {
-		primaryStage.setTitle("Renderer Experiment");
+	public void start(final Stage stage) {
+		stage.setTitle("Renderer Experiment");
 
 		// Size and position window...
-		primaryStage.setX(10);
-		primaryStage.setY(10);
+		stage.setX(10);
+		stage.setY(10);
 
-		final MikiParser parser = MikiParser.fromString(
-				"E");
-		final Sheet sheet = new Sheet(parser.score);
+		final Score score = MikiParser.fromString("A").score;
 
-		final Metrics metrics = Sheet.metrics;
-		primaryStage.setScene(new Scene(sheet, metrics.paperWidth, metrics.paperHeight));
-		primaryStage.show();
+		final Layout layout = new Layout(
+				score,
+				Layout.Format.a4,
+				Layout.Style.linear,
+				Metrics.M);
 
-		sheet.draw();
+		final Metrics m = layout.m;
+
+		final Canvas canvas = new Canvas(m.paperWidth, m.paperHeight);
+		final GraphicsContext gc = canvas.getGraphicsContext2D();
+		final Pane root = new Pane();
+		root.getChildren().add(canvas);
+
+		layout.pages.get(0).draw(gc);
+
+		final Scene scene = new Scene(root);
+		stage.setScene(scene);
+		stage.show();
 	}
 }
