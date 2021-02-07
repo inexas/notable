@@ -19,4 +19,15 @@ class ArrayUTest {
 		doubles.add(1.1);
 		assertArrayEquals(new double[]{0.0, 1.1}, ArrayU.doubleArray(doubles));
 	}
+
+	@Test
+	void doubleArray() {
+		assertEquals(0, ArrayU.parseDoubles(null).length);
+		assertEquals(0, ArrayU.parseDoubles("").length);
+		assertEquals(0.0, ArrayU.parseDoubles("0")[0]);
+		assertEquals(1.0, ArrayU.parseDoubles("1")[0]);
+		assertEquals(0.0, ArrayU.parseDoubles("0.0,1.1, 2.2")[0]);
+		assertEquals(1.1, ArrayU.parseDoubles("0.0,1.1, 2.2")[1]);
+		assertEquals(2.2, ArrayU.parseDoubles("0.0,1.1, 2.2")[2]);
+	}
 }

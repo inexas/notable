@@ -21,12 +21,7 @@ public class MetadataTest {
 
 	@Test
 	public void testClasses() {
-		final ClassesMetadataFile file = ClassesMetadataFile.load(
-				ClassesMetadataFile.class,
-				ClassesMetadataFile.filename);
-		assertEquals(85, file.classMap.size());
-		assertEquals(2, file.classMap.get("accidentalsPersian").length);
-		assertEquals("accidentalKoron", file.classMap.get("accidentalsPersian")[0]);
+		assertEquals("clefs", ClassesMetadataFile.instance.getClass("cClef"));
 	}
 
 	@Test
@@ -34,7 +29,7 @@ public class MetadataTest {
 		final GlyphNamesMetadataFile file = GlyphNamesMetadataFile.instance;
 		final Map<String, GlyphNamesMetadataFile.GlyphIdentity> map = file.glyphs;
 		assertEquals(2791, map.size());
-		GlyphNamesMetadataFile.GlyphIdentity glyph = map.get("4stringTabClef");
+		final GlyphNamesMetadataFile.GlyphIdentity glyph = map.get("4stringTabClef");
 		assertEquals("U+E06E", glyph.codepoint);
 		assertEquals("4-string tab clef", glyph.description);
 	}

@@ -62,34 +62,35 @@ public class Sheet extends VBox {
 		gc.strokeLine(xOrigin + width, y.l4, xOrigin + width, y.l0);
 
 		// Clef
+		final GlyphFactory glyphFactory = metrics.glyphFactory;
 		gc.setFont(metrics.font);
 		switch(staff.type) {
 			case alto -> {
-				glyph = metrics.cClef;
+				glyph = glyphFactory.getGlyph("cClef");
 				_y = y.l2;
 			}
 			case bass -> {
-				glyph = metrics.fClef;
+				glyph = glyphFactory.getGlyph("fClef");
 				_y = y.l3;
 			}
 			case tenor -> {
-				glyph = metrics.cClef;
+				glyph = glyphFactory.getGlyph("cClef");
 				_y = y.l3;
 			}
 			case treble -> {
-				glyph = metrics.gClef;
+				glyph = glyphFactory.getGlyph("gClef");
 				_y = y.l1;
 			}
 			default -> throw new RuntimeException("Unknown type: " + staff.type);
 		}
 		xCursor = xOrigin + glyph.lBearing;
 		gc.fillText(glyph.c, xCursor, _y);
-		xCursor += metrics.gClef.rBearing;
+		xCursor += glyph.rBearing;
 
 		// Key signature...
 		if(key.accidentalCount > 0) {
-			final int[] accidentals = key.getAccidentals(key);
-			final Glyph accidental = key.isSharp() ? metrics.accidentalSharp : metrics.accidentalFlat;
+			final int[] accidentals = key.getAccidentals(Clef.treble);
+			final Glyph accidental = key.isSharp() ? glyphFactory.accidentalSharp : glyphFactory.accidentalFlat;
 			for(int i = 0; i < key.accidentalCount; i++) {
 				gc.fillText(accidental.c, xCursor, y.index[accidentals[i]]);
 				xCursor += accidental.rBearing;
@@ -97,8 +98,9 @@ public class Sheet extends VBox {
 		}
 
 		// Time signature...
-		final Glyph numerator = metrics.timeSignature[score.timeSignature.numerator];
-		final Glyph denominator = metrics.timeSignature[score.timeSignature.denominator];
+		final Glyph[] timeSignatures = glyphFactory.timeSignatures;
+		final Glyph numerator = timeSignatures[score.timeSignature.numerator];
+		final Glyph denominator = timeSignatures[score.timeSignature.denominator];
 		gc.fillText(numerator.c, xCursor, y.l3);
 		gc.fillText(denominator.c, xCursor, y.l1);
 		xCursor += numerator.rBearing;
@@ -154,7 +156,7 @@ public class Sheet extends VBox {
 				}
 
 				// Draw note head...
-				glyph = metrics.getNoteHeadGlyph(note);
+				glyph = null;//metrics.getNoteHeadGlyph(null);
 				_y = y.index[note.slot];
 				gc.fillText(glyph.c, xCursor, _y);
 				// Stem...
@@ -167,7 +169,7 @@ public class Sheet extends VBox {
 						_x = xCursor + glyph.width - metrics.stemThickness / 2.0;
 						gc.strokeLine(_x, _y - metrics.stemLength, _x, _y - tilt);
 						// Flag?
-						glyph = metrics.getFlag(note.duration.clicks, relativeSlot);
+						glyph = null;//metrics.getFlag(note.duration.clicks, relativeSlot);
 						if(glyph != null) {
 							gc.fillText(glyph.c, _x, _y - metrics.stemLength);
 						}
@@ -176,14 +178,14 @@ public class Sheet extends VBox {
 						_x = xCursor + metrics.stemThickness / 2.0;
 						gc.strokeLine(_x, _y + tilt, _x, _y + metrics.stemLength);
 						// Flag?
-						glyph = metrics.getFlag(note.duration.clicks, relativeSlot);
+						glyph = null;//metrics.getFlag(note.duration.clicks, relativeSlot);
 						if(glyph != null) {
 							gc.fillText(glyph.c, _x, _y + metrics.stemLength);
 						}
 					}
 				}
 			} else if(event instanceof Rest) {
-				glyph = metrics.getItemGlyph(event);
+				glyph = glyphFactory.getItemGlyph(event);
 				// todo This should be automatic
 				_y = event.duration.clicks == 32 ? y.wholeRest : y.rest;
 				gc.fillText(glyph.c, xCursor, _y);
@@ -232,7 +234,7 @@ public class Sheet extends VBox {
 			// Leger line count
 
 			// Draw beam
-			final Glyph glyph = metrics.getNoteHeadGlyph(note);
+			final Glyph glyph = null;//metrics.getNoteHeadGlyph(null);
 			final double _y = y.index[note.slot];
 			gc.fillText(glyph.c, xCursor, _y);
 

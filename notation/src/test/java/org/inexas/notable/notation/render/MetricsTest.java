@@ -34,7 +34,7 @@ class MetricsTest {
 
 	@Test
 	public void testGlyphs() {
-		final Glyph glyph = metrics.gClef;
+		final Glyph glyph = metrics.glyphFactory.getGlyph("gClef");
 		assertEquals(0xE050, glyph.c.charAt(0));
 		assertEquals("gClef", glyph.name);
 		assertEquals("U+E050", glyph.codepoint);

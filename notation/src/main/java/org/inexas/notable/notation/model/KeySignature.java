@@ -11,7 +11,19 @@ import java.util.*;
 import static org.inexas.notable.notation.model.KeySignature.State.*;
 
 public class KeySignature extends Element implements Annotation {
-	public enum State {natural, sharp, flat}
+	public enum State {
+		sharp(0),
+		flat(1),
+		natural(2);
+
+		public final int index;
+
+		private State(final int index) {
+			this.index = index;
+		}
+	}
+
+	private final State state;
 
 	/**
 	 * This allows the KeySignature to be looked up by the key
@@ -35,6 +47,7 @@ public class KeySignature extends Element implements Annotation {
 	private static final KeySignature S5 = new KeySignature(sharp, 5, "B");
 	private static final KeySignature F7 = new KeySignature(flat, 7, "Cb");
 
+	// todo Figure out how to handle A# and the like
 	static {
 		map.put("C", C);
 
@@ -46,7 +59,6 @@ public class KeySignature extends Element implements Annotation {
 		map.put("F#", S6);
 		map.put("C#", S7);
 
-		// Figure out how to handle A# and the like
 		map.put("F", F1);
 		map.put("Bb", F2);
 		map.put("Eb", F3);
@@ -74,50 +86,31 @@ public class KeySignature extends Element implements Annotation {
 		map.put("Abm", F7);
 	}
 
-	public enum Type {
-		alto(Note.F3, Note.G4,
-				new int[]{Note.F4, Note.C4, Note.G4, Note.D4, Note.A3, Note.E4, Note.B3},
-				new int[]{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}),
-		bass(Note.G2, Note.A3,
-				new int[]{Note.F3, Note.C3, Note.G3, Note.D3, Note.A2, Note.E3, Note.B2},
-				new int[]{Note.B2, Note.E3, Note.A2, Note.D3, Note.G2, Note.C3, Note.F2}),
-		tenor(Note.D3, Note.E4,
-				new int[]{Note.F3, Note.C4, Note.G3, Note.D4, Note.A3, Note.E4, Note.B3},
-				new int[]{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}),
-		treble(Note.E4, Note.F5,
-				new int[]{Note.F5, Note.C5, Note.G5, Note.D5, Note.A4, Note.E5, Note.B4},
-				new int[]{Note.B4, Note.E5, Note.A4, Note.D5, Note.G4, Note.C5, Note.F4});
-		/**
-		 * Slot number of the lowest line, A0 is 0
-		 */
-		int lowSlot;
-		/**
-		 * Slot number of the highest line, A0 is 0
-		 */
-		int highSlot;
-		int[] sharps;
-		int[] flats;
-
-		Type(final int lowSlot, final int highSlot, final int[] sharps, final int[] flats) {
-			this.lowSlot = lowSlot;
-			this.highSlot = highSlot;
-			this.sharps = sharps;
-			this.flats = flats;
-		}
-	}
-
-	public Type type;
+	private final int[][][] accidentals = {{
+			// alto
+			{Note.F4, Note.C4, Note.G4, Note.D4, Note.A3, Note.E4, Note.B3},
+			{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}
+	}, {    // bass
+			{Note.F3, Note.C3, Note.G3, Note.D3, Note.A2, Note.E3, Note.B2},
+			{Note.B2, Note.E3, Note.A2, Note.D3, Note.G2, Note.C3, Note.F2}
+	}, {    // tenor
+			{Note.F3, Note.C4, Note.G3, Note.D4, Note.A3, Note.E4, Note.B3},
+			{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}
+	}, {    // treble
+			{Note.F5, Note.C5, Note.G5, Note.D5, Note.A4, Note.E5, Note.B4},
+			{Note.B4, Note.E5, Note.A4, Note.D5, Note.G4, Note.C5, Note.F4}
+	}};
 
 	/**
-	 * @param key The key
-	 * @return The list of slots that should be marked with an accidental
-	 * * for a give key
+	 * @param clef
+	 * @return The list of slots that should be marked with
+	 * an accidental for a given clef
 	 */
-	public int[] getAccidentals(final KeySignature key) {
+	public int[] getAccidentals(final Clef clef) {
 		return Arrays.copyOfRange(
-				key.isFlat() ? type.flats : type.sharps,
+				accidentals[clef.index][state.index],
 				0,
-				key.accidentalCount);
+				accidentalCount);
 	}
 
 	public static KeySignature get(final String name) {
@@ -126,7 +119,6 @@ public class KeySignature extends Element implements Annotation {
 
 	public final String name;
 	public final int accidentalCount;
-	private final State state;
 
 	private KeySignature(
 			final State keyState,

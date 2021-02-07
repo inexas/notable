@@ -13,7 +13,7 @@ class DSingleEvent {
 
 	DSingleEvent(final Layout layout, final Event event) {
 		this.layout = layout;
-		glyph = layout.m.getItemGlyph(event);
+		glyph = layout.m.glyphFactory.getItemGlyph(event);
 		if(event instanceof Rest) {
 			stem = false;
 		} else {

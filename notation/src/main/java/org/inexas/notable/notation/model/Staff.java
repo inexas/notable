@@ -8,18 +8,11 @@ import org.inexas.notable.notation.parser.*;
 
 public class Staff extends Element {
 	public enum Type {
-		alto(Note.F3, Note.G4,
-				new int[]{Note.F4, Note.C4, Note.G4, Note.D4, Note.A3, Note.E4, Note.B3},
-				new int[]{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}),
-		bass(Note.G2, Note.A3,
-				new int[]{Note.F3, Note.C3, Note.G3, Note.D3, Note.A2, Note.E3, Note.B2},
-				new int[]{Note.B2, Note.E3, Note.A2, Note.D3, Note.G2, Note.C3, Note.F2}),
-		tenor(Note.D3, Note.E4,
-				new int[]{Note.F3, Note.C4, Note.G3, Note.D4, Note.A3, Note.E4, Note.B3},
-				new int[]{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}),
-		treble(Note.E4, Note.F5,
-				new int[]{Note.F5, Note.C5, Note.G5, Note.D5, Note.A4, Note.E5, Note.B4},
-				new int[]{Note.B4, Note.E5, Note.A4, Note.D5, Note.G4, Note.C5, Note.F4});
+		alto(Note.F3, Note.G4),
+		bass(Note.G2, Note.A3),
+		tenor(Note.D3, Note.E4),
+		treble(Note.E4, Note.F5);
+
 		/**
 		 * Slot number of the lowest line, A0 is 0
 		 */
@@ -28,14 +21,10 @@ public class Staff extends Element {
 		 * Slot number of the highest line, A0 is 0
 		 */
 		int highSlot;
-		int[] sharps;
-		int[] flats;
 
-		Type(final int lowSlot, final int highSlot, final int[] sharps, final int[] flats) {
+		Type(final int lowSlot, final int highSlot) {
 			this.lowSlot = lowSlot;
 			this.highSlot = highSlot;
-			this.sharps = sharps;
-			this.flats = flats;
 		}
 	}
 

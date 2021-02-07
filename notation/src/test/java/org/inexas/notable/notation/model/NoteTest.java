@@ -9,18 +9,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NoteTest {
 	private final Map<Class<? extends Annotation>, Annotation> noAnnotations = Map.of();
 
-	@Test
-	void testParameters() {
-		AssertionError e;
-		e = assertThrows(AssertionError.class, () ->
-				Note.get(4, Duration.quarter, noAnnotations));
-		assertTrue(e.getMessage().contains("range"));
-
-		e = assertThrows(AssertionError.class, () ->
-				Note.get(4, Duration.quarter, noAnnotations));
-		assertTrue(e.getMessage().contains("range"));
-	}
-
+	//	@Test
+//	void testParameters() {
+//		AssertionError e;
+//		e = assertThrows(AssertionError.class, () ->
+//				Note.get(4, Duration.quarter, noAnnotations));
+//		assertTrue(e.getMessage().contains("range"));
+//
+//		e = assertThrows(AssertionError.class, () ->
+//				Note.get(4, Duration.quarter, noAnnotations));
+//		assertTrue(e.getMessage().contains("range"));
+//	}
+//
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Test
 	void testNoteNumberConversion() {
@@ -37,19 +37,19 @@ public class NoteTest {
 		assertEquals(28, Note.slot(4, "C"));
 	}
 
-	@Test
-	void testTonics() {
-		assertEquals(0, Note.get(28, Duration.quarter, noAnnotations).tonic);
-		assertEquals(1, Note.get(29, Duration.quarter, noAnnotations).tonic);
-
-		assertEquals(0, Note.C);
-		assertEquals(1, Note.D);
-		assertEquals(2, Note.E);
-		assertEquals(3, Note.F);
-		assertEquals(4, Note.G);
-		assertEquals(5, Note.A);
-		assertEquals(6, Note.B);
-	}
+//	@Test
+//	void testTonics() {
+//		assertEquals(0, Note.get(28, Duration.quarter, noAnnotations).tonic);
+//		assertEquals(1, Note.get(29, Duration.quarter, noAnnotations).tonic);
+//
+//		assertEquals(0, Note.C);
+//		assertEquals(1, Note.D);
+//		assertEquals(2, Note.E);
+//		assertEquals(3, Note.F);
+//		assertEquals(4, Note.G);
+//		assertEquals(5, Note.A);
+//		assertEquals(6, Note.B);
+//	}
 
 	@Test
 	void testNext() {
@@ -64,12 +64,12 @@ public class NoteTest {
 		assertEquals(55, Note.next(56, -1, 0, "B"));
 	}
 
-	@Test
-	void testToString() {
-		final Note note = Note.get(28, Duration.quarter, noAnnotations);
-		assertEquals("C4", note.name);
-	}
-
+	//	@Test
+//	void testToString() {
+//		final Note note = Note.get(28, Duration.quarter, noAnnotations);
+//		assertEquals("C4", note.name);
+//	}
+//
 	@Test
 	void testIsValid() {
 		assertTrue(Note.isValid(5));

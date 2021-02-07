@@ -42,13 +42,23 @@ class DStaff extends Drawable {
 		}
 
 		// Clef
-		final Glyph glyph = m.gClef;
+		final Glyph glyph = m.glyphFactory.getGlyph("gClef");
 		cursorX += glyph.lBearing;
 		cursorY = originY;
-		drawables.add(new DEvent(cursorX, cursorY - m.staffSpaceHeight, glyph, layout));
+		drawables.add(new DEvent(cursorX, cursorY - m.staffSpaceHeight, layout, glyph));
+		cursorX += glyph.lBearing + glyph.width + glyph.rBearing;
 
 		// Key signature
 		drawables.add(new DKeySignature(cursorX, cursorY, layout, KeySignature.get("A")));
+		cursorY += 50;
+
+		// Time signature...
+		drawables.add(new DTimeSignature(cursorX, cursorY, layout, TimeSignature.COMMON));
+
+		// Some notes...
+		final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+		final Note note = new Note(Note.C4, Duration.quarter, false, annotations);
+		drawables.add(new DNote(cursorX, cursorY, layout, note));
 
 		setDrawables(drawables);
 	}

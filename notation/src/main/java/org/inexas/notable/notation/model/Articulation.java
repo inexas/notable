@@ -60,7 +60,7 @@ public class Articulation extends Element implements Annotation {
 			"Hold the note in question its full length (or longer, " +
 					"with slight rubato), or play the note slightly louder",
 			"_");
-	private final String name;
+	public final String name;
 	public final String description;
 	public final String miki;
 

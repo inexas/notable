@@ -260,40 +260,9 @@ public class Metrics {
 	final Font textFont;
 	private final Text boundsText;
 
-	// Clefs
-	public Glyph cClef; // Alto and Tenor
-	public Glyph fClef; // Bass
-	public Glyph gClef; // Treble
-
-	// Note components
-	public final Glyph noteheadWhole;
-	public final Glyph noteheadHalf;
-	public final Glyph noteheadBlack;
-	public final Glyph noteheadXBlack;
-	public final Glyph noteheadXWhole;
-
-	public final Glyph flag8thUp;
-	public final Glyph flag8thDown;
-	public final Glyph flag16thUp;
-	public final Glyph flag16thDown;
-
-	// Rests
-	public final Glyph restWhole;
-	public final Glyph restHalf;
-	public final Glyph restQuarter;
-	public final Glyph rest8th;
-	public final Glyph rest16th;
-
-	// Accidentals
-	public Glyph accidentalFlat;
-	public Glyph accidentalNatural;
-	public Glyph accidentalSharp;
-
-	// Time signatures
-	public Glyph[] timeSignature;
-
-
 	private Map<String, Double> tmpEngravingDefaults;
+
+	final GlyphFactory glyphFactory;
 
 	Metrics(final double staffHeight) {
 		this.staffHeight = staffHeight;
@@ -344,127 +313,21 @@ public class Metrics {
 		textFont = font("serif", slotHeight * 3.0);
 		boundsText.setFont(textFont);
 
-		// Clefs
-		cClef = loadGlyph("cClef", 0.2, 0.3);
-		fClef = loadGlyph("fClef", 0.2, 0.3);
-		gClef = loadGlyph("gClef", 0.2, 0.3);
+		stemLength = staffHeight * 0.7;
 
-		// Note components
-		noteheadWhole = loadGlyph("noteheadWhole", 0.0, 1.8);
-		noteheadHalf = loadGlyph("noteheadHalf", 0.0, 1.8);
-		noteheadBlack = loadGlyph("noteheadBlack", 0.0, 1.8);
-		noteheadXBlack = loadGlyph("noteheadXBlack", 0.0, 1.8);
-		noteheadXWhole = loadGlyph("noteheadXWhole", 0.0, 1.8);
+		glyphFactory = new GlyphFactory(staffHeight);
 
-		stemLength = slotHeight * 6.5;
-		flag8thUp = loadGlyph("flag8thUp");
-		flag8thDown = loadGlyph("flag8thDown");
-		flag16thUp = loadGlyph("flag16thUp");
-		flag16thDown = loadGlyph("flag16thDown");
-
-		legerLineLength = legerLineExtension + noteheadBlack.width + legerLineExtension;
-
-		// Rests
-		restWhole = loadGlyph("restWhole", 0.0, 1.8);
-		restHalf = loadGlyph("restHalf", 0.0, 1.8);
-		restQuarter = loadGlyph("restQuarter", 0.0, 1.8);
-		rest8th = loadGlyph("rest8th", 0.0, 1.8);
-		rest16th = loadGlyph("rest16th", 0.0, 1.8);
-
-		// Accidentals
-		accidentalFlat = loadGlyph("accidentalFlat", 0.0, 1.2);
-		accidentalNatural = loadGlyph("accidentalNatural", 0.0, 1.2);
-		accidentalSharp = loadGlyph("accidentalSharp", 0.0, 1.2);
-
-		// Time signatures
-		timeSignature = new Glyph[]{
-				null,
-				loadGlyph("timeSig1"),
-				loadGlyph("timeSig2"),
-				loadGlyph("timeSig3"),
-				loadGlyph("timeSig4"),
-				loadGlyph("timeSig5"),
-				loadGlyph("timeSig6"),
-				loadGlyph("timeSig7"),
-				loadGlyph("timeSig8"),
-				loadGlyph("timeSig9")
-		};
+		legerLineLength = legerLineExtension
+				+ glyphFactory.noteheadBlack.width
+				+ legerLineExtension;
 	}
 
 	private Glyph loadGlyph(final String name) {
-		return new Glyph(name, staffSpaceHeight, 0.0, 0.0);
-	}
-
-	private Glyph loadGlyph(final String name, final double lBearingEm, final double rBearingEm) {
-		return new Glyph(name, staffSpaceHeight, lBearingEm, rBearingEm);
+		return new Glyph(name, staffSpaceHeight);
 	}
 
 	private double load(final String variable) {
 		return tmpEngravingDefaults.get(variable) * staffSpaceHeight;
-	}
-
-	Glyph getItemGlyph(final Event event) {
-		final Glyph returnValue;
-
-		final int clicks = event.duration.clicks;
-		if(event instanceof Note) {
-			if(clicks >= 32) {
-				returnValue = noteheadWhole;
-			} else if(clicks >= 16) {
-				returnValue = noteheadHalf;
-			} else {
-				returnValue = noteheadBlack;
-			}
-		} else if(event instanceof Rest) {
-			if(clicks >= 32) {
-				returnValue = restWhole;
-			} else if(clicks >= 16) {
-				returnValue = restHalf;
-			} else if(clicks >= 8) {
-				returnValue = restQuarter;
-			} else if(clicks >= 4) {
-				returnValue = rest8th;
-			} else {
-				returnValue = rest16th;
-			}
-		} else {
-			assert event instanceof Ghost : event.getClass().getSimpleName();
-			returnValue = clicks >= 16 ? noteheadXWhole : noteheadXBlack;
-		}
-
-		return returnValue;
-	}
-
-	Glyph getNoteHeadGlyph(final Note note) {
-		final Glyph returnValue;
-
-		switch(note.duration.clicks) {
-			case 32 -> returnValue = noteheadWhole;
-			case 16 -> returnValue = noteheadHalf;
-			default -> returnValue = noteheadBlack;
-		}
-
-		return returnValue;
-	}
-
-	Glyph getFlag(final int clicks, final int relativeSlot) {
-		final Glyph returnValue;
-
-		if(relativeSlot < 4) { // Stem up...
-			switch(clicks) {
-				case 4 -> returnValue = flag8thUp;
-				case 2 -> returnValue = flag16thUp;
-				default -> returnValue = null;
-			}
-		} else { // Stem down
-			switch(clicks) {
-				case 4 -> returnValue = flag8thDown;
-				case 2 -> returnValue = flag16thDown;
-				default -> returnValue = null;
-			}
-		}
-
-		return returnValue;
 	}
 
 	private Font loadFont(final double size) {

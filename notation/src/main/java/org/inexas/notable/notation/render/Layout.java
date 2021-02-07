@@ -20,6 +20,8 @@ public class Layout {
 	DClef clef;
 	KeySignature key;
 	TimeSignature time;
+	int staffHigh;
+	int staffLow;
 
 	final List<DPage> pages = new ArrayList<>();
 

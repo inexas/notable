@@ -36,7 +36,6 @@ public class Experiment extends Application {
 		final GraphicsContext gc = canvas.getGraphicsContext2D();
 		final Pane root = new Pane();
 		root.getChildren().add(canvas);
-
 		layout.pages.get(0).draw(gc);
 
 		final Scene scene = new Scene(root);

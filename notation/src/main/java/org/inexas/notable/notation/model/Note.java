@@ -166,68 +166,25 @@ public class Note extends Event {
 	final static int E5 = slot(5, E);
 	final static int F1 = slot(1, F);
 	final static int F2 = slot(2, F);
-	public final static int F3 = slot(3, F);
-	public final static int F4 = slot(4, F);
+	final static int F3 = slot(3, F);
+	final static int F4 = slot(4, F);
 	public final static int F5 = slot(5, F);
-	public final static int G2 = slot(2, G);
+	final static int G2 = slot(2, G);
 	final static int G3 = slot(3, G);
-	public final static int G4 = slot(4, G);
+	final static int G4 = slot(4, G);
 	final static int G5 = slot(5, G);
 	final static int A0 = slot(0, A);
 	final static int A2 = slot(2, A);
-	public final static int A3 = slot(3, A);
+	final static int A3 = slot(3, A);
 	final static int A4 = slot(4, A);
 	final static int A5 = slot(5, A);
 	final static int B0 = slot(0, B);
-	public final static int B3 = slot(3, B);
+	final static int B3 = slot(3, B);
 	final static int B2 = slot(2, B);
 	final static int B4 = slot(4, B);
 	final static int B5 = slot(5, B);
 
 	private static final String[] tonicName = {"C", "D", "E", "F", "G", "A", "B"};
-
-	private static class Key {
-		final int slot;
-		final Duration duration;
-		final Map<Class<? extends Annotation>, Annotation> annotations;
-
-		private Key(
-				final int slot,
-				final Duration duration,
-				final Map<Class<? extends Annotation>, Annotation> annotations) {
-			this.slot = slot;
-			this.duration = duration;
-			this.annotations = annotations;
-		}
-	}
-
-	private final static Map<Key, Note> cache = new HashMap<>();
-
-	/**
-	 * Note factory
-	 *
-	 * @param slot        E.g. 48 for C4
-	 * @param duration    e.g. Duration.quarter
-	 * @param annotations Annotations (not null but empty is OK)
-	 * @return The Note
-	 */
-	public static Note get(
-			final int slot,
-			final Duration duration,
-			final Map<Class<? extends Annotation>, Annotation> annotations) {
-		Note returnValue;
-
-		assert slot >= MINIMUM && slot <= MAXIMUM : "Slot out of range";
-
-		final Key key = new Key(slot, duration, annotations);
-		returnValue = cache.get(key);
-		if(returnValue == null) {
-			returnValue = new Note(slot, duration, annotations);
-			cache.put(key, returnValue);
-		}
-
-		return returnValue;
-	}
 
 	public static String toName(final int slot) {
 		return tonicName[slot % BASE] + slot / BASE;
@@ -244,22 +201,27 @@ public class Note extends Event {
 	 */
 	public final int tonic;
 
+	public boolean isGhost;
 
-	private Note(
+	public Note(
 			final int slot,
 			final Duration duration,
+			final boolean isGhost,
 			final Map<Class<? extends Annotation>, Annotation> annotations) {
 		super(toName(slot), slot, duration, annotations);
+
+		this.isGhost = isGhost;
 
 		octave = slot / BASE;
 		tonic = slot % BASE;
 	}
 
 	// todo I think I can get rid of the copy constructors
-	private Note(final Note toCopy) {
+	public Note(final Note toCopy) {
 		super(toCopy);
 		tonic = toCopy.tonic;
 		octave = toCopy.octave;
+		isGhost = toCopy.isGhost;
 	}
 
 	@Override
