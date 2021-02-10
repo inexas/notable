@@ -5,12 +5,14 @@
 package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
+import org.inexas.notable.util.*;
 
 import java.util.*;
+import java.util.regex.*;
 
 import static org.inexas.notable.notation.model.KeySignature.State.*;
 
-public class KeySignature extends Element implements Annotation {
+public class KeySignature extends Modifier {
 	public enum State {
 		sharp(0),
 		flat(1),
@@ -18,7 +20,7 @@ public class KeySignature extends Element implements Annotation {
 
 		public final int index;
 
-		private State(final int index) {
+		State(final int index) {
 			this.index = index;
 		}
 	}
@@ -88,29 +90,30 @@ public class KeySignature extends Element implements Annotation {
 
 	private final int[][][] accidentals = {{
 			// alto
-			{Note.F4, Note.C4, Note.G4, Note.D4, Note.A3, Note.E4, Note.B3},
-			{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}
+			{Notes.F4, Notes.C4, Notes.G4, Notes.D4, Notes.A3, Notes.E4, Notes.B3},
+			{Notes.B3, Notes.E4, Notes.A3, Notes.D4, Notes.G3, Notes.C4, Notes.F3}
 	}, {    // bass
-			{Note.F3, Note.C3, Note.G3, Note.D3, Note.A2, Note.E3, Note.B2},
-			{Note.B2, Note.E3, Note.A2, Note.D3, Note.G2, Note.C3, Note.F2}
+			{Notes.F3, Notes.C3, Notes.G3, Notes.D3, Notes.A2, Notes.E3, Notes.B2},
+			{Notes.B2, Notes.E3, Notes.A2, Notes.D3, Notes.G2, Notes.C3, Notes.F2}
 	}, {    // tenor
-			{Note.F3, Note.C4, Note.G3, Note.D4, Note.A3, Note.E4, Note.B3},
-			{Note.B3, Note.E4, Note.A3, Note.D4, Note.G3, Note.C4, Note.F3}
+			{Notes.F3, Notes.C4, Notes.G3, Notes.D4, Notes.A3, Notes.E4, Notes.B3},
+			{Notes.B3, Notes.E4, Notes.A3, Notes.D4, Notes.G3, Notes.C4, Notes.F3}
 	}, {    // treble
-			{Note.F5, Note.C5, Note.G5, Note.D5, Note.A4, Note.E5, Note.B4},
-			{Note.B4, Note.E5, Note.A4, Note.D5, Note.G4, Note.C5, Note.F4}
+			{Notes.F5, Notes.C5, Notes.G5, Notes.D5, Notes.A4, Notes.E5, Notes.B4},
+			{Notes.B4, Notes.E5, Notes.A4, Notes.D5, Notes.G4, Notes.C5, Notes.F4}
 	}};
 
 	/**
-	 * @param clef
+	 * @param clef The clef of the staff
 	 * @return The list of slots that should be marked with
 	 * an accidental for a given clef
 	 */
 	public int[] getAccidentals(final Clef clef) {
-		return Arrays.copyOfRange(
-				accidentals[clef.index][state.index],
-				0,
-				accidentalCount);
+		throw new ImplementMeException();
+//		return Arrays.copyOfRange(
+//				accidentals[clef.index][state.index],
+//				0,
+//				accidentalCount);
 	}
 
 	public static KeySignature get(final String name) {
@@ -144,5 +147,47 @@ public class KeySignature extends Element implements Annotation {
 
 	public boolean isSharp() {
 		return state == sharp;
+	}
+
+	private final static Pattern keySignaturePattern = Pattern.compile("" +
+			"([A-G])" +         // Tonic
+			"([b#n])?" +        // Accidental
+			"([Mm])?");         // Major/minor
+
+	public static KeySignature parseKeySignature(final String input) {
+		final KeySignature result;
+
+		final Matcher matcher = keySignaturePattern.matcher(input);
+		String tonic;
+		@SuppressWarnings("unused")
+		String mode = null;
+		if(!matcher.matches()) {
+			throw new RuntimeException("Recognizer/event parser mismatch");
+		}
+
+		// Group 1: Upper case tonic...
+		final String group1 = matcher.group(1);
+		tonic = group1.substring(0, 1);
+
+		// Group 2: Accidental...
+		final String group2 = matcher.group(2);
+		if(group2 != null) {
+			switch(group2.charAt(0)) {
+				case '-', 'b', 'B' -> tonic += "b";
+				case '+', '#' -> tonic += "#";
+				default -> throw new RuntimeException("Should never get here");
+			}
+		}
+
+		// Group 3: Mode...
+		final String group3 = matcher.group(3);
+		if(group3 != null) {
+			//noinspection UnusedAssignment
+			mode = group3;
+		}
+
+		result = KeySignature.get(tonic);
+
+		return result;
 	}
 }

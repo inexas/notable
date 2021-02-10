@@ -21,9 +21,9 @@ public class FontMetadataFile extends MetadataFile {
 	public Map<String, Map<String, Double[]>> glyphBBoxes;
 
 	public static Map<String, Double> getEngravingDefaults(final double factor) {
-		final Map<String, Double> returnValue = new HashMap<>();
+		final Map<String, Double> result = new HashMap<>();
 
-		return returnValue;
+		return result;
 	}
 
 	// Glyphs With Alternates

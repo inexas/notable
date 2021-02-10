@@ -2,7 +2,7 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-public class Beam extends Element implements Annotation {
+public class Beam extends Annotation {
 	private static final Beam beam1 = new Beam(1);
 	private static final Beam beam2 = new Beam(2);
 	private static final Beam beam3 = new Beam(3);

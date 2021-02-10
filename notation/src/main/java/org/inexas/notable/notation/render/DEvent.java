@@ -4,13 +4,21 @@ import javafx.scene.canvas.*;
 import javafx.scene.text.*;
 
 class DEvent extends Drawable {
-	private final Font font;
-	private final Glyph glyph;
+	int clicks;
+	private Font font;
+	Glyph glyph;
+	double width;
 
 	DEvent(final double originX, final double originY, final Layout layout, final Glyph glyph) {
 		super(originX, originY);
 		this.glyph = glyph;
 		font = layout.m.font;
+	}
+
+	DEvent(final double originX, final double originY) {
+	}
+
+	DEvent() {
 	}
 
 	@Override

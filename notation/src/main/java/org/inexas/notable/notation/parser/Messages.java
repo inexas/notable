@@ -11,18 +11,19 @@ import java.util.*;
 public class Messages {
 	private final boolean isFile;
 	private final String source;
+	ParserRuleContext ctx;
 
 	boolean containExcerpt(final String excerpt) {
-		boolean returnValue = false;
+		boolean result = false;
 
 		for(final Message message : messages) {
 			if(message.message.contains(excerpt)) {
-				returnValue = true;
+				result = true;
 				break;
 			}
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	public static class Message {
@@ -70,11 +71,11 @@ public class Messages {
 		return messages.size() > 0;
 	}
 
-	void error(final ParserRuleContext ctx, final String text) {
+	public void error(final String text) {
 		messages.add(new Message(Message.Type.Error, ctx, text));
 	}
 
-	void warn(final ParserRuleContext ctx, final String text) {
+	public void warn(final String text) {
 		messages.add(new Message(Message.Type.Warning, ctx, text));
 	}
 

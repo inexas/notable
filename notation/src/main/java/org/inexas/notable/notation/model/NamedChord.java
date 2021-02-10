@@ -33,17 +33,6 @@ public class NamedChord extends Event {
 	public final int sus;
 	public final int inversion;
 
-	private NamedChord(final NamedChord toCopy) {
-		super(toCopy);
-		tonic = toCopy.tonic;
-		mode = toCopy.mode;
-		dimAug = toCopy.dimAug;
-		seventh = toCopy.seventh;
-		add = toCopy.add;
-		sus = toCopy.sus;
-		inversion = toCopy.inversion;
-	}
-
 	private NamedChord(
 			final String name,
 			final Duration duration,
@@ -182,12 +171,5 @@ public class NamedChord extends Event {
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
-	}
-
-	@Override
-	public Event copy(final Duration duration) {
-		final Event result = new NamedChord(this);
-		result.duration = duration;
-		return result;
 	}
 }

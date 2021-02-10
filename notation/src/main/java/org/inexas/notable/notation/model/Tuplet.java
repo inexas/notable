@@ -11,12 +11,16 @@ import java.util.*;
 /**
  * Tuplet, e.g. Triplet
  */
-public class Tuplet extends Event implements Annotation {
-	public final List<Event> events;
+public class Tuplet extends Event implements Venue {
+	public final List<Event> events = new ArrayList();
 
-	public Tuplet(final Duration duration, final List<Event> events) {
+	public Tuplet(final Duration duration) {
 		super(duration);
-		this.events = events;
+	}
+
+	@Override
+	public void add(final Event event) {
+		events.add(event);
 	}
 
 	@Override
@@ -26,10 +30,5 @@ public class Tuplet extends Event implements Annotation {
 			event.accept(visitor);
 		}
 		visitor.exit(this);
-	}
-
-	@Override
-	public Event copy(final Duration duration) {
-		return null;
 	}
 }

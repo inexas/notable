@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Mode extends Element implements Annotation {
+public class Mode extends Annotation {
 	final static Mode Ionian = new Mode("Ionian", "M", "I", "i");
 	private final static Map<String, Mode> lookup = new HashMap<>();
 	@SuppressWarnings("unused")

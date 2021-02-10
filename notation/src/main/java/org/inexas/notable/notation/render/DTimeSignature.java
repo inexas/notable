@@ -3,14 +3,17 @@ package org.inexas.notable.notation.render;
 import javafx.scene.canvas.*;
 import org.inexas.notable.notation.model.*;
 
-public class DTimeSignature extends Drawable {
+public class DTimeSignature extends DEvent {
 	private final Glyph numerator;
 	private final Glyph denominator;
 	private final double up;
+	private final TimeSignature timeSignature;
 
 	DTimeSignature(final double originX, final double originY, final Layout layout,
 	               final TimeSignature timeSignature) {
 		super(originX, originY);
+
+		this.timeSignature = timeSignature;
 
 		final Metrics m = layout.m;
 		up = m.staffSpaceHeight * -2.0;

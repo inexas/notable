@@ -25,16 +25,16 @@ public class NoteTest {
 	@Test
 	void testNoteNumberConversion() {
 		// Range checks
-		assertThrows(AssertionError.class, () -> Note.slot(0, -1));
-		assertThrows(AssertionError.class, () -> Note.slot(0, 8));
-		assertThrows(AssertionError.class, () -> Note.slot(0, 4));
-		assertThrows(AssertionError.class, () -> Note.slot(8, 1));
-		assertEquals(5, Note.slot(0, 5));
-		assertEquals(56, Note.slot(8, 0));
+		assertThrows(AssertionError.class, () -> Notes.slot(0, -1));
+		assertThrows(AssertionError.class, () -> Notes.slot(0, 8));
+		assertThrows(AssertionError.class, () -> Notes.slot(0, 4));
+		assertThrows(AssertionError.class, () -> Notes.slot(8, 1));
+		assertEquals(5, Notes.slot(0, 5));
+		assertEquals(56, Notes.slot(8, 0));
 
 		// Calculation
-		assertEquals(4, Note.octave(28));
-		assertEquals(28, Note.slot(4, "C"));
+		assertEquals(4, Notes.octave(28));
+		assertEquals(28, Notes.slot(4, "C"));
 	}
 
 //	@Test
@@ -72,18 +72,18 @@ public class NoteTest {
 //
 	@Test
 	void testIsValid() {
-		assertTrue(Note.isValid(5));
-		assertTrue(Note.isValid(28));
-		assertTrue(Note.isValid(56));
+		assertTrue(Notes.isValid(5));
+		assertTrue(Notes.isValid(28));
+		assertTrue(Notes.isValid(56));
 
-		assertFalse(Note.isValid(4));
-		assertFalse(Note.isValid(57));
+		assertFalse(Notes.isValid(4));
+		assertFalse(Notes.isValid(57));
 	}
 
 	@Test
 	void testName() {
-		assertEquals("C4", Note.name(Note.C4));
-		assertEquals("A0", Note.name(5));
-		assertEquals("C8", Note.name(8 * Note.BASE));
+		assertEquals("C4", Notes.name(Notes.C4));
+		assertEquals("A0", Notes.name(5));
+		assertEquals("C8", Notes.name(8 * Notes.BASE));
 	}
 }

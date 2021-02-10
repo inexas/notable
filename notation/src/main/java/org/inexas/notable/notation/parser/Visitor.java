@@ -37,8 +37,6 @@ public interface Visitor {
 
 	void visit(TimeSignature timeSignature);
 
-	void visit(PickupMeasure pickupMeasure);
-
 	void visit(KeySignature keySignature);
 
 	void visit(Tempo tempo);
@@ -74,4 +72,8 @@ public interface Visitor {
 	void visit(Accidental accidental);
 
 	void visit(Beam beam);
+
+	void visit(Clef clef);
+
+	void visit(Measure measure);
 }

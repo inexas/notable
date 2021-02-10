@@ -10,15 +10,16 @@ score: command* EOF ;
 
 command
 	:	title		// Header...
+	|	sub
 	|	composer
 	|	header
 	|	part		// Structure...
 	|	phrase
-	|	staff
+	|	clef
 	|	tempo		// Substrate annnotations
 	|	key
 	|	time
-	|	pickup		// Pickup measure
+	|	cpm 		// Clicks Per Measure
 	|	barline
 	|	line
 	|	octave		// Event annotations
@@ -31,6 +32,8 @@ command
 
 title: TITLE STRING_LITERAL ;
 
+sub: SUB STRING_LITERAL ;
+
 composer: COMPOSER STRING_LITERAL ;
 
 header: HEADER STRING_LITERAL ;
@@ -39,7 +42,7 @@ part: PART STRING_LITERAL ;
 
 phrase: PHRASE STRING_LITERAL ;
 
-staff: STAFF STAFFS ;
+clef: CLEF CLEFS ;
 
 tempo: TEMPO ( FRACTION '=' COUNT | STRING_LITERAL ) ;
 
@@ -48,9 +51,9 @@ key: KEY NOTE ;
 time: TIME ( FRACTION | COMMON | CUT ) ;
 
 /**
- * Pickup measure, e.g. pickup 1/4 which is one 1/4 notes
+ * Clicks Per Measure, e.g. cpm 16
  */
-pickup: PICKUP FRACTION ;
+cpm: CPM COUNT ;
 
 barline
 	:	BAR | DOUBLE_BAR
@@ -105,6 +108,8 @@ LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN) ;
 
 TITLE: 'title' ;
 
+SUB: 'sub' ;
+
 COMPOSER: 'composer' ;
 
 HEADER: 'header' ;
@@ -113,15 +118,19 @@ PART: 'part' ;
 
 PHRASE: 'phrase' ;
 
-STAFF: 'staff' ;
+CLEF: 'clef' ;
 
-STAFFS: ( 'alto' | 'bass' | 'grand' | 'tenor' | 'treble' ) ;
+CLEFS: ('treble15a'|'treble8a'|'treble'|'treble8b'|'treble15b'|
+        'bass15a'|'bass8a'|'bass'|'bass8b'|'bass15b'|
+        'soprano'|'mezzoSoprano'|'alto'|'tenor'|'baritone'|
+        'tab'|
+        'percussion') ;
 
 TEMPO: 'tempo' ;
 
 KEY: 'key' ;
 
-PICKUP: 'pickup' ;
+CPM: 'cpm' ;
 
 COMMON: 'common' ;
 

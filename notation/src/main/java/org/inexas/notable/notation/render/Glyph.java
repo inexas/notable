@@ -10,37 +10,46 @@ import java.util.*;
 public class Glyph {
 	private static final String[][] metadataSource = {
 			// Key, LB, RB
-			{"clefs", "b=0,0.2,0.3,0"},
-			{"noteheads", "0,0,1.8,0"},
-			{"rests", "0,0,1.8,0"},
-			{"restWhole", "x=y=y+spaceHeight"},
-			{"accidentals", "0,0,1.2,0"},
+			{"clefs", "b:0,0.2,0.3,0"},
+			{"noteheads", "b:0,0,1.8,0"},
+			{"rests", "b:0,0,1.8,0"},
+			{"restWhole", "x:y=y+spaceHeight"},
+			{"accidentals", "b:0,0,1.2,0"},
 	};
 
 	private static class Metadata {
 		double lBearing, rBearing, tBearing, bBearing;
-		List<Expression.Node> expressions = new ArrayList<>();
+		List<Expression.Node> pre = new ArrayList<>();
+		List<Expression.Node> post = new ArrayList<>();
 
-		Metadata(final String[] array) {
-			for(final String string : array) {
-				switch(string.charAt(0)) {
-					case 'b' -> {   // Bearings
-						// b=Bearings N, W, E, S
-						final double[] d = ArrayU.parseDoubles(string.substring(2));
-						tBearing = d[0];
-						lBearing = d[1];
-						rBearing = d[2];
-						bBearing = d[3];
-					}
-					case 'x' -> {   // Expressions
-						// x=expr(,expr)
-						final String[] strings = string.split(",");
-						for(final String s : strings) {
-							expressions.add(new Expression(s).ast);
+		Metadata(final String commandString) {
+			// Something like "b:0,0.2,0.3,0"
+			final char descriminator = commandString.charAt(0);
+			assert commandString.charAt(1) == ':';
+			final String commands = commandString.substring(2);
+
+			switch(descriminator) {
+				case 'b' -> {   // Bearings
+					// b:Bearings N, W, E, S
+					final double[] d = ArrayU.parseDoubles(commands);
+					assert d.length == 4;
+					tBearing = d[0];
+					lBearing = d[1];
+					rBearing = d[2];
+					bBearing = d[3];
+				}
+				case 'X', 'x' -> {   // Expressions
+					// x:expr(,expr)
+					final String[] strings = commands.split(",");
+					for(final String string : strings) {
+						if(descriminator == 'X') {
+							pre.add(new Expression(string).ast);
+						} else {
+							post.add(new Expression(string).ast);
 						}
 					}
-					default -> throw new ImplementMeException(string);
 				}
+				default -> throw new ImplementMeException(commandString);
 			}
 		}
 	}
@@ -49,7 +58,7 @@ public class Glyph {
 
 	static {
 		for(final String[] array : metadataSource) {
-			metadataMap.put(array[0], new Metadata(array));
+			metadataMap.put(array[0], new Metadata(array[1]));
 		}
 	}
 
@@ -121,24 +130,24 @@ public class Glyph {
 			rBearing = width * metadata.rBearing;
 			bBearing = height * metadata.bBearing;
 
-			metadata.expressions.forEach(x -> x.evaluate(this));
+			metadata.pre.forEach(x -> x.evaluate(this));
 		}
 
 		advance = lBearing + width + rBearing;
 	}
 
 	private Metadata getMetadata(final String glyphName) {
-		Metadata returnValue;
+		Metadata result;
 
-		returnValue = metadataMap.get(glyphName);
-		if(returnValue == null) {
+		result = metadataMap.get(glyphName);
+		if(result == null) {
 			final String clazz = ClassesMetadataFile.instance.getClass(glyphName);
 			if(clazz != null) {
-				returnValue = metadataMap.get(clazz);
+				result = metadataMap.get(clazz);
 			}
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	@Override

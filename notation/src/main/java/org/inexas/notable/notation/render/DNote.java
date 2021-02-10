@@ -4,10 +4,16 @@ import org.inexas.notable.notation.model.*;
 
 import java.util.*;
 
-public class DNote extends Drawable {
+public class DNote extends DEvent {
 
-	DNote(final double originX, final double originY, final Layout layout, final Note note) {
+	DNote(
+			final double originX,
+			final double originY,
+			final Layout layout,
+			final Note note,
+			final Glyph glyph) {
 		super(originX, originY);
+		this.glyph = glyph;
 
 		final Metrics m = layout.m;
 		final int clicks = note.duration.clicks;

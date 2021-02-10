@@ -6,7 +6,7 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-public class Fingering extends Element implements Annotation {
+public class Fingering extends Annotation {
 	public final String label;
 
 	public Fingering(final String label) {

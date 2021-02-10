@@ -14,7 +14,6 @@ import java.util.*;
 public abstract class Event extends Element implements Visited {
 	public final String name;
 	public final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
-	// todo This should be final
 	public Duration duration;
 	/**
 	 * The note 'slot' is a slot between 9 and 96 that represents
@@ -22,6 +21,7 @@ public abstract class Event extends Element implements Visited {
 	 * C is 0, C# is 1 etc.
 	 */
 	public final int slot;
+
 
 	Event(
 			final String name,
@@ -45,24 +45,9 @@ public abstract class Event extends Element implements Visited {
 		slot = -1;
 	}
 
-	Event(final Event toCopy) {
-		name = toCopy.name;
-		slot = toCopy.slot;
-		duration = toCopy.duration;
-		// todo Copy annotations? If not, why not
-	}
-
 	public void add(final Annotation annotation) {
 		annotations.put(annotation.getClass(), annotation);
 	}
-
-	/**
-	 * Create an Event of the same time but of a different curation
-	 *
-	 * @param duration The new Duration
-	 * @return The new event
-	 */
-	public abstract Event copy(final Duration duration);
 
 	public <T> T get(final Class<T> clazz) {
 		//noinspection unchecked

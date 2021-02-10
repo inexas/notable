@@ -13,9 +13,8 @@ import java.util.*;
  * A piano has two Phrases, one for each hand
  */
 public class Phrase extends Element {
-	public final static String IMPLICIT = "#IMPLICIT#";
 	public final Score score;
-	public List<Event> events = new ArrayList<>();
+	public final List<Measure> measures = new ArrayList<>();
 	public final String name;
 	public final Part part;
 
@@ -23,22 +22,31 @@ public class Phrase extends Element {
 		this.name = name;
 		this.part = part;
 		score = part.score;
+		final Measure measure = new Measure(score, null);
+		measures.add(measure);
 	}
 
-	Phrase(final String name, final Phrase toCopy) {
-		this.name = name;
-		// todo This is a bit strange if there have already been events. It is likely
-		// that it should be a new Phrase
-		events.addAll(toCopy.events);
-		part = toCopy.part;
-		score = toCopy.score;
+	public Measure getOpenMeasure() {
+		Measure result;
+		result = measures.get(measures.size() - 1);
+		if(result.isComplete()) {
+			result = new Measure(score, result);
+			measures.add(result);
+		}
+		return result;
+	}
+
+	public Measure newMeasure() {
+		final Measure result = new Measure(score, measures.get(measures.size() - 1));
+		measures.add(result);
+		return result;
 	}
 
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.enter(this);
-		for(final Event event : events) {
-			event.accept(visitor);
+		for(final Measure measure : measures) {
+			measure.accept(visitor);
 		}
 		visitor.exit(this);
 	}

@@ -57,8 +57,8 @@ class DStaff extends Drawable {
 
 		// Some notes...
 		final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
-		final Note note = new Note(Note.C4, Duration.quarter, false, annotations);
-		drawables.add(new DNote(cursorX, cursorY, layout, note));
+		final Note note = new Note(Notes.C4, Duration.quarter, false, annotations);
+		drawables.add(new DNote(cursorX, cursorY, layout, note, null));
 
 		setDrawables(drawables);
 	}

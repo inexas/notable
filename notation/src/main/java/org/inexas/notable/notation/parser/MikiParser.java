@@ -14,11 +14,7 @@ import java.util.regex.*;
 
 public class MikiParser extends MusicBaseListener {
 	@SuppressWarnings("FieldCanBeLocal")
-	private final boolean DEBUG = false;
-	private final static Pattern keySignaturePattern = Pattern.compile("" +
-			"([A-G])" +         // Tonic
-			"([b#n])?" +        // Accidental
-			"([Mm])?");         // Major/minor
+	private final boolean DEBUG = true;
 	private final static Pattern notePattern = Pattern.compile("" +
 			"([A-GRX])" +       // Tonic, including rest & ghost
 			"([0-9]+.*\\*?)?" + // Duration
@@ -30,30 +26,23 @@ public class MikiParser extends MusicBaseListener {
 			"([0-9]+.*\\*?)?"); // Duration
 	// To collect Annotations for the current or next Event
 	private Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
-	private final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
-	private Phrase currentPhrase;
+	private static final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
+	/**
+	 * The current part. May be null.
+	 */
+	private Part part;
+	private Phrase phrase;
+	private Measure measure;
 	/**
 	 * Set by an o8 command
 	 */
 	private int absoluteOctave = -1;
 	private int relativeOctave;
-	private int lastNote = Note.C4;
-	private Part currentPart;
-	private KeySignature currentKey;
-	private boolean settingScoreDefaults = true;
+	private int lastNote;
 	/**
 	 * The number of clicks counted so far in the current measure
 	 */
-	private int clicksSoFar;
-	/**
-	 * Number of clicks in a measure
-	 */
-	private int measureSize;
-	@SuppressWarnings("unused")
-	private TimeSignature timeSignature;
-	private List<Event> events;
-	private boolean inNoteGroup;
-	private Duration currentDuration;
+	public Score score;
 	/**
 	 * This is used to save the state of the duration when a Note group is being
 	 * processed. For example, in the miki "C4* [t C E G]8 A" the duration is defaulted
@@ -62,7 +51,24 @@ public class MikiParser extends MusicBaseListener {
 	 * will save the 'quarter' duration set with "C4*"
 	 */
 	private Duration saveDuration;
-	public final Score score = new Score();
+	private Venue venue;
+	private Venue saveVenue;
+	private Duration duration;
+
+	private void push(final Venue venue) {
+		assert saveVenue == null;
+		saveVenue = this.venue;
+		this.venue = venue;
+		saveDuration = duration;
+	}
+
+	private void pop() {
+		assert saveVenue != null;
+		venue = saveVenue;
+		saveDuration = null;
+		duration = saveDuration;
+	}
+
 	final Messages messages;
 
 	private MikiParser(final String string) {
@@ -81,96 +87,123 @@ public class MikiParser extends MusicBaseListener {
 		return parser;
 	}
 
+	// S T R U C T U R E . . .
+
 	@Override
 	public void enterScore(final MusicParser.ScoreContext ctx) {
-		currentPart = score.getFirstPart();
-		currentPhrase = currentPart.getFirstPhrase();
-		events = currentPhrase.events;
-		// Set the defaults...
-		setTimeSignature(TimeSignature.COMMON);
-		currentDuration = Duration.quarter;
-		score.key = currentKey = KeySignature.C;
+		messages.ctx = ctx;
+		// Set up an anonymous Part and Phrase
+		score = new Score();
+		part = score.getOrCreatePart("");
+		phrase = part.getOrCreatePhrase("");
+		score.anonymousFicMeasure = measure = phrase.getOpenMeasure();
+		venue = measure;
 	}
 
 	@Override
 	public void exitScore(final MusicParser.ScoreContext ctx) {
-		padToEnd();
-		final BeamStylizer stylizer = new BeamStylizer(timeSignature.getMeasureSize());
-		currentPhrase.events = stylizer.process(currentPhrase.events);
-		final RestStylizer restStylizer = new RestStylizer(timeSignature.getMeasureSize());
-		currentPhrase.events = restStylizer.process(currentPhrase.events);
-	}
-
-	@Override
-	public void enterTitle(final MusicParser.TitleContext ctx) {
-		score.title = normalizeString(ctx.getStop().getText());
-	}
-
-	@Override
-	public void enterComposer(final MusicParser.ComposerContext ctx) {
-		score.composer = normalizeString(ctx.getStop().getText());
-	}
-
-	@Override
-	public void enterHeader(final MusicParser.HeaderContext ctx) {
-		score.header = normalizeString(ctx.getStop().getText());
+		messages.ctx = ctx;
+		// todo Terminate all the Phrases
+		// todo Pad to end?
+		// todo Check everything is the same length
+		// fixme
+//		final BeamStylizer stylizer = new BeamStylizer(measure.size);
+//		currentPhrase.events = stylizer.process(currentPhrase.events);
+//		final RestStylizer restStylizer = new RestStylizer(measure.size);
+//		currentPhrase.events = restStylizer.process(currentPhrase.events);
 	}
 
 	@Override
 	public void enterPart(final MusicParser.PartContext ctx) {
-		final String name = ctx.getStop().getText();
-		currentPart = score.getPart(StringU.stripQuotes(name));
-		settingScoreDefaults = false;
+		messages.ctx = ctx;
+		// Get existing or create a new Part
+		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
+		final Part part = score.getOrCreatePart(name);
+		if(this.part != part) {
+			// The Part has indeed changed so we don't know which Phrase
+			phrase = null;
+			measure = null;
+			venue = null;
+			assert annotationMap.isEmpty() : annotationMap.toString();
+		}
 	}
 
 	@Override
 	public void enterPhrase(final MusicParser.PhraseContext ctx) {
-		final String text = StringU.stripQuotes(ctx.getStop().getText());
-
-		// phrase "OptionalPartName:PhraseName"
-		final int colon = text.indexOf(':');
-		final String phraseName;
-		if(colon >= 0) {
-			final String partName = text.substring(0, colon);
-			currentPart = score.getPart(partName);
-			phraseName = text.substring(colon + 1);
-		} else {
-			phraseName = text;
+		messages.ctx = ctx;
+		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
+		final Phrase phrase = part.getOrCreatePhrase(name);
+		if(this.phrase != phrase) {
+			// This is indeed a change
+			this.phrase = phrase;
+			measure = phrase.getOpenMeasure();
+			venue = measure;
+			assert annotationMap.isEmpty() : annotationMap.toString();
 		}
-		currentPhrase = currentPart.getPhrase(phraseName);
-		// Reset
-		events = currentPhrase.events;
-		settingScoreDefaults = false;
-		annotationMap.clear();
-		lastNote = Note.C4;
-		clicksSoFar = 0;
 	}
 
 	@Override
-	public void exitPhrase(final MusicParser.PhraseContext ctx) {
-		padToEnd();
-	}
-
-	@Override
-	public void enterStaff(final MusicParser.StaffContext ctx) {
+	public void enterBarline(final MusicParser.BarlineContext ctx) {
+		messages.ctx = ctx;
 		final String text = ctx.getStop().getText();
-		final Staff staff = new Staff(text);
-		if(settingScoreDefaults) {
-			score.staff = staff;
-		} else {
-			currentPart.staff = staff;
+		final Barline barline = Barline.getBarline(text);
+
+		final int clicksSoFar = measure.clicksSoFar;
+		if(clicksSoFar > 0) {   // Ignore barlines at beginning of measure
+			if(!measure.isComplete()) {
+				error("Barline before end of measure");
+			} else {
+				score.accountFor(measure);
+				measure = phrase.newMeasure();
+			}
 		}
+	}
+
+	// S C O R E   D E T A I L S . . .
+
+	@Override
+	public void enterHeader(final MusicParser.HeaderContext ctx) {
+		messages.ctx = ctx;
+		score.setHeader(messages, ctx.getStop().getText());
+	}
+
+	@Override
+	public void enterTitle(final MusicParser.TitleContext ctx) {
+		messages.ctx = ctx;
+		score.setTitle(messages, ctx.getStop().getText());
+	}
+
+	@Override
+	public void enterSub(final MusicParser.SubContext ctx) {
+		messages.ctx = ctx;
+		score.setSubtitle(messages, ctx.getStop().getText());
+	}
+
+	@Override
+	public void enterComposer(final MusicParser.ComposerContext ctx) {
+		messages.ctx = ctx;
+		score.setComposer(messages, ctx.getStop().getText());
+	}
+
+	// M O D I F I E R S . . .
+
+	@Override
+	public void enterClef(final MusicParser.ClefContext ctx) {
+		messages.ctx = ctx;
+		final String text = ctx.getStop().getText();
+		measure.setClef(messages, new Clef(text));
 	}
 
 	@Override
 	public void enterTempo(final MusicParser.TempoContext ctx) {
+		messages.ctx = ctx;
 		final Tempo tempo;
 		if(ctx.getChildCount() == 2) {
 			final String text = ctx.getStop().getText();
 			final String noQuotes = text.charAt(0) == '"' ? StringU.stripQuotes(text) : text;
 			tempo = Tempo.getTempo(noQuotes);
 		} else {
-			// tempo 1/ 4 = 120
+			// tempo 1/4 = 120
 			// 0     1  2 3 4
 			assert ctx.getChildCount() == 5;
 			final int denominator = Integer.parseInt(ctx.getChild(2).getText());
@@ -178,22 +211,21 @@ public class MikiParser extends MusicBaseListener {
 			final int bpm = Integer.parseInt(ctx.getChild(4).getText());
 			tempo = Tempo.getTempo(duration, bpm);
 		}
-		annotate(ctx, tempo);
+		// todo this should annotate a time signature?
+		annotate(tempo);
 	}
 
 	@Override
 	public void enterKey(final MusicParser.KeyContext ctx) {
+		messages.ctx = ctx;
 		final String text = ctx.getStop().getText();
-		currentKey = parseKeySignature(text);
-		if(settingScoreDefaults) {
-			score.key = currentKey;
-		} else {
-			annotate(ctx, currentKey);
-		}
+		final KeySignature key = KeySignature.parseKeySignature(text);
+		measure.setKeySignature(messages, key);
 	}
 
 	@Override
 	public void enterTime(final MusicParser.TimeContext ctx) {
+		messages.ctx = ctx;
 		// time: TIME ( COUNT SLASH COUNT | COMMON | CUT ) ;
 		final int count = ctx.getChildCount();
 		final TimeSignature timeSignature;
@@ -205,37 +237,48 @@ public class MikiParser extends MusicBaseListener {
 			timeSignature = ctx.getStop().getType() == MusicParser.CUT ?
 					TimeSignature.CUT : TimeSignature.COMMON;
 		}
-		if(settingScoreDefaults) {
-			score.timeSignature = timeSignature;
-		} else {
-			annotate(ctx, timeSignature);
+		measure.setTimeSignature(messages, timeSignature);
+	}
+
+	@Override
+	public void enterCpm(final MusicParser.CpmContext ctx) {
+		messages.ctx = ctx;
+		// e.g. cpm 15 ;
+		final int cpm = Integer.parseInt(ctx.getChild(1).getText());
+		if(cpm < 1) {
+			error("CPM out of range: " + cpm);
 		}
-		clicksSoFar = 0;
-		setTimeSignature(timeSignature);
+		measure.setCpm(messages, cpm);
 	}
 
-	@Override
-	public void enterPickup(final MusicParser.PickupContext ctx) {
-		// pickup FRACTION ;
-		score.pickupMeasure = new PickupMeasure(ctx.getChild(1).getText());
-	}
+	// E V E N T S . . .
 
-	@Override
-	public void enterBarline(final MusicParser.BarlineContext ctx) {
-		final String text = ctx.getStop().getText();
-		final Barline barline = Barline.getBarline(text);
-		annotate(ctx, barline);
-	}
-
-	@Override
-	public void enterLine(final MusicParser.LineContext ctx) {
-		final String text = ctx.getStop().getText();
-		final LineParser parser = new LineParser(text);
-		annotate(ctx, parser.line);
-	}
-
+	//	@Override
+//	public void enterEvent(final MusicParser.EventContext ctx) {
+//		messages.ctx = ctx;
+//		// Leading barline...
+//		final boolean barAnnotated = annotationMap.containsKey(Barline.class);
+//		if(measure.clicksSoFar == 0) {
+//			// We're at the start of a new measure, make sure it's annotated...
+//			if(!barAnnotated) {
+//				annotate(Barline.bar);
+//			}
+//		} else if(barAnnotated) {
+//			// todo Removing a repeat bar may cause other issues
+//			annotationMap.remove(Barline.class);
+//			warn("Bar annotation not at start of measure; removed.");
+//		}
+//	}
+//
+//	@Override
+//	public void exitEvent(final MusicParser.EventContext ctx) {
+//		messages.ctx = ctx;
+//		annotationMap.clear();
+//	}
+//
 	@Override
 	public void enterOctave(final MusicParser.OctaveContext ctx) {
+		messages.ctx = ctx;
 		// E.g. o[1-8] or + or -
 		final String text = ctx.getStop().getText();
 		if(ctx.children.size() == 1) {
@@ -244,12 +287,12 @@ public class MikiParser extends MusicBaseListener {
 			final int direction = text.charAt(0) == '+' ? 1 : -1;
 			if(direction > 0) {
 				if(absoluteOctave >= 0 || relativeOctave < 0) {
-					messages.warn(ctx, "Possible confusion over octaves?");
+					warn("Possible confusion over octaves?");
 				}
 				relativeOctave += text.length();
 			} else { // direction < 0;
 				if(absoluteOctave >= 0 || relativeOctave > 0) {
-					messages.warn(ctx, "Possible confusion over octaves?");
+					warn("Possible confusion over octaves?");
 				}
 				relativeOctave -= text.length();
 			}
@@ -257,158 +300,22 @@ public class MikiParser extends MusicBaseListener {
 			// Absolute octave
 			absoluteOctave = Integer.parseInt(text);
 			if(relativeOctave != 0) {
-				messages.warn(ctx, "Possible confusion over octaves?");
+				warn("Possible confusion over octaves?");
 				relativeOctave = 0;
 			}
 		}
 	}
 
 	@Override
-	public void enterDynamic(final MusicParser.DynamicContext ctx) {
-		final String text = ctx.getStop().getText();
-		final Dynamic dynamic = Dynamic.getDynamic(text);
-		annotate(ctx, dynamic);
-	}
-
-	@Override
-	public void enterText(final MusicParser.TextContext ctx) {
-		final String text = StringU.stripQuotes(ctx.getStop().getText());
-		final TextAnnotation textAnnotation = new TextAnnotation(text);
-		annotate(ctx, textAnnotation);
-	}
-
-	@Override
-	public void enterFingering(final MusicParser.FingeringContext ctx) {
-		final String text = ctx.getStop().getText();
-		final Fingering fingering = new Fingering(text.substring(1));
-		annotate(ctx, fingering);
-	}
-
-	@Override
-	public void enterEvent(final MusicParser.EventContext ctx) {
-		// Leading barline...
-		final boolean barAnnotated = annotationMap.containsKey(Barline.class);
-		if(clicksSoFar == 0) {
-			// We're at the start of a new measure, make sure it's annotated...
-			if(!barAnnotated) {
-				annotate(ctx, Barline.bar);
-			}
-		} else if(barAnnotated) {
-			// todo Removing a repeat bar may cause other issues
-			annotationMap.remove(Barline.class);
-			messages.warn(ctx, "Bar annotation not at start of measure; removed.");
-		}
-	}
-
-	@Override
-	public void exitEvent(final MusicParser.EventContext ctx) {
-		annotationMap.clear();
-	}
-
-	@Override
-	public void enterNote(final MusicParser.NoteContext ctx) {
-		buildEvent(ctx);
-	}
-
-	@Override
 	public void enterChord(final MusicParser.ChordContext ctx) {
-		events = new ArrayList<>();
-		inNoteGroup = true;
-	}
-
-	@Override
-	public void enterBind(final MusicParser.BindContext ctx) {
-		// todo There's a stack of work to do here, different types of bind,
-		// how far they can extend, ...
-		final Beam beam = Beam.beams[ctx.getChildCount() - 2];
-		annotate(ctx, beam);
+		push(new Chord(duration));
 	}
 
 	@Override
 	public void exitChord(final MusicParser.ChordContext ctx) {
-		final Event event = buildChord(ctx);
-		inNoteGroup = false;
-		events = currentPhrase.events;
-		events.add(event);
-	}
+		messages.ctx = ctx;
 
-	@Override
-	public void enterTuplet(final MusicParser.TupletContext ctx) {
-		saveDuration = currentDuration;
-		events = new ArrayList<>();
-		inNoteGroup = true;
-	}
-
-	@Override
-	public void exitTuplet(final MusicParser.TupletContext ctx) {
-		currentDuration = saveDuration;
-		final String text = ctx.getStop().getText();
-		Duration duration;
-		if(text.length() > 1) {
-			final Matcher matcher = noteGroupEndPattern.matcher(text);
-			if(!matcher.matches()) {
-				throw new RuntimeException("Recognizer/event parser mismatch");
-			}
-
-			if(matcher.group(1) != null) {
-				messages.warn(ctx, "Tuplet articulation not supported, ignored: " + text);
-			}
-
-			// Group 2: Duration...
-			final String group2 = matcher.group(2);
-			if(group2 != null) {
-				duration = Duration.getByMiki(group2);
-				if(duration.setDefault) {
-					currentDuration = duration;
-				}
-			} else {
-				// No duration but an erroneous articulation
-				duration = currentDuration;
-			}
-		} else {
-			duration = currentDuration;
-		}
-		final int total = clicksSoFar + duration.clicks;
-		if(total > measureSize) {
-			messages.warn(ctx, "Tuplet duration to long, reduced");
-			final Duration[] durations = Duration.getByClicks(total - measureSize);
-			duration = durations[durations.length - 1];
-		}
-		final Tuplet tuplet = new Tuplet(duration, events);
-		events = currentPhrase.events;
-		account(tuplet, ctx);
-		events.add(tuplet);
-		inNoteGroup = false;
-	}
-
-	@Override
-	public void enterNamedChord(final MusicParser.NamedChordContext ctx) {
-		final String text = ctx.getStop().getText();
-		final NamedChord namedChord = NamedChord.parse(text, currentDuration, annotationMap);
-		final Event event = account(namedChord, ctx);
-		events.add(event);
-	}
-
-	@Override
-	public void enterEveryRule(final ParserRuleContext ctx) {
-		if(DEBUG) {
-			String name = ctx.getClass().getSimpleName();
-			name = name.substring(0, name.length() - 7);
-			if(!"Command".contains(name)) {
-				System.out.println(name);
-			}
-		}
-	}
-
-	@Override
-	public String toString() {
-		return score.toString();
-	}
-
-	private Event buildChord(final MusicParser.ChordContext ctx) {
-		Chord result;
-
-		final Duration duration;
+		final Chord chord = (Chord) venue;
 		final String closeText = ctx.stop.getText();
 		final Matcher matcher = noteGroupEndPattern.matcher(closeText);
 		if(!matcher.matches()) {
@@ -419,24 +326,87 @@ public class MikiParser extends MusicBaseListener {
 		final String group1 = matcher.group(1);
 		if(group1 != null) {
 			final Articulation articulation = Articulation.getByMiki(group1);
-			annotate(ctx, articulation);
+			if(annotationMap.put(articulation.getClass(), articulation) != null) {
+				warn("Annotation overwrites previous value: " + articulation);
+			}
 		}
 
 		// Group 2: Duration...
 		final String group2 = matcher.group(2);
+		final Duration duration;
 		if(group2 == null) {
-			duration = currentDuration;
+			duration = this.duration;
 		} else {
 			duration = Duration.getByMiki(group2);
 			if(duration.setDefault) {
-				currentDuration = duration;
+				this.duration = duration;
 			}
 		}
+		chord.duration = duration;
 
-		result = new Chord(duration, events, annotationMap);
-		result = (Chord) account(result, ctx);
+		venue.add(chord);
 
-		return result;
+		pop();
+	}
+
+	@Override
+	public void enterNamedChord(final MusicParser.NamedChordContext ctx) {
+		messages.ctx = ctx;
+		final String text = ctx.getStop().getText();
+		final NamedChord namedChord = NamedChord.parse(text, duration, annotationMap);
+		venue.add(namedChord);
+	}
+
+	@Override
+	public void enterTuplet(final MusicParser.TupletContext ctx) {
+		messages.ctx = ctx;
+		push(new Tuplet(duration));
+	}
+
+	@Override
+	public void exitTuplet(final MusicParser.TupletContext ctx) {
+		messages.ctx = ctx;
+
+		final Tuplet tuplet = (Tuplet) venue;
+		final String text = ctx.getStop().getText();
+		if(text.length() > 1) {
+			final Matcher matcher = noteGroupEndPattern.matcher(text);
+			if(!matcher.matches()) {
+				throw new RuntimeException("Recognizer/event parser mismatch");
+			}
+
+			if(matcher.group(1) != null) {
+				warn("Tuplet articulation not supported, ignored: " + text);
+			}
+
+			// Group 2: Duration...
+			final String group2 = matcher.group(2);
+			final Duration duration;
+			if(group2 != null) {
+				duration = Duration.getByMiki(group2);
+				if(duration.setDefault) {
+					saveDuration = duration;
+				}
+			} else {
+				// No duration but an erroneous articulation
+				duration = this.duration;
+			}
+			tuplet.duration = duration;
+		}
+		final int total = measure.clicksSoFar + duration.clicks;
+		if(total > measure.size) {
+			warn("Tuplet duration to long, reduced");
+			final Duration[] durations = Duration.getByClicks(total - measure.size);
+			duration = durations[durations.length - 1];
+		}
+		pop();
+		venue.add(tuplet);
+	}
+
+	@Override
+	public void enterNote(final MusicParser.NoteContext ctx) {
+		messages.ctx = ctx;
+		buildEvent(ctx);
 	}
 
 	private void buildEvent(final ParserRuleContext ctx) {
@@ -456,11 +426,11 @@ public class MikiParser extends MusicBaseListener {
 		final Duration duration;
 		final String group2 = matcher.group(2);
 		if(group2 == null) {
-			duration = currentDuration;
+			duration = this.duration;
 		} else {
 			duration = Duration.getByMiki(group2);
 			if(duration.setDefault) {
-				currentDuration = duration;
+				this.duration = duration;
 			}
 		}
 
@@ -468,9 +438,9 @@ public class MikiParser extends MusicBaseListener {
 		final String group3 = matcher.group(3);
 		if(group3 != null) {
 			switch(group3.charAt(0)) {
-				case 'b' -> annotate(ctx, Accidental.flat);
-				case 'n' -> annotate(ctx, Accidental.natural);
-				case '#' -> annotate(ctx, Accidental.sharp);
+				case 'b' -> annotate(Accidental.flat);
+				case 'n' -> annotate(Accidental.natural);
+				case '#' -> annotate(Accidental.sharp);
 				default -> throw new RuntimeException("Should never get here");
 			}
 		}
@@ -479,12 +449,12 @@ public class MikiParser extends MusicBaseListener {
 		final String group5 = matcher.group(4);
 		if(group5 != null) {
 			final Articulation articulation = Articulation.getByMiki(group5);
-			annotate(ctx, articulation);
+			annotate(articulation);
 		}
 
 		final char c = tonic.charAt(0);
 		final Map<Class<? extends Annotation>, Annotation> annotations;
-		if(inNoteGroup || annotationMap.isEmpty()) {
+		if(annotationMap.isEmpty()) {
 			annotations = mtAnnotationMap;
 		} else {
 			annotations = annotationMap;
@@ -503,136 +473,95 @@ public class MikiParser extends MusicBaseListener {
 		}
 
 		if(event instanceof Note) {
-			lastNote = ((Note) event).slot;
-			score.staff.accountFor(lastNote);
+			lastNote = event.slot;
 		}
 
-		// Have we reached the end of a measure?
-		if(!inNoteGroup) {
-			account(event, ctx);
-		}
-		events.add(event);
+		venue.add(event);
 
 		// Ready for next
 		relativeOctave = 0;
 		absoluteOctave = -1;
 	}
 
-	private void padToEnd() {
-		if(clicksSoFar > 0) {
-			// End of phrase and we have an incomplete measure, pad to the end
-			// with rests
-			annotationMap.clear();
-			final int padSize = measureSize - clicksSoFar;
-			final Duration[] durations = Duration.getByClicks(padSize);
-			for(final Duration duration : durations) {
-				events.add(new Rest(duration, annotationMap));
-			}
-		}
+	private void handle(final Event event) {
+		venue.add(event);
 	}
 
-	private Event account(final Event event, final ParserRuleContext ctx) {
-		Event result = event;
-		// Keep a tally of  where we are in the measure...
-		clicksSoFar += event.duration.clicks;
+	// A N N O T A T I O N S . . .
 
-		if(clicksSoFar >= 32) {
-			// We've come to at least the end of the current measure
-			clicksSoFar -= 32;
-			if(clicksSoFar > 0) {
-				/*
-				 * The duration of the current event is too long by thirtySeconds
-				 * so split it between this bar to fill it and the remainder in the
-				 * next
-				 */
-				Duration[] durations = Duration.getByClicks(
-						event.duration.clicks - clicksSoFar);
-				int count = durations.length;
-				for(int i = 0; i < durations.length; i++) {
-					final Event newEvent = event.copy(durations[i]);
-					events.add(newEvent);
-					if(i == 0) {
-						result = newEvent;
-					}
-				}
-
-				durations = Duration.getByClicks(clicksSoFar);
-				count += durations.length;
-				for(int i = 0; i < durations.length; i++) {
-					final Event newEvent = event.copy(durations[i]);
-					if(i == 0) {
-						newEvent.add(Barline.bar);
-					}
-					events.add(newEvent);
-				}
-
-				if(!(event instanceof Rest)) {
-					event.add(new Bind(count));
-				}
-				messages.warn(ctx, "Event overflowed measure, rewritten");
-			}
-		}
-		return result;
+	@Override
+	public void enterLine(final MusicParser.LineContext ctx) {
+		messages.ctx = ctx;
+		final String text = ctx.getStop().getText();
+		final LineParser parser = new LineParser(text);
+		annotate(parser.line);
 	}
 
-	private KeySignature parseKeySignature(final String input) {
-		final KeySignature result;
-
-		final Matcher matcher = keySignaturePattern.matcher(input);
-		String tonic;
-		@SuppressWarnings("unused")
-		String mode = null;
-		if(!matcher.matches()) {
-			throw new RuntimeException("Recognizer/event parser mismatch");
-		}
-
-		// Group 1: Upper case tonic...
-		final String group1 = matcher.group(1);
-		tonic = group1.substring(0, 1);
-
-		// Group 2: Accidental...
-		final String group2 = matcher.group(2);
-		if(group2 != null) {
-			switch(group2.charAt(0)) {
-				case '-', 'b', 'B' -> tonic += "b";
-				case '+', '#' -> tonic += "#";
-				default -> throw new RuntimeException("Should never get here");
-			}
-		}
-
-		// Group 3: Mode...
-		final String group3 = matcher.group(3);
-		if(group3 != null) {
-			//noinspection UnusedAssignment
-			mode = group3;
-		}
-
-		result = KeySignature.get(tonic);
-
-		return result;
+	@Override
+	public void enterDynamic(final MusicParser.DynamicContext ctx) {
+		messages.ctx = ctx;
+		final String text = ctx.getStop().getText();
+		final Dynamic dynamic = Dynamic.getDynamic(text);
+		annotate(dynamic);
 	}
 
-	private String normalizeString(final String string) {
-		String result;
-
-		assert string.startsWith("\"") && string.endsWith("\"");
-
-		result = StringU.stripQuotes(string).trim();
-		if(result.length() == 0) {
-			result = null;
-		}
-
-		return result;
+	@Override
+	public void enterText(final MusicParser.TextContext ctx) {
+		messages.ctx = ctx;
+		final String text = StringU.stripQuotes(ctx.getStop().getText());
+		final TextAnnotation textAnnotation = new TextAnnotation(text);
+		annotate(textAnnotation);
 	}
 
-	private void annotate(final ParserRuleContext ctx, final Annotation annotation) {
+	@Override
+	public void enterFingering(final MusicParser.FingeringContext ctx) {
+		messages.ctx = ctx;
+		final String text = ctx.getStop().getText();
+		final Fingering fingering = new Fingering(text.substring(1));
+		annotate(fingering);
+	}
+
+	@Override
+	public void enterBind(final MusicParser.BindContext ctx) {
+		messages.ctx = ctx;
+		// todo There's a stack of work to do here, different types of bind,
+		// how far they can extend, ...
+		final Beam beam = Beam.beams[ctx.getChildCount() - 2];
+		annotate(beam);
+	}
+
+	private void annotate(final Annotation annotation) {
 		if(annotationMap.put(annotation.getClass(), annotation) != null) {
-			messages.warn(ctx, "Annotation overwrites previous value: " + annotation);
+			warn("Annotation overwrites previous value: " + annotation);
 		}
 	}
 
-	private void setTimeSignature(final TimeSignature timeSignature) {
-		this.timeSignature = timeSignature;
-		measureSize = timeSignature.getMeasureSize();
+	// D E B U G G I N G . . .
+
+	@Override
+	public void enterEveryRule(final ParserRuleContext ctx) {
+		messages.ctx = ctx;
+		if(DEBUG) {
+			String name = ctx.getClass().getSimpleName();
+			name = name.substring(0, name.length() - 7);
+			if(!"Command".contains(name)) {
+				System.out.println(name);
+			}
+		}
+	}
+
+	// P A R S I N G   E R R O R   H A N D L I N G . . .
+
+	private void error(final String message) {
+		messages.error(message);
+	}
+
+	private void warn(final String message) {
+		messages.warn(message);
+	}
+
+	@Override
+	public String toString() {
+		return score.toString();
 	}
 }

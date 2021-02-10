@@ -5,6 +5,7 @@
 package org.inexas.notable.notation.parser;
 
 import org.inexas.notable.notation.model.*;
+import org.inexas.notable.util.*;
 
 import java.util.*;
 
@@ -33,30 +34,25 @@ public class ToMikiVisitor implements Visitor {
 
 		paragraph();
 
-		final Staff staff = score.staff;
-		if(!staff.type.equals(Staff.Type.treble)) {
-			visit(staff);
-		}
-
-		final KeySignature keySignature = score.key;
-		if(keySignature != KeySignature.C) {
-			visit(keySignature);
-		}
-
-		final TimeSignature timeSignature = score.timeSignature;
-		if(timeSignature != TimeSignature.COMMON) {
-			visit(timeSignature);
-		}
-
-		final PickupMeasure pickupMeasure = score.pickupMeasure;
-		if(pickupMeasure != null) {
-			visit(pickupMeasure);
-		}
-
-		final Tempo tempo = score.tempo;
-		if(tempo != Tempo.DEFAULT) {
-			visit(tempo);
-		}
+//		final KeySignature keySignature = score.key;
+//		if(keySignature != KeySignature.C) {
+//			visit(keySignature);
+//		}
+//
+//		final TimeSignature timeSignature = score.timeSignature;
+//		if(timeSignature != TimeSignature.COMMON) {
+//			visit(timeSignature);
+//		}
+//
+//		final Cpm pickupMeasure = score.pickupMeasure;
+//		if(pickupMeasure != null) {
+//			visit(pickupMeasure);
+//		}
+//
+//		final Tempo tempo = score.tempo;
+//		if(tempo != Tempo.DEFAULT) {
+//			visit(tempo);
+//		}
 
 		paragraph();
 	}
@@ -68,8 +64,7 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void enter(final Part part) {
-		//noinspection StringEquality
-		if(part.name != Part.IMPLICIT) {
+		if(part.name.length() > 0) {
 			paragraph();
 			writeQuoted("part", part.name);
 		}
@@ -82,10 +77,11 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void enter(final Phrase phrase) {
-		currentDuration = Duration.getByDenominator(phrase.part.score.timeSignature.denominator);
+		// fixme
+		currentDuration = Duration.getByDenominator(
+				TimeSignature.fourFour.denominator);
 
-		//noinspection StringEquality
-		if(phrase.name != Phrase.IMPLICIT) {
+		if(phrase.name.length() > 0) {
 			paragraph();
 			sb.append("phrase ");
 			appendQuoted(phrase.name);
@@ -158,7 +154,8 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final Staff staff) {
-		writeUnquoted("staff", staff.type.name());
+		throw new ImplementMeException();
+//		writeUnquoted("staff", staff.type.name());
 	}
 
 	@Override
@@ -166,11 +163,11 @@ public class ToMikiVisitor implements Visitor {
 		writeUnquoted("time", timeSignature.name);
 	}
 
-	@Override
-	public void visit(final PickupMeasure pickupMeasure) {
-		writeUnquoted("pickup", pickupMeasure.fraction.toString());
-	}
-
+	//	@Override
+//	public void visit(final Cpm cpm) {
+//		writeUnquoted("cpm", Integer.toString(cpm.clicks));
+//	}
+//
 	@Override
 	public void visit(final KeySignature keySignature) {
 		if(keySignature.accidentalCount > 0) {
@@ -318,6 +315,17 @@ public class ToMikiVisitor implements Visitor {
 		space();
 		sb.append('(');
 		beamCount = beam.count;
+	}
+
+	@Override
+	public void visit(final Clef clef) {
+		throw new ImplementMeException();
+	}
+
+	@Override
+	public void visit(final Measure measure) {
+		space();
+		sb.append('|');
 	}
 
 	@Override

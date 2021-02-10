@@ -14,19 +14,8 @@ public class Rest extends Event {
 		super("R", -1, duration, annotations);
 	}
 
-	private Rest(final Rest toCopy) {
-		super(toCopy);
-	}
-
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
-	}
-
-	@Override
-	public Event copy(final Duration duration) {
-		final Event result = new Rest(this);
-		result.duration = duration;
-		return result;
 	}
 }

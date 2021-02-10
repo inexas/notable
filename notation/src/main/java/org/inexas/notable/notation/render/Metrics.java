@@ -226,7 +226,7 @@ public class Metrics {
 	/**
 	 * Top and bottom margins in pixels
 	 */
-	final double topMargin;
+	private final double topMargin;
 	/**
 	 * Width available to staff in pixels
 	 */
@@ -331,58 +331,59 @@ public class Metrics {
 	}
 
 	private Font loadFont(final double size) {
-		final Font returnValue;
+		final Font result;
 
 		try {
 			final ClassLoader classLoader = FontMetadataFile.class.getClassLoader();
 			final InputStream is = classLoader.getResourceAsStream("Bravura.otf");
-			returnValue = Font.loadFont(is, size);
+			result = Font.loadFont(is, size);
 		} catch(final Exception e) {
 			throw new RuntimeException("Error loading font", e);
 		}
 
-		return returnValue;
+		return result;
 	}
 
 
-	Y getY(final Staff staff) {
-		return new Y(staff);
+	Y getY(final DMeasure measure) {
+		return new Y(measure);
 	}
 
 	double[] WidthHeight(final String text) {
-		final double[] returnValue = new double[2];
+		final double[] result = new double[2];
 
 		boundsText.setText(text);
 		final Bounds bounds = boundsText.getLayoutBounds();
-		returnValue[0] = bounds.getWidth();
-		returnValue[1] = bounds.getHeight();
+		result[0] = bounds.getWidth();
+		result[1] = bounds.getHeight();
 
-		return returnValue;
+		return result;
 	}
 
 	class Y {
 		final double[] index = new double[8 * 7 + 1];
 
-		Y(final Staff staff) {
+		Y(final DMeasure measure) {
+			final int lowNote = measure.getClef().type.lowSlot;
 			double y = topMargin
-					+ (staff.slotsAbove() // Notes above the staff
+					+ (measure.slotsAbove() // Notes above the staff
 					+ 8 // Slots in the staff
-					+ staff.lowSlot)  // Slots below the staff
+					+ lowNote)  // Slots below the staff
 					* slotHeight;
-			for(int i = 0; i <= Note.MAXIMUM; i++) {
+			for(int i = 0; i <= Notes.MAXIMUM; i++) {
 				index[i] = y;
 				y -= slotHeight;
 			}
 
-			l0 = index[staff.lowSlot];
-			s0 = index[staff.lowSlot + 1];
-			l1 = index[staff.lowSlot + 2];
-			s1 = index[staff.lowSlot + 3];
-			l2 = index[staff.lowSlot + 4];
-			s2 = index[staff.lowSlot + 5];
-			l3 = index[staff.lowSlot + 6];
-			s3 = index[staff.lowSlot + 7];
-			l4 = index[staff.lowSlot + 8];
+			l0 = index[lowNote];
+			s0 = index[lowNote + 1];
+			l1 = index[lowNote + 2];
+			s1 = index[lowNote + 3];
+			l2 = index[lowNote + 4];
+			s2 = index[lowNote + 5];
+			l3 = index[lowNote + 6];
+			s3 = index[lowNote + 7];
+			l4 = index[lowNote + 8];
 
 			wholeRest = l3;
 			rest = l2;

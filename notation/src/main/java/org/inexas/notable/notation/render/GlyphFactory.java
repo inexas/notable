@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 
 public class GlyphFactory {
-	private final Map<String, Glyph> map = new HashMap<>();
+	private static final Map<String, Glyph> map = new HashMap<>();
 	private final double scaleFactor;
 
 	Glyph[] timeSignatures = new Glyph[10];
@@ -62,63 +62,67 @@ public class GlyphFactory {
 		accidentalNatural = getGlyph("accidentalNatural");
 	}
 
-	Glyph getGlyph(final String name) {
-		Glyph returnValue;
+	public Glyph getClef(final Clef clef) {
+		return getGlyph(clef.type.smufl);
+	}
 
-		returnValue = map.get(name);
-		if(returnValue == null) {
-			returnValue = new Glyph(name, scaleFactor);
-			map.put(name, returnValue);
+	Glyph getGlyph(final String name) {
+		Glyph result;
+
+		result = map.get(name);
+		if(result == null) {
+			result = new Glyph(name, scaleFactor);
+			map.put(name, result);
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	private Font loadFont(final double size) {
-		final Font returnValue;
+		final Font result;
 
 		try {
 			final ClassLoader classLoader = FontMetadataFile.class.getClassLoader();
 			final InputStream is = classLoader.getResourceAsStream("Bravura.otf");
-			returnValue = Font.loadFont(is, size);
+			result = Font.loadFont(is, size);
 		} catch(final Exception e) {
 			throw new RuntimeException("Error loading font", e);
 		}
 
-		return returnValue;
+		return result;
 	}
 
 
 	Glyph getItemGlyph(final Event event) {
-		final Glyph returnValue;
+		final Glyph result;
 
 		final int clicks = event.duration.clicks;
 		if(event instanceof Note) {
 			if(clicks >= 32) {
-				returnValue = noteheadWhole;
+				result = noteheadWhole;
 			} else if(clicks >= 16) {
-				returnValue = noteheadHalf;
+				result = noteheadHalf;
 			} else {
-				returnValue = noteheadBlack;
+				result = noteheadBlack;
 			}
 		} else if(event instanceof Rest) {
 			if(clicks >= 32) {
-				returnValue = restWhole;
+				result = restWhole;
 			} else if(clicks >= 16) {
-				returnValue = restHalf;
+				result = restHalf;
 			} else if(clicks >= 8) {
-				returnValue = restQuarter;
+				result = restQuarter;
 			} else if(clicks >= 4) {
-				returnValue = rest8th;
+				result = rest8th;
 			} else {
-				returnValue = rest16th;
+				result = rest16th;
 			}
 		} else {
 			assert event instanceof Ghost : event.getClass().getSimpleName();
-			returnValue = clicks >= 16 ? noteheadXWhole : noteheadXBlack;
+			result = clicks >= 16 ? noteheadXWhole : noteheadXBlack;
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	/**
@@ -134,13 +138,13 @@ public class GlyphFactory {
 	}
 
 	NoteKit getNoteHeadGlyph(final Note note, final boolean stemUp) {
-		final NoteKit returnValue = new NoteKit();
+		final NoteKit result = new NoteKit();
 
 		final int clicks = note.duration.clicks;
 
 		// Note head...
 		if(note.isGhost) {
-			returnValue.noteHead = switch(clicks) {
+			result.noteHead = switch(clicks) {
 				case 32:
 					yield noteheadWhole;
 				case 16:
@@ -149,7 +153,7 @@ public class GlyphFactory {
 					yield noteheadBlack;
 			};
 		} else {
-			returnValue.noteHead = switch(clicks) {
+			result.noteHead = switch(clicks) {
 				case 32:
 					yield noteheadWhole;
 				case 16:
@@ -161,7 +165,7 @@ public class GlyphFactory {
 
 		// Flag...
 		if(stemUp) {
-			returnValue.flag = switch(clicks) {
+			result.flag = switch(clicks) {
 				case 4, 3:
 					yield flag8thUp;
 				case 2:
@@ -170,7 +174,7 @@ public class GlyphFactory {
 					yield null;
 			};
 		} else { // Stem down
-			returnValue.flag = switch(clicks) {
+			result.flag = switch(clicks) {
 				case 4, 3:
 					yield flag8thDown;
 				case 2:
@@ -183,20 +187,20 @@ public class GlyphFactory {
 		// Accidental...
 		final Accidental accidental = note.get(Accidental.class);
 		if(accidental == Accidental.flat) {
-			returnValue.accidental = accidentalFlat;
+			result.accidental = accidentalFlat;
 		}
 		if(accidental == Accidental.sharp) {
-			returnValue.accidental = accidentalSharp;
+			result.accidental = accidentalSharp;
 		}
 		if(accidental == Accidental.natural) {
-			returnValue.accidental = accidentalNatural;
+			result.accidental = accidentalNatural;
 		}
 
 		final Articulation articulation = note.get(Articulation.class);
 		if(articulation != null) {
-			returnValue.articulation = getGlyph(articulation.name);
+			result.articulation = getGlyph(articulation.name);
 		}
 
-		return returnValue;
+		return result;
 	}
 }

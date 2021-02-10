@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Tempo extends Element implements Annotation {
+public class Tempo extends Annotation {
 	private final static Tempo Larghissimo = new Tempo(
 			"Larghissimo", "Very, very slow (24 tempo and under)", 22);
 	private final static Tempo Adagissimo = new Tempo(
@@ -56,7 +56,6 @@ public class Tempo extends Element implements Annotation {
 			"Presto", "Very, very fast (168–200 tempo)", 184);
 	private final static Tempo Prestissimo = new Tempo(
 			"Prestissimo", "Even faster than presto (200 tempo and over)", 200);
-	public final static Tempo DEFAULT = Andante;
 	private final static Map<String, Tempo> lookup = new HashMap<>();
 
 	// Todo See https://en.wikipedia.org/wiki/Tempo Additional terms

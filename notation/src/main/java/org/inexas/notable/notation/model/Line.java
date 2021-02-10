@@ -10,7 +10,7 @@ package org.inexas.notable.notation.model;
  * <p>
  * todo Change beats into clicks
  */
-public abstract class Line extends Element implements Annotation {
+public abstract class Line extends Annotation {
 	public final int beats;
 	public final int bars;
 

@@ -18,11 +18,6 @@ public class BasicParserTest {
 	}
 
 	@Test
-	void quickTest() {
-		assertEquals("[C E G]. R R2 ||\n", toMiki("[CEG]."));
-	}
-
-	@Test
 	void testEmpty() {
 		assertEquals("", toMiki(""));
 	}
@@ -45,18 +40,17 @@ public class BasicParserTest {
 
 	@Test
 	void testStructure1() {
-		final Score score = toScore("");
+		final Score score = toScore("C");
 		assertEquals(1, score.partMap.size());
 		final Part part = score.getFirstPart();
 		assertEquals("#IMPLICIT#", part.name);
 		assertEquals(1, part.phraseMap.size());
 		final Phrase phrase = part.getFirstPhrase();
 		assertEquals("#IMPLICIT#", phrase.name);
-		assertEquals("time 4/4\n", score.timeSignature.toString());
-		assertNull(score.pickupMeasure);
-		assertEquals("tempo \"Andante\"\n", score.tempo.toString());
-		assertEquals("", score.key.toString());
-		assertEquals("staff treble\n", score.staff.toString());
+//		assertEquals("time 4/4\n", score.timeSignature.toString());
+//		assertNull(score.pickupMeasure);
+//		assertEquals("tempo \"Andante\"\n", score.tempo.toString());
+//		assertEquals("", score.key.toString());
 	}
 
 	@Test

@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Barline extends Element implements Annotation {
+public class Barline extends Annotation {
 	private final static Map<String, Barline> lookup = new HashMap<>();
 	// Note simple bars don't get printed at begging on line
 	public final static Barline bar = new Barline(

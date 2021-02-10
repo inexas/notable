@@ -35,12 +35,12 @@ public class Sheet extends VBox {
 		// Draw staff...
 
 		// Gather some useful constants...
-		staff = score.staff;
-		y = metrics.new Y(staff);
+		// fixme
+		y = metrics.new Y(null);
 		final double staffSpaceHeight = metrics.staffSpaceHeight;
 		final double xOrigin = metrics.sideMargin;
 		final double width = metrics.width;
-		final KeySignature key = score.key;
+		final KeySignature key = KeySignature.C;
 
 		// Temporary variables used to avoid repetitive local calculation
 		double _x, _y;
@@ -64,25 +64,27 @@ public class Sheet extends VBox {
 		// Clef
 		final GlyphFactory glyphFactory = metrics.glyphFactory;
 		gc.setFont(metrics.font);
-		switch(staff.type) {
-			case alto -> {
-				glyph = glyphFactory.getGlyph("cClef");
-				_y = y.l2;
-			}
-			case bass -> {
-				glyph = glyphFactory.getGlyph("fClef");
-				_y = y.l3;
-			}
-			case tenor -> {
-				glyph = glyphFactory.getGlyph("cClef");
-				_y = y.l3;
-			}
-			case treble -> {
-				glyph = glyphFactory.getGlyph("gClef");
-				_y = y.l1;
-			}
-			default -> throw new RuntimeException("Unknown type: " + staff.type);
-		}
+//		switch(staff.type) {
+//			case alto -> {
+//				glyph = glyphFactory.getGlyph("cClef");
+//				_y = y.l2;
+//			}
+//			case bass -> {
+//				glyph = glyphFactory.getGlyph("fClef");
+//				_y = y.l3;
+//			}
+//			case tenor -> {
+//				glyph = glyphFactory.getGlyph("cClef");
+//				_y = y.l3;
+//			}
+//			case treble -> {
+//				glyph = glyphFactory.getGlyph("gClef");
+//				_y = y.l1;
+//			}
+//			default -> throw new RuntimeException("Unknown type: " + staff.type);
+//		}
+		// todo Sort this mess out
+		glyph = glyphFactory.getGlyph("cClef");
 		xCursor = xOrigin + glyph.lBearing;
 		gc.fillText(glyph.c, xCursor, _y);
 		xCursor += glyph.rBearing;
@@ -99,8 +101,9 @@ public class Sheet extends VBox {
 
 		// Time signature...
 		final Glyph[] timeSignatures = glyphFactory.timeSignatures;
-		final Glyph numerator = timeSignatures[score.timeSignature.numerator];
-		final Glyph denominator = timeSignatures[score.timeSignature.denominator];
+
+		final Glyph numerator = timeSignatures[TimeSignature.fourFour.numerator];
+		final Glyph denominator = timeSignatures[TimeSignature.fourFour.denominator];
 		gc.fillText(numerator.c, xCursor, y.l3);
 		gc.fillText(denominator.c, xCursor, y.l1);
 		xCursor += numerator.rBearing;
@@ -111,7 +114,9 @@ public class Sheet extends VBox {
 		final double usableWidth = width - (xCursor - metrics.sideMargin);
 		final double perClick = usableWidth / (4.0 * 32.0);
 
-		events = score.getFirstPart().getFirstPhrase().events;
+		// fixme
+		events = score.getFirstPart().getFirstPhrase().measures.get(0).events;
+//		events = score.getFirstPart().getFirstPhrase().events;
 		boolean first = true;
 		for(int i = 0; i < events.size(); i++) {
 			final Event event = events.get(i);
@@ -135,7 +140,9 @@ public class Sheet extends VBox {
 				final Note note = (Note) event;
 
 				// Draw leger lines...
-				final int count = staff.countLedgerLines(note.slot);
+				// todo Fix me
+				final int count = 0;
+//				final int count = staff.countLedgerLines(note.slot);
 				if(count != 0) {
 					gc.setLineWidth(metrics.legerLineThickness);
 					_x = xCursor - metrics.legerLineExtension;
@@ -162,7 +169,9 @@ public class Sheet extends VBox {
 				// Stem...
 				if(note.duration.clicks < 32) {
 					gc.setLineWidth(metrics.stemThickness);
-					final int relativeSlot = note.slot - staff.lowSlot;
+					// todo Fix me
+					final int relativeSlot = 0;
+//					final int relativeSlot = note.slot - staff.lowSlot;
 					final double tilt = glyph.height / 5;
 					if(relativeSlot < 4) {
 						// Stem up...
@@ -200,7 +209,9 @@ public class Sheet extends VBox {
 		final int endOffset = startOffset + beam.count;
 
 		// Fact find...
-		final int midSlot = staff.lowSlot + 4;    // Slot number of middle line
+		// todo Fix me
+		final int midSlot = 0;
+//		final int midSlot = staff.lowSlot + 4;    // Slot number of middle line
 		int highestSlot = Integer.MAX_VALUE;
 		int lowestSlot = Integer.MIN_VALUE;
 		final int[] slots = new int[count];

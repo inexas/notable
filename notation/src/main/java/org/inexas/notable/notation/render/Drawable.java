@@ -10,7 +10,8 @@ abstract class Drawable {
 	 * locates it on the JavaFX Canvas os measured in pixels with
 	 * 0,0 at the top left
 	 */
-	final double originX, originY;
+	double originX;
+	final double originY;
 	private Drawable[] drawables;
 
 	Drawable(final double originX, final double originY) {

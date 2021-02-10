@@ -1,35 +1,18 @@
 package org.inexas.notable.notation.render;
 
 import org.inexas.notable.notation.model.*;
-import org.inexas.notable.util.*;
+
+import java.util.*;
 
 class DPhrase {
 	private final Layout layout;
-	String name;
-	DEvent[] events;
+	final List<DMeasure> measures = new ArrayList<>();
 
-	DPhrase(final Layout layout, final Phrase phrase, final boolean singleton) {
+	DPhrase(final Layout layout, final Phrase phrase) {
 		this.layout = layout;
-		//noinspection StringEquality
-		if(singleton && phrase.name == Phrase.IMPLICIT) {
-			name = null;
-		} else {
-			name = StringU.nullOrText(phrase.name);
-		}
+	}
 
-		final int count = phrase.events.size();
-		events = new DEvent[count];
-		for(int i = 0; i < count; i++) {
-			final DEvent dEvent;
-			final Event event = phrase.events.get(i);
-			if(event instanceof Note ||
-					event instanceof Rest ||
-					event instanceof Ghost) {
-//				dEvent = new DSingleEvent(layout, event);
-			} else {
-//				dEvent = new DMultiEvent(event);
-			}
-//			events[i] = dEvent;
-		}
+	void add(final DMeasure measure) {
+		measures.add(measure);
 	}
 }

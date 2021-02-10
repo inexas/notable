@@ -66,17 +66,17 @@ public class GlyphWorks extends Application {
 	}
 
 	private Font loadFont(final double size) {
-		final Font returnValue;
+		final Font result;
 
 		try {
 			final ClassLoader classLoader = FontMetadataFile.class.getClassLoader();
 			final InputStream is = classLoader.getResourceAsStream("Bravura.otf");
-			returnValue = Font.loadFont(is, size);
+			result = Font.loadFont(is, size);
 		} catch(final Exception e) {
 			throw new RuntimeException("Error loading font", e);
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	private void drawHorizontalLines() {

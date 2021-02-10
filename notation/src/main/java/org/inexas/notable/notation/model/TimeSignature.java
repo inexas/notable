@@ -6,8 +6,9 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-public class TimeSignature extends Element implements Visited, Annotation {
+public class TimeSignature extends Modifier {
 	public final static TimeSignature COMMON = new TimeSignature(4, 4);
+	public final static TimeSignature fourFour = new TimeSignature(4, 4);
 	public final static TimeSignature CUT = new TimeSignature(2, 2);
 	public final int numerator;
 	public final int denominator;

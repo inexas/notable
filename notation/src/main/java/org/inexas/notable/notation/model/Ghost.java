@@ -16,19 +16,8 @@ public class Ghost extends Event {
 		super("X", -1, duration, annotations);
 	}
 
-	private Ghost(final Ghost toCopy) {
-		super(toCopy);
-	}
-
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
-	}
-
-	@Override
-	public Event copy(final Duration duration) {
-		final Event result = new Ghost(this);
-		result.duration = duration;
-		return result;
 	}
 }

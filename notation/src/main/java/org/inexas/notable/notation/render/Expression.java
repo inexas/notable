@@ -66,17 +66,18 @@ class Expression {
 
 		@Override
 		double evaluate(final Object object) {
-			final double returnValue;
+			final double result;
 
 			try {
 				final Field field = object.getClass().getDeclaredField(identifier);
 				field.setAccessible(true);
-				returnValue = (Double) field.get(object);
+				result = (Double) field.get(object);
 			} catch(final Exception e) {
-				throw new ExecutionException("Error reading '" + identifier + '\'', e);
+				throw new ExecutionException("Error reading "
+						+ object.getClass().getName() + '.' + identifier, e);
 			}
 
-			return returnValue;
+			return result;
 		}
 	}
 
@@ -186,11 +187,11 @@ class Expression {
 	}
 
 	private Node assignment() {
-		final Node returnValue;
+		final Node result;
 
 		if(eatIdentifier()) {
 			if(eat('=')) {
-				returnValue = new AssignmentNode(eaten, expression());
+				result = new AssignmentNode(eaten, expression());
 			} else {
 				throw new ParsingException("Missing assignment");
 			}
@@ -198,7 +199,7 @@ class Expression {
 			throw new ParsingException("Missing assignment");
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	private Node expression() {
@@ -252,7 +253,7 @@ class Expression {
 	}
 
 	private boolean eatDouble() {
-		final boolean returnValue;
+		final boolean result;
 
 		final int startPos = cursor;
 		if(isNumeric(c)) {
@@ -261,17 +262,17 @@ class Expression {
 				next();
 			}
 			eaten = new String(ca, startPos, cursor - startPos);
-			returnValue = true;
+			result = true;
 		} else {
-			returnValue = false;
+			result = false;
 		}
 
-		return returnValue;
+		return result;
 	}
 
 
 	private boolean eatIdentifier() {
-		final boolean returnValue;
+		final boolean result;
 
 		final int startPos = cursor;
 		if(isAlphabetic(c)) {
@@ -280,12 +281,12 @@ class Expression {
 				next();
 			}
 			eaten = new String(ca, startPos, cursor - startPos);
-			returnValue = true;
+			result = true;
 		} else {
-			returnValue = false;
+			result = false;
 		}
 
-		return returnValue;
+		return result;
 	}
 
 	private boolean isAlphanumeric(final char c) {
@@ -301,17 +302,17 @@ class Expression {
 	}
 
 	private boolean eat(final char eatMe) {
-		final boolean returnValue;
+		final boolean result;
 		while(Character.isWhitespace(c)) {
 			next();
 		}
 		if(c == eatMe) {
 			next();
-			returnValue = true;
+			result = true;
 		} else {
-			returnValue = false;
+			result = false;
 		}
-		return returnValue;
+		return result;
 	}
 
 	private void next() {
