@@ -22,7 +22,6 @@ public abstract class Event extends Element implements Visited {
 	 */
 	public final int slot;
 
-
 	Event(
 			final String name,
 			final int slot,
