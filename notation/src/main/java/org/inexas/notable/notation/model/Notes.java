@@ -1,10 +1,21 @@
 package org.inexas.notable.notation.model;
 
+import java.util.regex.*;
+
 @SuppressWarnings({"PointlessArithmeticExpression", "unused"})
 public interface Notes {
 	int BASE = 7;
 	int MINIMUM = 5;    // A0
 	int MAXIMUM = 56;   // C8
+	Pattern notePattern = Pattern.compile("" +
+			"([A-GRX])" +       // Tonic, including rest & ghost
+			"([0-9]+.*\\*?)?" + // Duration
+			"([b#n])?" +        // Accidental
+			"([._!fg]+)?");     // Articulation
+	Pattern noteGroupEndPattern = Pattern.compile("" +
+			"]" +               // Closing ]
+			"([._!fg]+)?" +     // Articulation
+			"([0-9]+.*\\*?)?"); // Duration
 
 	static int tonic(final int slot) {
 		return slot % BASE;

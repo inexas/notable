@@ -28,11 +28,11 @@ public class Part extends Element implements Visited {
 	 * @param name The requested name of the Phrase
 	 * @return Non-null Phrase
 	 */
-	public Phrase getOrCreatePhrase(final String name) {
+	public Phrase getOrCreatePhrase(final Messages messages, final String name) {
 		Phrase result;
 		result = phraseMap.get(name);
 		if(result == null) {
-			result = new Phrase(name, this);
+			result = new Phrase(messages, name, this);
 			phraseMap.put(name, result);
 		}
 		return result;

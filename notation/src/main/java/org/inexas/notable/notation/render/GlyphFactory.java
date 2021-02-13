@@ -118,7 +118,6 @@ public class GlyphFactory {
 				result = rest16th;
 			}
 		} else {
-			assert event instanceof Ghost : event.getClass().getSimpleName();
 			result = clicks >= 16 ? noteheadXWhole : noteheadXBlack;
 		}
 

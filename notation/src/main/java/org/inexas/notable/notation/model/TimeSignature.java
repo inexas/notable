@@ -33,4 +33,8 @@ public class TimeSignature extends Modifier {
 	public int getMeasureSize() {
 		return numerator * Duration.getByDenominator(denominator).clicks;
 	}
+
+	Duration getDefaultDuration() {
+		return Duration.getByDenominator(denominator);
+	}
 }

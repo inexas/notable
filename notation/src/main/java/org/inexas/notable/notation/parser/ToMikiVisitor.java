@@ -148,11 +148,6 @@ public class ToMikiVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(final Ghost ghost) {
-		visitEvent(ghost);
-	}
-
-	@Override
 	public void visit(final Staff staff) {
 		throw new ImplementMeException();
 //		writeUnquoted("staff", staff.type.name());
@@ -163,11 +158,11 @@ public class ToMikiVisitor implements Visitor {
 		writeUnquoted("time", timeSignature.name);
 	}
 
-	//	@Override
-//	public void visit(final Cpm cpm) {
-//		writeUnquoted("cpm", Integer.toString(cpm.clicks));
-//	}
-//
+	@Override
+	public void visit(final Cpm cpm) {
+		writeUnquoted("cpm", Integer.toString(cpm.clicks));
+	}
+
 	@Override
 	public void visit(final KeySignature keySignature) {
 		if(keySignature.accidentalCount > 0) {

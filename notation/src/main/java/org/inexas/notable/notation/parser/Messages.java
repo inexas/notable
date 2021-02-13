@@ -104,4 +104,8 @@ public class Messages {
 
 		return sb.toString();
 	}
+
+	public int count() {
+		return messages.size();
+	}
 }

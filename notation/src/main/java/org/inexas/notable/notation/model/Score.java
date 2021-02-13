@@ -13,20 +13,19 @@ import java.util.*;
  * Top level representation of a musical piece that contains a list of partMaps
  */
 public class Score extends Element implements Visited {
+	private final Messages messages;
 	public final Map<String, Part> partMap = new LinkedHashMap<>();
 	public String title;
 	private String subtitle;
 	public String composer;
 	public String header;
-	public Measure anonymousFicMeasure;
+	// Score defaults...
+	private Clef clef;
+	private KeySignature keySignature;
+	private TimeSignature timeSignature = TimeSignature.fourFour;
 
-	@Override
-	public void accept(final Visitor visitor) {
-		visitor.enter(this);
-		for(final Part part : partMap.values()) {
-			part.accept(visitor);
-		}
-		visitor.exit(this);
+	public Score(final Messages messages) {
+		this.messages = messages;
 	}
 
 	/**
@@ -49,7 +48,6 @@ public class Score extends Element implements Visited {
 		return partMap.values().iterator().next();
 	}
 
-
 	/**
 	 * The time line collects the sizes of measures for the duration of the
 	 * score. Measure sizes are synchronized across all Phases so, for example
@@ -68,7 +66,7 @@ public class Score extends Element implements Visited {
 	private int cursor = 0;
 	private int defaultClicks = TimeSignature.fourFour.getMeasureSize();
 
-	public void accountFor(final Measure measure) {
+	void accountFor(final Measure measure) {
 		final int ordinal = measure.ordinal;
 		assert ordinal <= cursor;
 
@@ -100,37 +98,27 @@ public class Score extends Element implements Visited {
 		}
 	}
 
-	int getDefaultClicks() {
-		return defaultClicks;
+	public int[] getTimeLine() {
+		final int[] result = new int[cursor];
+		System.arraycopy(timeline, 0, result, 0, cursor);
+		return result;
 	}
 
-	//	public void setMeasureSize(final int measureNumber, final int size) {
-//		assert size > 0 : "Can't set to zero";
-//		assert measureNumber == 0 || timeline[measureNumber - 1] > 0 : "Ordinal issue";
-//
-//		if(measureNumber >= timeline.length) {
-//			final int[] old = timeline;
-//			timeline = new int[2 * old.length];
-//			System.arraycopy(old, 0, timeline, 0, old.length);
-//		}
-//		timeline[measureNumber] = size;
-//	}
-//
 	public String getTitle() {
 		return title;
 	}
 
-	public void setTitle(final Messages messages, final String title) {
+	public void setTitle(final String title) {
 		if(this.title != null) {
-			messages.warn("Score title already set, ignoring redefinition");
+			warn("Score title already set, ignoring redefinition");
 		} else {
 			this.title = StringU.stripQuotesTrim(title);
 		}
 	}
 
-	public void setSubtitle(final Messages messages, final String subtitle) {
+	public void setSubtitle(final String subtitle) {
 		if(this.subtitle != null) {
-			messages.warn("Score subtitle already set, ignoring redefinition");
+			warn("Score subtitle already set, ignoring redefinition");
 		} else {
 			this.subtitle = StringU.stripQuotesTrim(subtitle);
 		}
@@ -140,9 +128,9 @@ public class Score extends Element implements Visited {
 		return composer;
 	}
 
-	public void setComposer(final Messages messages, final String composer) {
+	public void setComposer(final String composer) {
 		if(this.composer != null) {
-			messages.warn("Composer already set, ignoring redefinition");
+			warn("Composer already set, ignoring redefinition");
 		} else {
 			this.composer = StringU.stripQuotesTrim(composer);
 		}
@@ -152,11 +140,63 @@ public class Score extends Element implements Visited {
 		return header;
 	}
 
-	public void setHeader(final Messages messages, final String header) {
+	public void setHeader(final String header) {
 		if(this.header != null) {
-			messages.warn("Header already set, ignoring redefinition");
+			warn("Header already set, ignoring redefinition");
 		} else {
 			this.header = StringU.stripQuotesTrim(header);
 		}
+	}
+
+	public Clef getClef() {
+		return clef == null ? Clef.treble : clef;
+	}
+
+	public void handle(final Clef clef) {
+		if(this.clef != null) {
+			error("Default clef already set for the score");
+		} else {
+			this.clef = clef;
+		}
+	}
+
+	public KeySignature getKeySignature() {
+		return keySignature == null ? KeySignature.C : keySignature;
+	}
+
+	public void setKeySignature(final KeySignature keySignature) {
+		if(getKeySignature() != null) {
+			error("Default key signature already set for this score");
+		}
+		this.keySignature = keySignature;
+	}
+
+	public TimeSignature getTimeSignature() {
+		return timeSignature == null ? TimeSignature.fourFour : timeSignature;
+	}
+
+	public void setTimeSignature(final TimeSignature timeSignature) {
+		if(timeSignature != null) {
+			error("Default time signature already set for this score");
+		} else {
+			this.timeSignature = timeSignature;
+		}
+	}
+
+	private void warn(final String message) {
+		messages.warn(message);
+	}
+
+	private void error(final String message) {
+		messages.error(message);
+	}
+
+	@Override
+	public void accept(final Visitor visitor) {
+		visitor.enter(this);
+		for(final Part part : partMap.values()) {
+			part.accept(visitor);
+		}
+		visitor.exit(this);
 	}
 }

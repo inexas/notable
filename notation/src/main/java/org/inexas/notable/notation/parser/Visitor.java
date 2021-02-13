@@ -31,8 +31,6 @@ public interface Visitor {
 
 	void visit(Rest rest);
 
-	void visit(Ghost ghost);
-
 	void visit(Staff staff);
 
 	void visit(TimeSignature timeSignature);
@@ -76,4 +74,6 @@ public interface Visitor {
 	void visit(Clef clef);
 
 	void visit(Measure measure);
+
+	void visit(Cpm cpm);
 }

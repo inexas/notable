@@ -5,7 +5,10 @@ import org.inexas.notable.notation.parser.*;
 import java.util.*;
 
 public class Measure extends Element implements Venue {
-	private final Score score;
+	/**
+	 * Parent phrase
+	 */
+	private final Phrase phrase;
 	/**
 	 * Linked list: previous in chain
 	 */
@@ -43,14 +46,28 @@ public class Measure extends Element implements Venue {
 	 * The list of events in this measure
 	 */
 	public final List<Event> events = new ArrayList<>();
-
+	/**
+	 * Clicks Per Measure. If this value is non-zero then the time
+	 * signature has been overridden for this measure. E.g. a
+	 * pickup measure
+	 */
 	private int cpm;
+	/**
+	 * The default duration of events.
+	 */
+	private Duration duration;
 
-	Measure(final Score score, final Measure previous) {
-		this.score = score;
-		pic = previous;
-		ordinal = pic == null ? 0 : pic.ordinal + 1;
-		size = score.getDefaultClicks();
+	Measure(final Phrase phrase, final Measure pic) {
+		this.phrase = phrase;
+		this.pic = pic;
+		if(pic == null) {
+			// This is the first measure for the parent Phrase
+			ordinal = 0;
+		} else {
+			// Non-first
+			ordinal = pic.ordinal + 1;
+		}
+		size = getTimeSignature().getMeasureSize();
 	}
 
 	@Override
@@ -64,30 +81,14 @@ public class Measure extends Element implements Venue {
 		clicksSoFar += event.duration.clicks;
 	}
 
-	public Clef getClef() {
-		final Clef result;
-		if(clef == null) {
-			// No explicit clef, check for a previous definition...
-			if(pic == null) {
-				// We're first in chain (fic) so check anonymous fic...
-				final Measure anonymousFic = score.anonymousFicMeasure;
-				if(anonymousFic.clef == null) {
-					result = Clef.treble;
-				} else {
-					result = anonymousFic.clef;
-				}
-			} else {
-				result = pic.getClef();
-			}
-		} else {
-			result = clef;
-		}
-		return result;
+	private Clef getClef() {
+		return pic == null ? Clef.treble : pic.getClef();
 	}
 
 	public void setClef(final Messages messages, final Clef clef) {
-		messages.error("Clef already set for this measure");
-		if(clicksSoFar > 0) {
+		if(this.clef != null) {
+			messages.error("Clef already set for this measure");
+		} else if(clicksSoFar > 0) {
 			messages.error("Clefs must appear at the beginning of a measure");
 		} else {
 			this.clef = clef;
@@ -97,7 +98,7 @@ public class Measure extends Element implements Venue {
 	public KeySignature getKeySignature() {
 		final KeySignature result;
 		if(clef == null) {
-			result = pic == null ? KeySignature.C : pic.getKeySignature();
+			result = pic == null ? phrase.part.score.getKeySignature() : pic.getKeySignature();
 		} else {
 			result = keySignature;
 		}
@@ -117,7 +118,7 @@ public class Measure extends Element implements Venue {
 	public TimeSignature getTimeSignature() {
 		final TimeSignature result;
 		if(timeSignature == null) {
-			result = pic == null ? TimeSignature.fourFour : pic.getTimeSignature();
+			result = pic == null ? phrase.part.score.getTimeSignature() : pic.getTimeSignature();
 		} else {
 			result = timeSignature;
 		}
@@ -140,6 +141,7 @@ public class Measure extends Element implements Venue {
 	}
 
 	public void setCpm(final Messages messages, final int cpm) {
+		assert cpm > 0;
 		if(clicksSoFar > 0) {
 			messages.error("CPM must appear at start of measure");
 		} else if(this.cpm != 0) {
@@ -147,6 +149,14 @@ public class Measure extends Element implements Venue {
 		} else {
 			this.cpm = cpm;
 		}
+	}
+
+	public Duration getDuration() {
+		return duration == null ? getTimeSignature().getDefaultDuration() : duration;
+	}
+
+	public void setDuration(final Messages messages, final Duration duration) {
+		this.duration = duration;
 	}
 
 	//	private void padToEnd() {
