@@ -58,11 +58,11 @@ public class Layout {
 	 */
 	private DPara firstPass() {
 		final DPara result = new DPara(this);
-		for(final Part part : score.partMap.values()) {
+		for(final Part part : score.parts) {
 			final DPart dPart = new DPart(this, part);
 			result.add(dPart);
 
-			for(final Phrase phrase : part.phraseMap.values()) {
+			for(final Phrase phrase : part.phrases) {
 				final DPhrase dPhrase = new DPhrase(this, phrase);
 				dPart.add(dPhrase);
 

@@ -12,6 +12,10 @@ public class Messages {
 	private final boolean isFile;
 	private final String source;
 	ParserRuleContext ctx;
+	private final List<Message> messages = new ArrayList<>();
+	private final List<Message> errors = new ArrayList<>();
+	private final List<Message> warnings = new ArrayList<>();
+
 
 	boolean containExcerpt(final String excerpt) {
 		boolean result = false;
@@ -60,8 +64,6 @@ public class Messages {
 		}
 	}
 
-	private final List<Message> messages = new ArrayList<>();
-
 	Messages(final boolean isFile, final String source) {
 		this.isFile = isFile;
 		this.source = source;
@@ -72,11 +74,15 @@ public class Messages {
 	}
 
 	public void error(final String text) {
-		messages.add(new Message(Message.Type.Error, ctx, text));
+		final Message message = new Message(Message.Type.Error, ctx, text);
+		messages.add(message);
+		errors.add(message);
 	}
 
 	public void warn(final String text) {
-		messages.add(new Message(Message.Type.Warning, ctx, text));
+		final Message message = new Message(Message.Type.Warning, ctx, text);
+		messages.add(message);
+		warnings.add(message);
 	}
 
 	@Override
@@ -107,5 +113,13 @@ public class Messages {
 
 	public int count() {
 		return messages.size();
+	}
+
+	public String getError(final int index) {
+		return errors.get(index).message;
+	}
+
+	public int getErrorCount() {
+		return errors.size();
 	}
 }

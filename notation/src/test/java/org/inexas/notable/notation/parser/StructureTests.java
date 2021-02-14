@@ -1,27 +1,34 @@
 package org.inexas.notable.notation.parser;
 
-import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
-
-import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StructureTests {
 
-	void test(final String toTest) {
-		final MikiParser parser = new MikiParser(toTest);
+	private void errorExpected(final String expected, final String toTest) {
+		final MikiParser parser = MikiParser.fromString(toTest);
 		final Messages messages = parser.messages;
-		if(messages.hasMessages()) {
-			System.out.println(messages);
+		boolean found = false;
+		final int count = messages.getErrorCount();
+		for(int i = 0; i < count; i++) {
+			if(messages.getError(i).contains(expected)) {
+				found = true;
+				break;
+			}
 		}
-		assertEquals(0, messages.count());
+		if(!found) {
+			System.out.println("Searching for: " + expected);
+			System.out.println(messages);
+			assertTrue(found);
+		}
 	}
 
 	@Test
 	void testAnonymous() {
-		final Score score = MikiParser.fromString("A").score;
-		final Map<String, Part> map = score.partMap;
-		assertEquals(1, map.size());
+		errorExpected("Measure not complete", "");
+		errorExpected("Measure not complete", "A");
+		final MikiParser parser = MikiParser.fromString("ARRR|");
+		assertFalse(parser.messages.hasMessages());
 	}
 }

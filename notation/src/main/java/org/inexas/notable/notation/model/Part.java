@@ -5,20 +5,25 @@
 package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
-
-import java.util.*;
+import org.inexas.notable.util.*;
 
 /**
  * The part played by one instrument
  */
-public class Part extends Element implements Visited {
+public class Part extends Element implements Visited, MappedList.Named {
 	public final String name;
 	public final Score score;
-	public final Map<String, Phrase> phraseMap = new LinkedHashMap<>();
+	// Preserve the oder
+	public final MappedList<Phrase> phrases = new MappedList<>();
 
 	Part(final String name, final Score score) {
 		this.name = name;
 		this.score = score;
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 
 	/**
@@ -28,12 +33,12 @@ public class Part extends Element implements Visited {
 	 * @param name The requested name of the Phrase
 	 * @return Non-null Phrase
 	 */
-	public Phrase getOrCreatePhrase(final Messages messages, final String name) {
+	public Phrase getOrCreatePhrase(final String name) {
 		Phrase result;
-		result = phraseMap.get(name);
+		result = phrases.get(name);
 		if(result == null) {
-			result = new Phrase(messages, name, this);
-			phraseMap.put(name, result);
+			result = new Phrase(name, this);
+			phrases.add(result);
 		}
 		return result;
 	}
@@ -41,14 +46,46 @@ public class Part extends Element implements Visited {
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.enter(this);
-		for(final Phrase phrase : phraseMap.values()) {
-			phrase.accept(visitor);
+		final int count = phrases.size();
+		for(int i = 0; i < count; i++) {
+			phrases.get(i).accept(visitor);
 		}
 		visitor.exit(this);
 	}
 
 	public Phrase getFirstPhrase() {
-		return phraseMap.values().iterator().next();
+		return phrases.getFirst();
+	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+
+	@Override
+	public boolean equals(final Object object) {
+		final boolean result;
+
+		if(this == object) {
+			result = true;
+		} else {
+			if(object == null || getClass() != object.getClass()) {
+				result = false;
+			} else {
+				final Part rhs = (Part) object;
+				result = name.equals(rhs.name);
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Part{");
+		sb.append(name);
+		sb.append('}');
+		return sb.toString();
 	}
 }
 

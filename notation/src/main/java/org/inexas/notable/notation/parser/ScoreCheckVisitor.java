@@ -15,7 +15,7 @@ public class ScoreCheckVisitor implements Visitor {
 	@Override
 	public void enter(final Score score) {
 		timeLine = score.getTimeLine();
-		partCount = score.partMap.size();
+		partCount = score.parts.size();
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public class ScoreCheckVisitor implements Visitor {
 	@Override
 	public void enter(final Part part) {
 		partName = part.name.length() == 0 ? "(Anonymous)" : part.name;
-		phraseCount = part.phraseMap.size();
+		phraseCount = part.phrases.size();
 		totalPhraseCount += phraseCount;
 	}
 
@@ -40,7 +40,7 @@ public class ScoreCheckVisitor implements Visitor {
 		for(int i = 0; i < timeLine.length; i++) {
 			final int size = timeLine[i];
 			final Measure measure = phrase.measures.get(i);
-			assert measure.size == timeLine[i] : "Coding error";
+			assert measure.getSize() == timeLine[i] : "Coding error";
 			if(!measure.isComplete()) {
 				messages.error(partName + '/' + phraseName + '-' + i + ": "
 						+ "Measure not complete");

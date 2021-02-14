@@ -5,10 +5,8 @@ import org.inexas.notable.notation.parser.*;
 import java.util.*;
 
 public class Measure extends Element implements Venue {
-	/**
-	 * Parent phrase
-	 */
-	private final Phrase phrase;
+	private final Messages messages;
+	private final Score score;
 	/**
 	 * Linked list: previous in chain
 	 */
@@ -24,41 +22,24 @@ public class Measure extends Element implements Venue {
 	 */
 	private Clef clef;
 	/**
-	 * Null or change of key
-	 */
-	private KeySignature keySignature;
-	/**
-	 * Null or change of time
-	 */
-	private TimeSignature timeSignature;
-	/**
-	 * Size of this measure in clicks. This is set by a time signature
-	 * and may be overridden by a CPM. If there is neither a time signature
-	 * nor a cpm for this measures then a default is used.
-	 */
-	public int size;
-	/**
 	 * The clicksSoFar counts up the clicks used each time an event is
 	 * added to the measure.
 	 */
-	public int clicksSoFar;
+	int clicksSoFar;
+	/**
+	 * The key signature for this measure. Will probably be null unless there's
+	 * a command to set it. It is effective for this and all subsequent
+	 * measures until another is encountered.
+	 */
+	private KeySignature keySignature;
 	/**
 	 * The list of events in this measure
 	 */
 	public final List<Event> events = new ArrayList<>();
-	/**
-	 * Clicks Per Measure. If this value is non-zero then the time
-	 * signature has been overridden for this measure. E.g. a
-	 * pickup measure
-	 */
-	private int cpm;
-	/**
-	 * The default duration of events.
-	 */
-	private Duration duration;
 
 	Measure(final Phrase phrase, final Measure pic) {
-		this.phrase = phrase;
+		score = phrase.part.score;
+		messages = score.messages;
 		this.pic = pic;
 		if(pic == null) {
 			// This is the first measure for the parent Phrase
@@ -67,7 +48,8 @@ public class Measure extends Element implements Venue {
 			// Non-first
 			ordinal = pic.ordinal + 1;
 		}
-		size = getTimeSignature().getMeasureSize();
+		// Force Score to register the new Measure
+		score.getMeasureSize(0);
 	}
 
 	@Override
@@ -81,82 +63,91 @@ public class Measure extends Element implements Venue {
 		clicksSoFar += event.duration.clicks;
 	}
 
-	private Clef getClef() {
-		return pic == null ? Clef.treble : pic.getClef();
+	public int getSize() {
+		return score.getMeasureSize(ordinal);
 	}
 
-	public void setClef(final Messages messages, final Clef clef) {
+	public void setClef(final Clef clef) {
 		if(this.clef != null) {
-			messages.error("Clef already set for this measure");
-		} else if(clicksSoFar > 0) {
-			messages.error("Clefs must appear at the beginning of a measure");
+			error("Clef already set for this measure");
 		} else {
 			this.clef = clef;
 		}
 	}
 
+	/**
+	 * @return The clef for this measure or null if one has not been set
+	 * @see #getEffectiveClef()
+	 */
+	private Clef getClef() {
+		return clef;
+	}
+
+	/**
+	 * @return The non-null clef that is effective for this measure
+	 * @see #getClef()
+	 */
+	private Clef getEffectiveClef() {
+		return pic == null ? score.getDefaultClef() : pic.getEffectiveClef();
+	}
+
+	void setKeySignature(final KeySignature keySignature) {
+		if(this.keySignature != null) {
+			error("Key signature already set for this measure");
+		} else if(clicksSoFar > 0) {
+			warn("It is good practice to set the key signature at the start of a measure");
+		} else if(getEffectiveKeySignature().equals(keySignature)) {
+			warn("Key signature is already " + keySignature);
+		} else {
+			this.keySignature = keySignature;
+		}
+	}
+
+	/**
+	 * @return The key signature set for this measure or null if none has been set
+	 * @see #getEffectiveKeySignature()
+	 */
 	public KeySignature getKeySignature() {
+		return keySignature;
+	}
+
+	/**
+	 * @return The effective key signature for this measure
+	 */
+	private KeySignature getEffectiveKeySignature() {
 		final KeySignature result;
-		if(clef == null) {
-			result = pic == null ? phrase.part.score.getKeySignature() : pic.getKeySignature();
+		if(keySignature == null) {
+			result = pic == null ? score.getDefaultKeySignature() : pic.getKeySignature();
 		} else {
 			result = keySignature;
 		}
 		return result;
 	}
 
-	public void setKeySignature(final Messages messages, final KeySignature keySignature) {
-		if(clicksSoFar > 0) {
-			messages.error("Key signatures must appear at the beginning of a measure");
-		}
-		if(getKeySignature() != null) {
-			messages.error("Key signature already set for this measure");
-		}
-		this.keySignature = keySignature;
-	}
-
+	/**
+	 * @return The time signature for this measure or null if no time signature
+	 * has been explicitly set
+	 */
 	public TimeSignature getTimeSignature() {
-		final TimeSignature result;
-		if(timeSignature == null) {
-			result = pic == null ? phrase.part.score.getTimeSignature() : pic.getTimeSignature();
-		} else {
-			result = timeSignature;
-		}
-		return result;
+		return score.getTimeSignature(ordinal);
 	}
 
-	public void setTimeSignature(final Messages messages, final TimeSignature timeSignature) {
+	void handle(final TimeSignature timeSignature) {
 		if(clicksSoFar > 0) {
-			messages.error("Time signatures must appear at the beginning of a measure");
+			error("Time signatures must appear at the beginning of a measure");
 		}
-		if(timeSignature != null) {
-			messages.error("Time signature already set for this measure");
-		}
-		this.timeSignature = timeSignature;
-		size = timeSignature.getMeasureSize();
+		score.report(ordinal, timeSignature);
 	}
 
-	public int getCpm() {
-		return cpm;
-	}
-
-	public void setCpm(final Messages messages, final int cpm) {
-		assert cpm > 0;
+	void handle(final Cpm cpm) {
+		final int clicks = cpm.clicks;
 		if(clicksSoFar > 0) {
-			messages.error("CPM must appear at start of measure");
-		} else if(this.cpm != 0) {
-			messages.error("Maximum one CPM per measure");
+			error("CPM must appear at start of measure");
+		} else if(clicks == getSize()) {
+			warn("CPM does not change measure size?");
 		} else {
-			this.cpm = cpm;
+			score.report(ordinal, cpm);
 		}
-	}
-
-	public Duration getDuration() {
-		return duration == null ? getTimeSignature().getDefaultDuration() : duration;
-	}
-
-	public void setDuration(final Messages messages, final Duration duration) {
-		this.duration = duration;
 	}
 
 	//	private void padToEnd() {
@@ -170,7 +161,29 @@ public class Measure extends Element implements Venue {
 //	}
 //
 	public boolean isComplete() {
-		assert clicksSoFar <= size;
-		return clicksSoFar == size;
+		assert clicksSoFar <= getSize();
+		return clicksSoFar == getSize();
+	}
+
+	private void warn(final String message) {
+		messages.warn(message);
+	}
+
+	private void error(final String message) {
+		messages.error(message);
+	}
+
+	void handle(final Clef clef) {
+		if(clicksSoFar > 0) {
+			error("Cleft should be set at beginning of a measure");
+		} else if(this.clef != null) {
+			error("Clef has already been set for this measure");
+		} else {
+			this.clef = clef;
+		}
+	}
+
+	TimeSignature getEffectiveTimeSignature() {
+		return score.getEffectiveTimeSignature(ordinal);
 	}
 }

@@ -1,6 +1,7 @@
 package org.inexas.notable.notation.render;
 
 import org.inexas.notable.notation.model.*;
+import org.inexas.notable.util.*;
 
 import java.util.*;
 
@@ -12,7 +13,7 @@ public class DPara extends Drawable {
 	DPara(final Layout layout) {
 		final List<Drawable> drawables = new ArrayList<>();
 
-		final Map<String, Part> partMap = layout.score.partMap;
+		final MappedList<Part> parts = layout.score.parts;
 
 		final Metrics m = layout.m;
 

@@ -115,7 +115,7 @@ public class Sheet extends VBox {
 		final double perClick = usableWidth / (4.0 * 32.0);
 
 		// fixme
-		events = score.getFirstPart().getFirstPhrase().measures.get(0).events;
+		events = score.parts.getFirst().phrases.getFirst().measures.get(0).events;
 //		events = score.getFirstPart().getFirstPhrase().events;
 		boolean first = true;
 		for(int i = 0; i < events.size(); i++) {

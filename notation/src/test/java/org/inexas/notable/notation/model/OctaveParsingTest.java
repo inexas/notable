@@ -12,7 +12,7 @@ public class OctaveParsingTest {
 		final List<Note> result = new ArrayList<>();
 
 		final Score score = MikiParser.fromString(miki).score;
-		score.getFirstPart().getFirstPhrase().measures.get(0).events.forEach(event -> {
+		score.parts.getFirst().phrases.getFirst().measures.get(0).events.forEach(event -> {
 			if(event instanceof Note) {
 				result.add((Note) event);
 			}

@@ -2,13 +2,9 @@ package org.inexas.notable.notation.model;
 
 import org.junit.jupiter.api.*;
 
-import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class NoteTest {
-	private final Map<Class<? extends Annotation>, Annotation> noAnnotations = Map.of();
-
 	//	@Test
 //	void testParameters() {
 //		AssertionError e;
@@ -37,7 +33,7 @@ public class NoteTest {
 		assertEquals(28, Notes.slot(4, "C"));
 	}
 
-//	@Test
+	//	@Test
 //	void testTonics() {
 //		assertEquals(0, Note.get(28, Duration.quarter, noAnnotations).tonic);
 //		assertEquals(1, Note.get(29, Duration.quarter, noAnnotations).tonic);
@@ -50,20 +46,20 @@ public class NoteTest {
 //		assertEquals(5, Note.A);
 //		assertEquals(6, Note.B);
 //	}
-
-	@Test
-	void testNext() {
-		assertEquals(28, Note.next(28, 4, 0, "C"));
-		// Lower limit...
-		assertEquals(5, Note.next(5, -1, 0, "A"));
-		assertEquals(8, Note.next(5, -1, 0, "D"));
-		assertEquals(11, Note.next(5, -1, 0, "G"));
-		// Upper limit...
-		assertEquals(56, Note.next(56, -1, 0, "C"));
-		assertEquals(50, Note.next(56, -1, 0, "D"));
-		assertEquals(55, Note.next(56, -1, 0, "B"));
-	}
-
+//
+//	@Test
+//	void testNext() {
+//		assertEquals(28, Note.next(28, 4, 0, "C"));
+//		// Lower limit...
+//		assertEquals(5, Note.next(5, -1, 0, "A"));
+//		assertEquals(8, Note.next(5, -1, 0, "D"));
+//		assertEquals(11, Note.next(5, -1, 0, "G"));
+//		// Upper limit...
+//		assertEquals(56, Note.next(56, -1, 0, "C"));
+//		assertEquals(50, Note.next(56, -1, 0, "D"));
+//		assertEquals(55, Note.next(56, -1, 0, "B"));
+//	}
+//
 	//	@Test
 //	void testToString() {
 //		final Note note = Note.get(28, Duration.quarter, noAnnotations);

@@ -9,10 +9,22 @@ import org.antlr.v4.runtime.tree.*;
 import org.inexas.notable.notation.model.*;
 import org.inexas.notable.util.*;
 
+import java.util.*;
+import java.util.regex.*;
+
+/**
+ * This class has the following jobs
+ * 1. Building the structure of the score
+ * 2. Complete parsing so that all text is parsed into model objects and hand them
+ * to the structure
+ * 3. Structure wide verification and style check
+ */
 public class MikiParser extends MusicBaseListener {
 	@SuppressWarnings("FieldCanBeLocal")
 	private final boolean DEBUG = true;
-	final Messages messages;
+	public final Messages messages;
+	private static final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
+
 	/**
 	 * The number of clicks counted so far in the current measure
 	 */
@@ -27,7 +39,7 @@ public class MikiParser extends MusicBaseListener {
 	 */
 	private boolean settingDefaults = true;
 
-	MikiParser(final String string) {
+	private MikiParser(final String string) {
 		messages = new Messages(false, string);
 	}
 
@@ -51,7 +63,7 @@ public class MikiParser extends MusicBaseListener {
 		// Set up an anonymous Part and Phrase
 		score = new Score(messages);
 		part = score.getOrCreatePart("");
-		phrase = part.getOrCreatePhrase(messages, "");
+		phrase = part.getOrCreatePhrase("");
 	}
 
 	@Override
@@ -73,12 +85,17 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterPart(final MusicParser.PartContext ctx) {
 		messages.ctx = ctx;
-		// Get existing or create a new Part
+		// Get existing or create a new Part...
 		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
 		final Part part = score.getOrCreatePart(name);
-		if(this.part != part) {
-			// The Part has indeed changed so we don't know which Phrase
-			phrase = null;
+		if(!this.part.equals(part)) {
+			/*
+			We don't know for sure which phrase is required so we'll select
+			the first named phrase within the part if there is one otherwise
+			the anonymous phrase
+			 */
+			final int count = part.phrases.size();
+			phrase = count == 1 ? part.phrases.getFirst() : part.phrases.get(1);
 		}
 		settingDefaults = false;
 	}
@@ -86,12 +103,15 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterPhrase(final MusicParser.PhraseContext ctx) {
 		messages.ctx = ctx;
+		// Get existing or create a new Phrase...
 		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
-		final Phrase phrase = part.getOrCreatePhrase(messages, name);
-		if(this.phrase != phrase) {
-			// This is indeed a change
-			this.phrase = phrase;
-		}
+		/*
+		I would have like to be able to select the phrase without having to
+		select the part first say when changing from guitar to (piano) RH but
+		this doesn't work. We couldn't tell if the user was trying to create
+		a new phrase or select an existing phrase in a different part.
+		 */
+		phrase = part.getOrCreatePhrase(name);
 		settingDefaults = false;
 	}
 
@@ -158,7 +178,7 @@ public class MikiParser extends MusicBaseListener {
 		final String text = ctx.getStop().getText();
 		final Clef clef = new Clef(text);
 		if(settingDefaults) {
-			score.handle(clef);
+			score.setDefaultClef(clef);
 		} else {
 			phrase.handle(clef);
 		}
@@ -168,8 +188,12 @@ public class MikiParser extends MusicBaseListener {
 	public void enterKey(final MusicParser.KeyContext ctx) {
 		messages.ctx = ctx;
 		final String text = ctx.getStop().getText();
-		final KeySignature key = KeySignature.parseKeySignature(text);
-		phrase.handle(key);
+		final KeySignature keySignature = KeySignature.parseKeySignature(text);
+		if(settingDefaults) {
+			score.setDefaultKeySignature(keySignature);
+		} else {
+			phrase.handle(keySignature);
+		}
 	}
 
 	@Override
@@ -187,7 +211,7 @@ public class MikiParser extends MusicBaseListener {
 					TimeSignature.CUT : TimeSignature.COMMON;
 		}
 		if(settingDefaults) {
-			score.setTimeSignature(timeSignature);
+			score.setDefaultTimeSignature(timeSignature);
 		} else {
 			phrase.handle(timeSignature);
 		}
@@ -207,6 +231,69 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterEvent(final MusicParser.EventContext ctx) {
 		settingDefaults = false;
+	}
+
+	@Override
+	public void enterNote(final MusicParser.NoteContext ctx) {
+		messages.ctx = ctx;
+		final String input = ctx.stop.getText();
+		// Split up the Event into its parts..
+		final Matcher matcher = Notes.notePattern.matcher(input);
+		if(!matcher.matches()) {
+			throw new RuntimeException("Recognizer/event parser mismatch: '" + input + '\'');
+		}
+
+		// Group 1: Tonic...
+		final String tonic = matcher.group(1);
+
+		// Group 2: Duration...
+		final Duration duration;
+		final String group2 = matcher.group(2);
+		if(group2 == null) {
+			duration = phrase.duration;
+		} else {
+			duration = Duration.getByMiki(group2);
+			if(duration.setDefault) {
+				phrase.duration = duration;
+			}
+		}
+
+		// Group 2: Accidental...
+		final String group3 = matcher.group(3);
+		if(group3 != null) {
+			switch(group3.charAt(0)) {
+				case 'b' -> phrase.annotate(Accidental.flat);
+				case 'n' -> phrase.annotate(Accidental.natural);
+				case '#' -> phrase.annotate(Accidental.sharp);
+				default -> throw new RuntimeException("Should never get here");
+			}
+		}
+
+		// Group 4: Articulation...
+		final String group5 = matcher.group(4);
+		if(group5 != null) {
+			final Articulation articulation = Articulation.getByMiki(group5);
+			phrase.annotate(articulation);
+		}
+
+		final char c = tonic.charAt(0);
+		final Map<Class<? extends Annotation>, Annotation> annotations;
+		if(phrase.annotationMap.isEmpty()) {
+			annotations = mtAnnotationMap;
+		} else {
+			annotations = phrase.annotationMap;
+			phrase.annotationMap = new HashMap<>();
+		}
+
+		final Event event;
+		if(c == 'R') {
+			event = new Rest(duration, annotations);
+		} else {
+			final int number = phrase.next(tonic);
+			event = new Note(number, duration, false, annotations);
+			phrase.lastNote = event.slot;
+		}
+		phrase.handle(event);
 	}
 
 	@Override
@@ -252,12 +339,6 @@ public class MikiParser extends MusicBaseListener {
 	public void exitTuplet(final MusicParser.TupletContext ctx) {
 		messages.ctx = ctx;
 		phrase.endTuplet(ctx.getStop().getText());
-	}
-
-	@Override
-	public void enterNote(final MusicParser.NoteContext ctx) {
-		messages.ctx = ctx;
-		phrase.buildEvent(ctx);
 	}
 
 	// A N N O T A T I O N S . . .
@@ -318,10 +399,6 @@ public class MikiParser extends MusicBaseListener {
 	}
 
 	// P A R S I N G   E R R O R   H A N D L I N G . . .
-
-	private void error(final String message) {
-		messages.error(message);
-	}
 
 	@Override
 	public String toString() {

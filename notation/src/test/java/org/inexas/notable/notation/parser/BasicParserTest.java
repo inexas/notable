@@ -41,10 +41,10 @@ public class BasicParserTest {
 	@Test
 	void testStructure1() {
 		final Score score = toScore("C");
-		assertEquals(1, score.partMap.size());
-		final Part part = score.getFirstPart();
+		assertEquals(1, score.parts.size());
+		final Part part = score.parts.getFirst();
 		assertEquals("#IMPLICIT#", part.name);
-		assertEquals(1, part.phraseMap.size());
+		assertEquals(1, part.phrases.size());
 		final Phrase phrase = part.getFirstPhrase();
 		assertEquals("#IMPLICIT#", phrase.name);
 //		assertEquals("time 4/4\n", score.timeSignature.toString());
@@ -57,10 +57,10 @@ public class BasicParserTest {
 	void testStructure2() {
 		// Name the children
 		final Score score = toScore("part \"p1\" phrase \"f1\"");
-		assertEquals(1, score.partMap.size());
-		final Part part = score.getFirstPart();
+		assertEquals(1, score.parts.size());
+		final Part part = score.parts.getFirst();
 		assertEquals("p1", part.name);
-		assertEquals(1, part.phraseMap.size());
+		assertEquals(1, part.phrases.size());
 		final Phrase phrase = part.getFirstPhrase();
 		assertEquals("f1", phrase.name);
 	}
@@ -69,10 +69,10 @@ public class BasicParserTest {
 	void testStructure3() {
 		// Part:Phrase
 		final Score score = toScore("phrase \"p1:f1\"");
-		assertEquals(1, score.partMap.size());
-		final Part part = score.getFirstPart();
+		assertEquals(1, score.parts.size());
+		final Part part = score.parts.getFirst();
 		assertEquals("p1", part.name);
-		assertEquals(1, part.phraseMap.size());
+		assertEquals(1, part.phrases.size());
 		final Phrase phrase = part.getFirstPhrase();
 		assertEquals("f1", phrase.name);
 	}

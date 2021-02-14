@@ -4,7 +4,6 @@
 
 package org.inexas.notable.notation.model;
 
-import org.antlr.v4.runtime.*;
 import org.inexas.notable.notation.parser.*;
 import org.inexas.notable.util.*;
 
@@ -15,23 +14,22 @@ import java.util.regex.*;
 /**
  * A piano has two Phrases, one for each hand
  */
-public class Phrase extends Element {
+public class Phrase extends Element implements MappedList.Named {
 	private final Messages messages;
+	private final Score score;
 	public final Part part;
 	public final String name;
 	// Parsing state variables...
 	public final List<Measure> measures = new ArrayList<>();
 	private Measure measure;
-	private Clef clef;
 	// To collect Annotations for the current or next Event
-	private Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
-	private static final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
+	public Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
 	/**
 	 * Set by an o8 command
 	 */
 	private int absoluteOctave = -1;
 	private int relativeOctave;
-	private int lastNote;
+	public int lastNote;
 	/**
 	 * This is used to save the state of the duration when a Note group is being
 	 * processed. For example, in the miki "C4* [t C E G]8 A" the duration is defaulted
@@ -42,26 +40,23 @@ public class Phrase extends Element {
 	private Duration saveDuration;
 	private Venue venue;
 	private Venue saveVenue;
-	private Duration duration;
+	public Duration duration;
 
-	Phrase(final Messages messages, final String name, final Part part) {
-		this.messages = messages;
+	Phrase(final String name, final Part part) {
 		this.name = name;
 		this.part = part;
+		score = part.score;
+		messages = score.messages;
 		measure = new Measure(this, null);
 		measures.add(measure);
 		venue = measure;
-		final int denominator = part.score.getTimeSignature().denominator;
+		final int denominator = measure.getEffectiveTimeSignature().denominator;
 		duration = Duration.getByDenominator(denominator);
 	}
 
-	public Measure getOpenMeasure() {
-		// todo Is this check necessary
-		if(measure.isComplete()) {
-			measure = new Measure(this, measure);
-			measures.add(measure);
-		}
-		return measure;
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	private Measure newMeasure() {
@@ -188,85 +183,13 @@ public class Phrase extends Element {
 			tuplet.duration = duration;
 		}
 		final int total = measure.clicksSoFar + duration.clicks;
-		if(total > measure.size) {
+		if(total > measure.getSize()) {
 			warn("Tuplet duration to long, reduced");
-			final Duration[] durations = Duration.getByClicks(total - measure.size);
+			final Duration[] durations = Duration.getByClicks(total - measure.getSize());
 			duration = durations[durations.length - 1];
 		}
 		pop();
 		venue.add(tuplet);
-	}
-
-	public void buildEvent(final ParserRuleContext ctx) {
-		final Event event;
-
-		final String input = ctx.stop.getText();
-		// Split up the Event into its parts..
-		final Matcher matcher = Notes.notePattern.matcher(input);
-		if(!matcher.matches()) {
-			throw new RuntimeException("Recognizer/event parser mismatch: '" + input + '\'');
-		}
-
-		// Group 1: Tonic...
-		final String tonic = matcher.group(1);
-
-		// Group 2: Duration...
-		final Duration duration;
-		final String group2 = matcher.group(2);
-		if(group2 == null) {
-			duration = this.duration;
-		} else {
-			duration = Duration.getByMiki(group2);
-			if(duration.setDefault) {
-				this.duration = duration;
-			}
-		}
-
-		// Group 2: Accidental...
-		final String group3 = matcher.group(3);
-		if(group3 != null) {
-			switch(group3.charAt(0)) {
-				case 'b' -> annotate(Accidental.flat);
-				case 'n' -> annotate(Accidental.natural);
-				case '#' -> annotate(Accidental.sharp);
-				default -> throw new RuntimeException("Should never get here");
-			}
-		}
-
-		// Group 4: Articulation...
-		final String group5 = matcher.group(4);
-		if(group5 != null) {
-			final Articulation articulation = Articulation.getByMiki(group5);
-			annotate(articulation);
-		}
-
-		final char c = tonic.charAt(0);
-		final Map<Class<? extends Annotation>, Annotation> annotations;
-		if(annotationMap.isEmpty()) {
-			annotations = mtAnnotationMap;
-		} else {
-			annotations = annotationMap;
-			annotationMap = new HashMap<>();
-		}
-		if(c == 'R') {
-			event = new Rest(duration, annotations);
-		} else {
-			final int number = Note.next(
-					lastNote,
-					absoluteOctave, relativeOctave,
-					tonic);
-			event = new Note(number, duration, false, annotations);
-		}
-
-		if(event instanceof Note) {
-			lastNote = event.slot;
-		}
-
-		venue.add(event);
-
-		// Ready for next
-		relativeOctave = 0;
-		absoluteOctave = -1;
 	}
 
 	public void handle(final Barline barline) {
@@ -275,7 +198,6 @@ public class Phrase extends Element {
 			if(!measure.isComplete()) {
 				error("Barline before end of measure");
 			} else {
-				part.score.accountFor(measure);
 				measure = newMeasure();
 			}
 		}
@@ -296,8 +218,48 @@ public class Phrase extends Element {
 //
 	}
 
+	/**
+	 * Calculator that given the last note slot and a new tonic, calculates
+	 * the next slot.
+	 *
+	 * @param tonicText The tonic to move to, e.g. "C"
+	 * @return The note slot of the next note
+	 */
+	public int next(final String tonicText) {
+		final int result;
+
+		final int tonic = Notes.tonic(tonicText);
+
+		if(absoluteOctave >= 0) {
+			// Absolute octave has been specified
+			assert relativeOctave == 0;
+			assert absoluteOctave < 8 || absoluteOctave == 8 && tonic == 0;
+			result = absoluteOctave * Notes.BASE + tonic;
+		} else {
+			final Note.SearchSpace searchSpace = new Note.SearchSpace(lastNote);
+			if(relativeOctave != 0) {
+				searchSpace.moveAnchor(relativeOctave);
+			}
+			result = searchSpace.lookup(tonic);
+		}
+
+		return result;
+	}
+
+	public void handle(final Clef clef) {
+		measure.handle(clef);
+	}
+
+	public void handle(final TimeSignature timeSignature) {
+		measure.handle(timeSignature);
+	}
+
+	public void handle(final Cpm cpm) {
+		measure.handle(cpm);
+	}
+
 	public void handle(final KeySignature key) {
-		measure.setKeySignature(messages, key);
+		measure.setKeySignature(key);
 	}
 
 	public void annotate(final Annotation annotation) {
@@ -314,16 +276,7 @@ public class Phrase extends Element {
 		messages.error(message);
 	}
 
-
-	public void handle(final Clef clef) {
-		throw new ImplementMeException();
-	}
-
-	public void handle(final TimeSignature timeSignature) {
-		// todo measure??
-	}
-
-	public void handle(final Cpm cpm) {
-		measure.setCpm(messages, cpm.clicks);
+	public void handle(final Event event) {
+		measure.add(event);
 	}
 }

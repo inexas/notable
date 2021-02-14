@@ -13,19 +13,20 @@ import java.util.*;
  * Top level representation of a musical piece that contains a list of partMaps
  */
 public class Score extends Element implements Visited {
-	private final Messages messages;
-	public final Map<String, Part> partMap = new LinkedHashMap<>();
+	final Messages messages;
+	public final MappedList<Part> parts = new MappedList<>();
 	public String title;
 	private String subtitle;
 	public String composer;
 	public String header;
 	// Score defaults...
-	private Clef clef;
-	private KeySignature keySignature;
-	private TimeSignature timeSignature = TimeSignature.fourFour;
+	private Clef defaultClef;
+	private KeySignature defaultKeySignature;
+	private TimeSignature defaultTimeSignature;
 
 	public Score(final Messages messages) {
 		this.messages = messages;
+		getOrCreatePart("");
 	}
 
 	/**
@@ -36,16 +37,12 @@ public class Score extends Element implements Visited {
 	 * @return Non-null Part
 	 */
 	public Part getOrCreatePart(final String name) {
-		Part result = partMap.get(name);
+		Part result = parts.get(name);
 		if(result == null) {
 			result = new Part(name, this);
-			partMap.put(name, result);
+			parts.add(result);
 		}
 		return result;
-	}
-
-	public Part getFirstPart() {
-		return partMap.values().iterator().next();
 	}
 
 	/**
@@ -62,45 +59,119 @@ public class Score extends Element implements Visited {
 	 * phrases may do so. Values should also be set successively so jumping
 	 * indicates that something is wrong.
 	 */
-	private int[] timeline = new int[64];
-	private int cursor = 0;
-	private int defaultClicks = TimeSignature.fourFour.getMeasureSize();
-
-	void accountFor(final Measure measure) {
-		final int ordinal = measure.ordinal;
-		assert ordinal <= cursor;
-
-		if(ordinal == cursor) {
-			// A new measure is born. Check there's room at the inn...
-			if(cursor >= timeline.length) {
-				final int[] old = timeline;
-				timeline = new int[2 * old.length];
-				System.arraycopy(old, 0, timeline, 0, old.length);
-			}
-
-			// Assume the default
-			final int clicks = defaultClicks;
-
-			// Does this measure have a new time signature?
-			final TimeSignature timeSignature = measure.getTimeSignature();
-			if(timeSignature != null) {
-				// A new time signature
-				defaultClicks = timeSignature.getMeasureSize();
-			}
-
-			// Does this measure have a CPM?
-			final int cpm = measure.getCpm();
-			if(cpm > 0) {
-				timeline[cursor] = cpm;
-			}
-
-			timeline[cursor++] = clicks;
-		}
+	static class Time {
+		TimeSignature timeSignature;
+		int cpm;
+		int actual;
 	}
 
+	// T I M E L I N E . . .
+
+	private final List<Time> timeline = new ArrayList<>();
+
 	public int[] getTimeLine() {
-		final int[] result = new int[cursor];
-		System.arraycopy(timeline, 0, result, 0, cursor);
+		final int size = timeline.size();
+		final int[] result = new int[size];
+		for(int i = 0; i < size; i++) {
+			final Time time = timeline.get(i);
+			result[i] = time.actual;
+		}
+		return result;
+	}
+
+	int report(final int ordinal, final Cpm cpm) {
+		// We can only change the latest measure...
+		final int last = timeline.size() - 1;
+		final Time time = timeline.get(ordinal);
+		if(ordinal == last) {
+			if(time.cpm == 0) {
+				time.actual = time.cpm = cpm.clicks;
+			} else {
+				error("Attempt to redefine CPM");
+			}
+		} else {
+			error("Can't change size of measure once it has been fixed elsewhere");
+		}
+		return time.actual;
+	}
+
+	int report(final int ordinal, final TimeSignature timeSignature) {
+		// We can only change the latest measure...
+		final int last = timeline.size() - 1;
+		final Time time = timeline.get(ordinal);
+		if(ordinal == last) {
+			if(time.timeSignature == null) {
+				time.timeSignature = timeSignature;
+				if(time.cpm == 0) {
+					time.actual = timeSignature.getMeasureSize();
+				}
+			} else {
+				error("Attempt to redefine time signature");
+			}
+		} else {
+			error("Can't change size of measure once it has been fixed elsewhere");
+		}
+		return time.actual;
+	}
+
+	/**
+	 * Get the size of the measure at the given ordinal. If the ordinal is
+	 * beyond the end of the time line a new record is created.
+	 *
+	 * @param ordinal The ith measure that we're interested in
+	 * @return The size of the measure at the given ordinal
+	 */
+	int getMeasureSize(final int ordinal) {
+		final int result;
+
+		assert ordinal >= 0 && ordinal <= timeline.size() : "Ordinal: " + ordinal;
+
+		final int count = timeline.size();
+		if(ordinal == count) {
+			// New measure...
+			int clicks = 0;
+			for(int i = count - 1; i >= 0; i--) {
+				final Time time = timeline.get(i);
+				if(time.timeSignature != null) {
+					clicks = time.timeSignature.getMeasureSize();
+					break;
+				}
+			}
+			if(clicks == 0) {
+				// Time signature has not been explicitly set...
+				clicks = defaultTimeSignature == null ?
+						TimeSignature.fourFour.getMeasureSize()
+						: defaultTimeSignature.getMeasureSize();
+			}
+			final Time time = new Time();
+			result = time.actual = clicks;
+			timeline.add(time);
+		} else {
+			// Existing measure
+			result = timeline.get(ordinal).actual;
+		}
+		return result;
+	}
+
+	public TimeSignature getTimeSignature(final int ordinal) {
+		assert ordinal >= 0 && timeline.size() > ordinal;
+		return timeline.get(ordinal).timeSignature;
+	}
+
+	TimeSignature getEffectiveTimeSignature(final int ordinal) {
+		TimeSignature result = null;
+
+		for(int i = ordinal; i >= 0; i--) {
+			final Time time = timeline.get(i);
+			if(time.timeSignature != null) {
+				result = time.timeSignature;
+				break;
+			}
+		}
+		if(result == null) {
+			result = getDefaultTimeSignature();
+		}
+
 		return result;
 	}
 
@@ -148,39 +219,55 @@ public class Score extends Element implements Visited {
 		}
 	}
 
-	public Clef getClef() {
-		return clef == null ? Clef.treble : clef;
+	Clef getDefaultClef() {
+		return defaultClef == null ? Clef.treble : defaultClef;
 	}
 
-	public void handle(final Clef clef) {
-		if(this.clef != null) {
+	/**
+	 * Set the default clef for the score. The starting default
+	 * is 'treble' but calling this overrides it.
+	 *
+	 * @param clef The default clef for the score
+	 */
+	public void setDefaultClef(final Clef clef) {
+		if(defaultClef != null) {
 			error("Default clef already set for the score");
+		} else if(clef.equals(Clef.treble)) {
+			warn("The default clef is already 'treble', you can omit 'clef treble'");
 		} else {
-			this.clef = clef;
+			defaultClef = clef;
 		}
 	}
 
-	public KeySignature getKeySignature() {
-		return keySignature == null ? KeySignature.C : keySignature;
+	KeySignature getDefaultKeySignature() {
+		return defaultKeySignature == null ? KeySignature.C : defaultKeySignature;
 	}
 
-	public void setKeySignature(final KeySignature keySignature) {
-		if(getKeySignature() != null) {
+	/**
+	 * Set the default key signature for the score. The starting default
+	 * is C but calling this overrides it.
+	 *
+	 * @param keySignature The default key signature for the score
+	 */
+	public void setDefaultKeySignature(final KeySignature keySignature) {
+		if(defaultKeySignature != null) {
 			error("Default key signature already set for this score");
+		} else if(keySignature.equals(KeySignature.C)) {
+			warn("The default key signature is already C, you can omit 'key C'");
 		}
-		this.keySignature = keySignature;
+		defaultKeySignature = keySignature;
 	}
 
-	public TimeSignature getTimeSignature() {
-		return timeSignature == null ? TimeSignature.fourFour : timeSignature;
-	}
-
-	public void setTimeSignature(final TimeSignature timeSignature) {
-		if(timeSignature != null) {
+	public void setDefaultTimeSignature(final TimeSignature timeSignature) {
+		if(defaultTimeSignature != null) {
 			error("Default time signature already set for this score");
 		} else {
-			this.timeSignature = timeSignature;
+			defaultTimeSignature = timeSignature;
 		}
+	}
+
+	private TimeSignature getDefaultTimeSignature() {
+		return defaultTimeSignature == null ? TimeSignature.fourFour : defaultTimeSignature;
 	}
 
 	private void warn(final String message) {
@@ -194,8 +281,9 @@ public class Score extends Element implements Visited {
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.enter(this);
-		for(final Part part : partMap.values()) {
-			part.accept(visitor);
+		final int size = parts.size();
+		for(int i = 0; i < parts.size(); i++) {
+			parts.get(i).accept(visitor);
 		}
 		visitor.exit(this);
 	}
