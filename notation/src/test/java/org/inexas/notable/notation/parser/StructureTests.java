@@ -100,11 +100,25 @@ public class StructureTests {
 				subtitle "Subtitle"
 				copyright "Copyright" """;
 		final Score score = toScore(toTest);
-		assertEquals("Title", toScore(toTest).title);
-		assertEquals("Subtitle", toScore(toTest).subtitle);
-		assertEquals("Composer", toScore(toTest).composer);
-		assertEquals("Header", toScore(toTest).header);
-		assertEquals("Copyright", toScore(toTest).copyright);
+		assertEquals("Title", score.title);
+		assertEquals("Subtitle", score.subtitle);
+		assertEquals("Composer", score.composer);
+		assertEquals("Header", score.header);
+		assertEquals("Copyright", score.copyright);
+	}
+
+	@Test
+	void defaults() {
+		final String toTest = """
+				clef bass
+				key D
+				time 3/4
+				C C C C |
+				""";
+		final Score score = toScore(toTest);
+		assertEquals(Clef.bass, score.defaultClef);
+		assertEquals(KeySignature.get("D"), score.defaultKeySignature);
+		assertEquals(new TimeSignature(3, 4), score.defaultTimeSignature);
 	}
 
 	@Test

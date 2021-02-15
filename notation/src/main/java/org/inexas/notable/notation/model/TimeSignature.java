@@ -22,6 +22,13 @@ public class TimeSignature extends Modifier {
 		isCompound = numerator % 3 == 0;
 	}
 
+	public TimeSignature(final Fraction fraction) {
+		numerator = fraction.numerator;
+		denominator = fraction.denominator;
+		name = fraction.toString();
+		isCompound = numerator % 3 == 0;
+	}
+
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
@@ -36,5 +43,28 @@ public class TimeSignature extends Modifier {
 
 	Duration getDefaultDuration() {
 		return Duration.getByDenominator(denominator);
+	}
+
+	@Override
+	public int hashCode() {
+		return numerator << 8 | denominator;
+	}
+
+	@Override
+	public boolean equals(final Object object) {
+		final boolean result;
+
+		if(this == object) {
+			result = true;
+		} else {
+			if(object == null || getClass() != object.getClass()) {
+				result = false;
+			} else {
+				final TimeSignature rhs = (TimeSignature) object;
+				result = numerator == rhs.numerator && denominator == rhs.denominator;
+			}
+		}
+
+		return result;
 	}
 }

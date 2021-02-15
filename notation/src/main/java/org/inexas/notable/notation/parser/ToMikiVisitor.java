@@ -38,7 +38,7 @@ public class ToMikiVisitor implements Visitor {
 			visit(keySignature);
 		}
 		final TimeSignature timeSignature = score.defaultTimeSignature;
-		if(TimeSignature.fourFour.equals(timeSignature)) {
+		if(!TimeSignature.fourFour.equals(timeSignature)) {
 			visit(timeSignature);
 		}
 
@@ -143,7 +143,9 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final TimeSignature timeSignature) {
-		writeUnquoted("time", timeSignature.name);
+		if(timeSignature != null) {
+			writeUnquoted("time", timeSignature.name);
+		}
 	}
 
 	@Override

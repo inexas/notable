@@ -203,13 +203,11 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterTime(final MusicParser.TimeContext ctx) {
 		messages.ctx = ctx;
-		// time: TIME ( COUNT SLASH COUNT | COMMON | CUT ) ;
+		// time: TIME ( FRACTION | COMMON | CUT ) ;
 		final int count = ctx.getChildCount();
 		final TimeSignature timeSignature;
-		if(count == 4) {
-			timeSignature = new TimeSignature(
-					Integer.parseInt(ctx.getChild(1).getText()),
-					Integer.parseInt(ctx.getChild(3).getText()));
+		if(count == 2) {
+			timeSignature = new TimeSignature(new Fraction(ctx.getChild(1).getText()));
 		} else {
 			timeSignature = ctx.getStop().getType() == MusicParser.CUT ?
 					TimeSignature.CUT : TimeSignature.COMMON;
