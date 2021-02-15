@@ -50,6 +50,7 @@ public class Measure extends Element implements Venue {
 			ordinal = pic.ordinal + 1;
 		}
 		// Force Score to register the new Measure
+		// todo Dual purpose
 		score.getMeasureSize(0);
 	}
 
@@ -90,8 +91,16 @@ public class Measure extends Element implements Venue {
 	 * @return The non-null clef that is effective for this measure
 	 * @see #getClef()
 	 */
-	private Clef getEffectiveClef() {
-		return pic == null ? score.getDefaultClef() : pic.getEffectiveClef();
+	public Clef getEffectiveClef() {
+		final Clef result;
+		if(clef != null) {
+			result = clef;
+		} else if(pic == null) {
+			result = score.getDefaultClef();
+		} else {
+			result = pic.getEffectiveClef();
+		}
+		return result;
 	}
 
 	void setKeySignature(final KeySignature keySignature) {
@@ -118,7 +127,7 @@ public class Measure extends Element implements Venue {
 	/**
 	 * @return The effective key signature for this measure
 	 */
-	private KeySignature getEffectiveKeySignature() {
+	public KeySignature getEffectiveKeySignature() {
 		final KeySignature result;
 		if(keySignature == null) {
 			result = pic == null ? score.getDefaultKeySignature() : pic.getKeySignature();

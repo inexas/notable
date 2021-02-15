@@ -119,7 +119,7 @@ public class Score extends Element implements Visited {
 	 * Get the size of the measure at the given ordinal. If the ordinal is
 	 * beyond the end of the time line a new record is created.
 	 *
-	 * @param ordinal The ith measure that we're interested in
+	 * @param ordinal The i'th measure that we're interested in
 	 * @return The size of the measure at the given ordinal
 	 */
 	int getMeasureSize(final int ordinal) {

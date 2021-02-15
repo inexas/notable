@@ -108,7 +108,7 @@ public class StructureTests {
 	}
 
 	@Test
-	void defaults() {
+	void defaults1() {
 		final String toTest = """
 				clef bass
 				key D
@@ -119,6 +119,35 @@ public class StructureTests {
 		assertEquals(Clef.bass, score.defaultClef);
 		assertEquals(KeySignature.get("D"), score.defaultKeySignature);
 		assertEquals(new TimeSignature(3, 4), score.defaultTimeSignature);
+	}
+
+	@Test
+	void defaults2() {
+		final String toTest = """
+				clef bass
+				key D
+				phrase ""
+				key C
+				clef treble
+				C C C C |
+				phrase "Bass"
+				C C C C |
+				""";
+		final Score score = toScore(toTest);
+		assertEquals(Clef.bass, score.defaultClef);
+		assertEquals(KeySignature.get("D"), score.defaultKeySignature);
+
+		Measure measure = score.parts.get("").phrases.get("").measures.get(0);
+		assertEquals(Clef.treble, measure.getClef());
+		assertEquals(Clef.treble, measure.getEffectiveClef());
+		assertEquals(KeySignature.C, measure.getKeySignature());
+		assertEquals(KeySignature.C, measure.getEffectiveKeySignature());
+
+		measure = score.parts.get("").phrases.get("Bass").measures.get(0);
+		assertNull(measure.getClef());
+		assertEquals(Clef.bass, measure.getEffectiveClef());
+		assertNull(measure.getKeySignature());
+		assertEquals(KeySignature.get("D"), measure.getEffectiveKeySignature());
 	}
 
 	@Test
