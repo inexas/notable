@@ -47,11 +47,8 @@ public class Phrase extends Element implements MappedList.Named {
 		this.part = part;
 		score = part.score;
 		messages = score.messages;
-		measure = new Measure(this, null);
-		measures.add(measure);
-		venue = measure;
-		final int denominator = measure.getEffectiveTimeSignature().denominator;
-		duration = Duration.getByDenominator(denominator);
+		newMeasure();
+		duration = measure.getEffectiveTimeSignature().getDefaultDuration();
 	}
 
 	@Override
@@ -59,10 +56,16 @@ public class Phrase extends Element implements MappedList.Named {
 		return name;
 	}
 
-	private Measure newMeasure() {
-		final Measure result = new Measure(this, measures.get(measures.size() - 1));
-		measures.add(result);
-		return result;
+	private void newMeasure() {
+		final int count = measures.size();
+		final Measure pic = count == 0 ? null : measures.get(count - 1);
+		measure = new Measure(this, pic);
+		measures.add(measure);
+		venue = measure;
+	}
+
+	public int getActiveMeasureCount() {
+		return measure.isActive ? measure.ordinal + 1 : measure.ordinal;
 	}
 
 	private void push(final Venue venue) {
@@ -76,15 +79,6 @@ public class Phrase extends Element implements MappedList.Named {
 		assert saveVenue != null;
 		venue = saveVenue;
 		duration = saveDuration;
-	}
-
-	@Override
-	public void accept(final Visitor visitor) {
-		visitor.enter(this);
-		for(final Measure measure : measures) {
-			measure.accept(visitor);
-		}
-		visitor.exit(this);
 	}
 
 	public void setRelativeOctave(final int change) {
@@ -198,7 +192,7 @@ public class Phrase extends Element implements MappedList.Named {
 			if(!measure.isComplete()) {
 				error("Barline before end of measure");
 			} else {
-				measure = newMeasure();
+				newMeasure();
 			}
 		}
 		//		messages.ctx = ctx;
@@ -278,5 +272,16 @@ public class Phrase extends Element implements MappedList.Named {
 
 	public void handle(final Event event) {
 		measure.add(event);
+	}
+
+	@Override
+	public void accept(final Visitor visitor) {
+		visitor.enter(this);
+		for(final Measure measure : measures) {
+			if(measure.isActive) {
+				measure.accept(visitor);
+			}
+		}
+		visitor.exit(this);
 	}
 }

@@ -34,7 +34,7 @@ public class MappedListTest {
 
 	@Test
 	void get() {
-		final MappedList<Example> ml = new MappedList<>();
+		MappedList<Example> ml = new MappedList<>();
 		ml.add(new Example("0"));
 		ml.add(new Example("1"));
 		ml.add(new Example("2"));
@@ -57,6 +57,10 @@ public class MappedListTest {
 		assertEquals(2, ml.indexOf("2"));
 		assertEquals(3, ml.indexOf(""));
 		assertEquals(4, ml.indexOf(null));
+
+		ml = new MappedList<>();
+		ml.add(new Example(""));
+		assertEquals(0, ml.indexOf(""));
 	}
 
 	@Test
@@ -65,8 +69,6 @@ public class MappedListTest {
 		assertThrows(RuntimeException.class, ml::getFirst);
 		assertThrows(RuntimeException.class, ml::getLast);
 		assertThrows(RuntimeException.class, () -> ml.get(0));
-		assertThrows(RuntimeException.class, () -> ml.get(""));
-		assertThrows(RuntimeException.class, () -> ml.get(null));
 
 		ml.add(new Example("0"));
 		assertEquals("0", ml.get(0).getName());
@@ -95,5 +97,33 @@ public class MappedListTest {
 			count++;
 		}
 		assertEquals(3, count);
+	}
+
+	private int count = 0;
+
+	@Test
+	void forEach() {
+		final MappedList<Example> ml = new MappedList<>();
+		ml.add(new Example("0"));
+		ml.add(new Example("1"));
+		ml.add(new Example("2"));
+		ml.forEach((example) -> {
+			count++;
+		});
+		assertEquals(3, count);
+	}
+
+	@Test
+	void missing() {
+		final MappedList<Example> ml = new MappedList<>();
+		assertThrows(RuntimeException.class, () -> ml.get(0));
+		assertThrows(RuntimeException.class, () -> ml.getFirst());
+		assertThrows(RuntimeException.class, () -> ml.getLast());
+		assertNull(ml.get(null));
+		assertNull(ml.get(""));
+
+		ml.add(new Example("0"));
+		assertNull(ml.get(null));
+		assertNull(ml.get(""));
 	}
 }

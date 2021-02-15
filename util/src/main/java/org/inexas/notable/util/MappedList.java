@@ -48,7 +48,7 @@ public class MappedList<V extends MappedList.Named> implements Iterable<V> {
 
 	public V getFirst() {
 		if(cursor == 0) {
-			throw new RuntimeException("MappedList is empty");
+			throw new RuntimeException("Empty: MappedList.getFirst()");
 		}
 		//noinspection unchecked
 		return (V) elements[0];
@@ -56,7 +56,7 @@ public class MappedList<V extends MappedList.Named> implements Iterable<V> {
 
 	public V get(final int index) {
 		if(index >= cursor) {
-			throw new RuntimeException("Out of range");
+			throw new RuntimeException("Out of range: MappedList.get(" + index + ')');
 		}
 		//noinspection unchecked
 		return (V) elements[index];
@@ -64,7 +64,7 @@ public class MappedList<V extends MappedList.Named> implements Iterable<V> {
 
 	public V getLast() {
 		if(cursor == 0) {
-			throw new RuntimeException("MappedList is empty");
+			throw new RuntimeException("Empty: MappedList.getLast()");
 		}
 		//noinspection unchecked
 		return (V) elements[cursor - 1];
@@ -89,21 +89,22 @@ public class MappedList<V extends MappedList.Named> implements Iterable<V> {
 	public V get(final String name) {
 		final V result;
 		if(cursor == 0) {
-			throw new RuntimeException("MappedList is empty");
-		}
-		final int index = indexOf(name);
-		if(index < 0) {
 			result = null;
 		} else {
-			//noinspection unchecked
-			result = (V) elements[index];
+			final int index = indexOf(name);
+			if(index < 0) {
+				result = null;
+			} else {
+				//noinspection unchecked
+				result = (V) elements[index];
+			}
 		}
 		return result;
 	}
 
 	public void add(final V element) {
 		if(indexOf(element.getName()) >= 0) {
-			throw new RuntimeException("Duplicate element: " + element.getName());
+			throw new RuntimeException("Duplicate element, MappedList(" + element.getName() + ')');
 		}
 
 		ensureCapacity(cursor + 1);

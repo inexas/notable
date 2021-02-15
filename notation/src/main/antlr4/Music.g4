@@ -10,9 +10,10 @@ score: command* EOF ;
 
 command
 	:	title		// Header...
-	|	sub
+	|	subtitle
 	|	composer
 	|	header
+	|	copyright
 	|	part		// Structure...
 	|	phrase
 	|	clef
@@ -32,11 +33,13 @@ command
 
 title: TITLE STRING_LITERAL ;
 
-sub: SUB STRING_LITERAL ;
+subtitle: SUBTITLE STRING_LITERAL ;
 
 composer: COMPOSER STRING_LITERAL ;
 
 header: HEADER STRING_LITERAL ;
+
+copyright: COPYRIGHT STRING_LITERAL ;
 
 part: PART STRING_LITERAL ;
 
@@ -108,11 +111,13 @@ LINE_COMMENT: '//' ~[\r\n]* -> channel(HIDDEN) ;
 
 TITLE: 'title' ;
 
-SUB: 'sub' ;
+SUBTITLE: 'subtitle' ;
 
 COMPOSER: 'composer' ;
 
 HEADER: 'header' ;
+
+COPYRIGHT: 'copyright' ;
 
 PART: 'part' ;
 

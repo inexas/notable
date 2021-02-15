@@ -5,7 +5,7 @@ import org.inexas.notable.notation.model.*;
 public class ScoreCheckVisitor implements Visitor {
 	private final Messages messages;
 	private int[] timeLine;
-	private int partCount, phraseCount, totalPhraseCount, measureCount;
+	private int measureCount;
 	private String partName, phraseName;
 
 	ScoreCheckVisitor(final Messages messages) {
@@ -14,8 +14,17 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void enter(final Score score) {
-		timeLine = score.getTimeLine();
-		partCount = score.parts.size();
+		// Find number of measures defined...
+		measureCount = 0;
+		for(final Part part : score.parts) {
+			for(final Phrase phrase : part.phrases) {
+				final int count = phrase.getActiveMeasureCount();
+				if(count > measureCount) {
+					measureCount = count;
+				}
+			}
+		}
+		timeLine = score.getTimeLine(measureCount);
 	}
 
 	@Override
@@ -25,8 +34,6 @@ public class ScoreCheckVisitor implements Visitor {
 	@Override
 	public void enter(final Part part) {
 		partName = part.name.length() == 0 ? "(Anonymous)" : part.name;
-		phraseCount = part.phrases.size();
-		totalPhraseCount += phraseCount;
 	}
 
 	@Override
@@ -37,8 +44,7 @@ public class ScoreCheckVisitor implements Visitor {
 	public void enter(final Phrase phrase) {
 		phraseName = phrase.name.length() == 0 ? "(Anonymous)" : phrase.name;
 
-		for(int i = 0; i < timeLine.length; i++) {
-			final int size = timeLine[i];
+		for(int i = 0; i < measureCount; i++) {
 			final Measure measure = phrase.measures.get(i);
 			assert measure.getSize() == timeLine[i] : "Coding error";
 			if(!measure.isComplete()) {

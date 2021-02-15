@@ -21,7 +21,7 @@ import java.util.regex.*;
  */
 public class MikiParser extends MusicBaseListener {
 	@SuppressWarnings("FieldCanBeLocal")
-	private final boolean DEBUG = true;
+	private final boolean DEBUG = false;
 	public final Messages messages;
 	private static final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
 
@@ -138,7 +138,7 @@ public class MikiParser extends MusicBaseListener {
 	}
 
 	@Override
-	public void enterSub(final MusicParser.SubContext ctx) {
+	public void enterSubtitle(final MusicParser.SubtitleContext ctx) {
 		messages.ctx = ctx;
 		score.setSubtitle(ctx.getStop().getText());
 	}
@@ -147,6 +147,12 @@ public class MikiParser extends MusicBaseListener {
 	public void enterComposer(final MusicParser.ComposerContext ctx) {
 		messages.ctx = ctx;
 		score.setComposer(ctx.getStop().getText());
+	}
+
+	@Override
+	public void enterCopyright(final MusicParser.CopyrightContext ctx) {
+		messages.ctx = ctx;
+		score.setCopyright(ctx.getStop().getText());
 	}
 
 	@Override

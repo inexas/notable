@@ -16,17 +16,17 @@ public class Score extends Element implements Visited {
 	final Messages messages;
 	public final MappedList<Part> parts = new MappedList<>();
 	public String title;
-	private String subtitle;
+	public String subtitle;
 	public String composer;
 	public String header;
+	public String copyright;
 	// Score defaults...
-	private Clef defaultClef;
-	private KeySignature defaultKeySignature;
-	private TimeSignature defaultTimeSignature;
+	public Clef defaultClef;
+	public KeySignature defaultKeySignature;
+	public TimeSignature defaultTimeSignature;
 
 	public Score(final Messages messages) {
 		this.messages = messages;
-		getOrCreatePart("");
 	}
 
 	/**
@@ -69,10 +69,11 @@ public class Score extends Element implements Visited {
 
 	private final List<Time> timeline = new ArrayList<>();
 
-	public int[] getTimeLine() {
-		final int size = timeline.size();
-		final int[] result = new int[size];
-		for(int i = 0; i < size; i++) {
+	public int[] getTimeLine(final int count) {
+		assert count == timeline.size() || count == timeline.size() - 1;
+
+		final int[] result = new int[count];
+		for(int i = 0; i < count; i++) {
 			final Time time = timeline.get(i);
 			result[i] = time.actual;
 		}
@@ -181,15 +182,19 @@ public class Score extends Element implements Visited {
 
 	public void setTitle(final String title) {
 		if(this.title != null) {
-			warn("Score title already set, ignoring redefinition");
+			warn("Title already set, ignoring redefinition");
 		} else {
 			this.title = StringU.stripQuotesTrim(title);
 		}
 	}
 
+	public String getSubtitle() {
+		return subtitle;
+	}
+
 	public void setSubtitle(final String subtitle) {
 		if(this.subtitle != null) {
-			warn("Score subtitle already set, ignoring redefinition");
+			warn("Subtitle already set, ignoring redefinition");
 		} else {
 			this.subtitle = StringU.stripQuotesTrim(subtitle);
 		}
@@ -216,6 +221,18 @@ public class Score extends Element implements Visited {
 			warn("Header already set, ignoring redefinition");
 		} else {
 			this.header = StringU.stripQuotesTrim(header);
+		}
+	}
+
+	public String getCopyright() {
+		return copyright;
+	}
+
+	public void setCopyright(final String copyright) {
+		if(this.copyright != null) {
+			warn("Copyright already set, ignoring redefinition");
+		} else {
+			this.copyright = StringU.stripQuotesTrim(copyright);
 		}
 	}
 

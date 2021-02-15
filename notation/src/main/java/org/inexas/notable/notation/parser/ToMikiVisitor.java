@@ -22,44 +22,41 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void enter(final Score score) {
-
-		if(score.title != null) {
-			writeQuoted("title", score.title);
-		}
-
-		if(score.composer != null) {
-			writeQuoted("composer", score.composer);
-		}
+		writeQuoted("title", score.title);
+		writeQuoted("subtitle", score.subtitle);
+		writeQuoted("composer", score.composer);
 		writeQuoted("header", score.header);
+		writeQuoted("copyright", score.copyright);
 
 		paragraph();
 
-//		final KeySignature keySignature = score.key;
-//		if(keySignature != KeySignature.C) {
-//			visit(keySignature);
-//		}
-//
-//		final TimeSignature timeSignature = score.timeSignature;
-//		if(timeSignature != TimeSignature.COMMON) {
-//			visit(timeSignature);
-//		}
-//
-//		final Cpm pickupMeasure = score.pickupMeasure;
-//		if(pickupMeasure != null) {
-//			visit(pickupMeasure);
-//		}
-//
-//		final Tempo tempo = score.tempo;
-//		if(tempo != Tempo.DEFAULT) {
-//			visit(tempo);
-//		}
+		final Clef clef = score.defaultClef;
+		if(clef != null && !Clef.treble.equals(clef)) {
+			visit(clef);
+		}
+		final KeySignature keySignature = score.defaultKeySignature;
+		if(keySignature != null && !KeySignature.C.equals(keySignature)) {
+			visit(keySignature);
+		}
+		final TimeSignature timeSignature = score.defaultTimeSignature;
+		if(timeSignature != null && TimeSignature.fourFour.equals(timeSignature)) {
+			visit(timeSignature);
+		}
 
 		paragraph();
 	}
 
 	@Override
 	public void exit(final Score score) {
-		// Nothing on exit
+		// Trim trailing whitespace
+		int length = sb.length();
+		while(length > 0 && Character.isWhitespace(sb.charAt(length - 1))) {
+			length--;
+		}
+		sb.setLength(length);
+		if(length > 0) {
+			sb.append('\n');
+		}
 	}
 
 	@Override
@@ -78,9 +75,7 @@ public class ToMikiVisitor implements Visitor {
 	@Override
 	public void enter(final Phrase phrase) {
 		// fixme
-		currentDuration = Duration.getByDenominator(
-				TimeSignature.fourFour.denominator);
-
+		currentDuration = Duration.getByDenominator(TimeSignature.fourFour.denominator);
 		if(phrase.name.length() > 0) {
 			paragraph();
 			sb.append("phrase ");
