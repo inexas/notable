@@ -88,14 +88,12 @@ public class MikiParser extends MusicBaseListener {
 		// Get existing or create a new Part...
 		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
 		final Part part = score.getOrCreatePart(name);
-		if(!this.part.equals(part)) {
-			/*
-			We don't know for sure which phrase is required so we'll select
-			the first named phrase within the part if there is one otherwise
-			the anonymous phrase
-			 */
-			final int count = part.phrases.size();
-			phrase = count == 1 ? part.phrases.getFirst() : part.phrases.get(1);
+		if(this.part.equals(part)) {
+			messages.warn("Part already selected: " + name);
+		} else {
+			// Change of part
+			this.part = part;
+			phrase = null;
 		}
 		settingDefaults = false;
 	}

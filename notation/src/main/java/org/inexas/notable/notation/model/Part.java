@@ -23,7 +23,19 @@ public class Part extends Element implements Visited, MappedList.Named {
 
 	@Override
 	public String getName() {
-		return null;
+		return name;
+	}
+
+	public boolean isActive() {
+		final boolean result;
+
+		if(name.length() == 0) {
+			result = phrases.size() > 1 || phrases.getFirst().isActive();
+		} else {
+			result = true;
+		}
+
+		return result;
 	}
 
 	/**

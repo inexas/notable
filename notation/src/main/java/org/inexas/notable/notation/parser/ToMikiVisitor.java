@@ -5,7 +5,6 @@
 package org.inexas.notable.notation.parser;
 
 import org.inexas.notable.notation.model.*;
-import org.inexas.notable.util.*;
 
 import java.util.*;
 
@@ -39,7 +38,7 @@ public class ToMikiVisitor implements Visitor {
 			visit(keySignature);
 		}
 		final TimeSignature timeSignature = score.defaultTimeSignature;
-		if(timeSignature != null && TimeSignature.fourFour.equals(timeSignature)) {
+		if(TimeSignature.fourFour.equals(timeSignature)) {
 			visit(timeSignature);
 		}
 
@@ -143,12 +142,6 @@ public class ToMikiVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(final Staff staff) {
-		throw new ImplementMeException();
-//		writeUnquoted("staff", staff.type.name());
-	}
-
-	@Override
 	public void visit(final TimeSignature timeSignature) {
 		writeUnquoted("time", timeSignature.name);
 	}
@@ -165,6 +158,11 @@ public class ToMikiVisitor implements Visitor {
 			sb.append("key ");
 			sb.append(keySignature.name);
 		}
+	}
+
+	@Override
+	public void visit(final Clef clef) {
+		writeUnquoted("clef", clef.type.name());
 	}
 
 	@Override
@@ -305,11 +303,6 @@ public class ToMikiVisitor implements Visitor {
 		space();
 		sb.append('(');
 		beamCount = beam.count;
-	}
-
-	@Override
-	public void visit(final Clef clef) {
-		throw new ImplementMeException();
 	}
 
 	@Override

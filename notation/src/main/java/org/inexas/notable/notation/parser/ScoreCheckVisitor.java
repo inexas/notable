@@ -33,7 +33,9 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void enter(final Part part) {
-		partName = part.name.length() == 0 ? "(Anonymous)" : part.name;
+		if(part.isActive()) {
+			partName = part.name.length() == 0 ? "(Anonymous)" : part.name;
+		}
 	}
 
 	@Override
@@ -42,14 +44,16 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void enter(final Phrase phrase) {
-		phraseName = phrase.name.length() == 0 ? "(Anonymous)" : phrase.name;
+		if(phrase.isActive()) {
+			phraseName = phrase.name.length() == 0 ? "(Anonymous)" : phrase.name;
 
-		for(int i = 0; i < measureCount; i++) {
-			final Measure measure = phrase.measures.get(i);
-			assert measure.getSize() == timeLine[i] : "Coding error";
-			if(!measure.isComplete()) {
-				messages.error(partName + '/' + phraseName + '-' + i + ": "
-						+ "Measure not complete");
+			for(int i = 0; i < measureCount; i++) {
+				final Measure measure = phrase.measures.get(i);
+				assert measure.getSize() == timeLine[i] : "Coding error";
+				if(!measure.isComplete()) {
+					messages.error(partName + '/' + phraseName + '-' + i + ": "
+							+ "Measure not complete");
+				}
 			}
 		}
 	}
@@ -85,11 +89,6 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void visit(final Rest rest) {
-
-	}
-
-	@Override
-	public void visit(final Staff staff) {
 
 	}
 

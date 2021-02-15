@@ -46,6 +46,7 @@ public class Clef extends Modifier {
 	}
 
 	public static Clef treble = new Clef(Type.treble);
+	public static Clef bass = new Clef(Type.bass);
 	public final Type type;
 
 	public Clef(final Type type) {
@@ -63,5 +64,33 @@ public class Clef extends Modifier {
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public int hashCode() {
+		return type.hashCode();
+	}
+
+	@Override
+	public boolean equals(final Object object) {
+		final boolean result;
+
+		if(this == object) {
+			result = true;
+		} else {
+			if(object == null || getClass() != object.getClass()) {
+				result = false;
+			} else {
+				final Clef rhs = (Clef) object;
+				result = type.equals(rhs.type);
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return type.name();
 	}
 }

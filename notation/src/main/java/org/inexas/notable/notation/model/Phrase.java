@@ -56,6 +56,10 @@ public class Phrase extends Element implements MappedList.Named {
 		return name;
 	}
 
+	public boolean isActive() {
+		return name.length() > 0 || measures.size() > 1 || measure.isActive;
+	}
+
 	private void newMeasure() {
 		final int count = measures.size();
 		final Measure pic = count == 0 ? null : measures.get(count - 1);
@@ -283,5 +287,33 @@ public class Phrase extends Element implements MappedList.Named {
 			}
 		}
 		visitor.exit(this);
+	}
+
+	@Override
+	public int hashCode() {
+		return part.hashCode() ^ name.hashCode();
+	}
+
+	@Override
+	public boolean equals(final Object object) {
+		final boolean result;
+
+		if(this == object) {
+			result = true;
+		} else {
+			if(object == null || getClass() != object.getClass()) {
+				result = false;
+			} else {
+				final Phrase rhs = (Phrase) object;
+				result = part.equals(rhs.part) && name.equals(rhs.name);
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return '{' + part.name + '/' + name + '}';
 	}
 }

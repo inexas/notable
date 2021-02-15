@@ -1,6 +1,7 @@
 package org.inexas.notable.notation.parser;
 
 import org.inexas.notable.notation.model.*;
+import org.inexas.notable.util.*;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -90,15 +91,65 @@ public class StructureTests {
 		assertEquals("copyright \"0\"\n", toMiki("copyright \"0\""));
 	}
 
-//	@Test
-//	void testComposer() {
-//		assertEquals("composer \"abc\"\n\n", toMiki("composer \"abc\""));
-//	}
-//
-//	@Test
-//	void testHeader() {
-//		assertEquals("header \"a\nb\"\n\n", toMiki("header \"a\nb\""));
-//	}
-//
-//
+	@Test
+	void allHeaders() {
+		final String toTest = """
+				title "Title"
+				header "Header"
+				composer "Composer"
+				subtitle "Subtitle"
+				copyright "Copyright" """;
+		final Score score = toScore(toTest);
+		assertEquals("Title", toScore(toTest).title);
+		assertEquals("Subtitle", toScore(toTest).subtitle);
+		assertEquals("Composer", toScore(toTest).composer);
+		assertEquals("Header", toScore(toTest).header);
+		assertEquals("Copyright", toScore(toTest).copyright);
+	}
+
+	@Test
+	void structure1() {
+		final String toTest = """
+				phrase "Guitar"
+				C C C C |
+				part "Piano"
+				phrase "RH"
+				C C C C |
+				phrase "LH"
+				clef bass
+				C C C C |
+				""";
+		final Score score = toScore(toTest);
+		final MappedList<Part> parts = score.parts;
+		assertEquals(2, parts.size());
+
+		final Part anonymousPart = parts.getFirst();
+		assertEquals("", anonymousPart.name);
+		assertTrue(anonymousPart.isActive());
+		assertEquals(2, anonymousPart.phrases.size());
+
+		MappedList<Phrase> phrases = anonymousPart.phrases;
+		final Phrase anonymousPhrase = phrases.getFirst();
+		assertFalse(anonymousPhrase.isActive());
+
+		final Phrase guitar = phrases.get(1);
+		assertTrue(guitar.isActive());
+		assertEquals("Guitar", guitar.name);
+
+		final Part piano = parts.get(1);
+		assertEquals("Piano", piano.name);
+		assertTrue(piano.isActive());
+
+		phrases = piano.phrases;
+		assertEquals(2, phrases.size());
+
+		final Phrase rh = phrases.get(0);
+		assertTrue(rh.isActive());
+		assertEquals("RH", rh.name);
+
+		final Phrase lh = phrases.get(1);
+		assertEquals(Clef.bass, lh.measures.get(0).getClef());
+		assertTrue(lh.isActive());
+		assertEquals("LH", lh.name);
+	}
 }

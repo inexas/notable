@@ -82,7 +82,7 @@ public class Measure extends Element implements Venue {
 	 * @return The clef for this measure or null if one has not been set
 	 * @see #getEffectiveClef()
 	 */
-	private Clef getClef() {
+	public Clef getClef() {
 		return clef;
 	}
 

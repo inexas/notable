@@ -8,9 +8,9 @@ import org.inexas.notable.notation.parser.*;
 
 public class Staff extends Element {
 	int lineCount;
-	
+
 	@Override
 	public void accept(final Visitor visitor) {
-		visitor.visit(this);
+//		visitor.visit(this);
 	}
 }

@@ -31,8 +31,6 @@ public interface Visitor {
 
 	void visit(Rest rest);
 
-	void visit(Staff staff);
-
 	void visit(TimeSignature timeSignature);
 
 	void visit(KeySignature keySignature);
