@@ -24,20 +24,23 @@ public class MikiParser extends MusicBaseListener {
 	private final boolean DEBUG = false;
 	public final Messages messages;
 	private static final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
-
 	/**
-	 * The number of clicks counted so far in the current measure
+	 * This is true until we encounter the first part, phrase or event
 	 */
+	private boolean settingDefaults = true;
 	public Score score;
 	/**
 	 * The current part. May be null.
 	 */
 	private Part part;
+	/**
+	 * The current phrase. May be null.
+	 */
 	private Phrase phrase;
 	/**
-	 * This is true until we encounter the first part, phrase or event
+	 * The current measure. May be null.
 	 */
-	private boolean settingDefaults = true;
+	private Measure measure;
 
 	private MikiParser(final String string) {
 		messages = new Messages(false, string);
@@ -62,8 +65,9 @@ public class MikiParser extends MusicBaseListener {
 		messages.ctx = ctx;
 		// Set up an anonymous Part and Phrase
 		score = new Score(messages);
-		part = score.getOrCreatePart("");
-		phrase = part.getOrCreatePhrase("");
+		part = score.newPart("");
+		phrase = part.newPhrase("");
+		measure = phrase.measure;
 	}
 
 	@Override
@@ -73,12 +77,10 @@ public class MikiParser extends MusicBaseListener {
 		final ScoreCheckVisitor scoreCheckVisitor = new ScoreCheckVisitor(messages);
 		score.accept(scoreCheckVisitor);
 		// todo Terminate all the Phrases
-		// todo Pad to end?
 		// todo Check everything is the same length
-		// fixme
 //		final BeamStylizer stylizer = new BeamStylizer(measure.size);
 //		currentPhrase.events = stylizer.process(currentPhrase.events);
-//		final RestStylizer restStylizer = new RestStylizer(measure.size);
+//		final RestStylizer restStylizer = new RestStylizer();
 //		currentPhrase.events = restStylizer.process(currentPhrase.events);
 	}
 
@@ -87,13 +89,15 @@ public class MikiParser extends MusicBaseListener {
 		messages.ctx = ctx;
 		// Get existing or create a new Part...
 		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
-		final Part part = score.getOrCreatePart(name);
-		if(this.part.equals(part)) {
+		if(part.name.equals(name)) {
 			messages.warn("Part already selected: " + name);
 		} else {
-			// Change of part
-			this.part = part;
+			part = score.parts.get(name);
+			if(part == null) {
+				part = score.newPart(name);
+			}
 			phrase = null;
+			measure = null;
 		}
 		settingDefaults = false;
 	}
@@ -104,12 +108,16 @@ public class MikiParser extends MusicBaseListener {
 		// Get existing or create a new Phrase...
 		final String name = StringU.stripQuotesTrim(ctx.getStop().getText());
 		/*
-		I would have like to be able to select the phrase without having to
+		todo I would have like to be able to select the phrase without having to
 		select the part first say when changing from guitar to (piano) RH but
 		this doesn't work. We couldn't tell if the user was trying to create
 		a new phrase or select an existing phrase in a different part.
 		 */
-		phrase = part.getOrCreatePhrase(name);
+		phrase = part.phrases.get(name);
+		if(phrase == null) {
+			phrase = part.newPhrase(name);
+		}
+		measure = phrase.measure;
 		settingDefaults = false;
 	}
 
@@ -117,8 +125,8 @@ public class MikiParser extends MusicBaseListener {
 	public void enterBarline(final MusicParser.BarlineContext ctx) {
 		messages.ctx = ctx;
 		final String text = ctx.getStop().getText();
-		final Barline barline = Barline.getBarline(text);
-		phrase.handle(barline);
+		final Barline barline = Barline.get(text);
+		measure.handle(barline);
 	}
 
 	// S C O R E   D E T A I L S . . .

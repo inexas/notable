@@ -1,8 +1,19 @@
 grammar Music;
 
-
 // P A R S E R
 
+// o Octave
+// f, mf, f, sfz Dynamics
+//
+// +, - octave
+// ~1 fingering
+// | Barlines
+//
+// [CEG] chord
+// [t ...] Tuplet
+//
+// Available
+// /
 /**
  * A file contains a list of at least one blocks
  */
@@ -60,9 +71,8 @@ cpm: CPM COUNT ;
 
 barline
 	:	BAR | DOUBLE_BAR
-	|	BEGIN_REPEAT | END_REPEAT | BEGIN_END_RPEAT
-	|	THICK_THIN | THIN_THICK
-	|	DOTTED
+	|	BEGIN_REPEAT | END_REPEAT | BEGIN_END_REPEAT
+	|	FINAL
 ;
 
 line: LINE ;
@@ -94,7 +104,7 @@ tuplet: START_TUPLET (octave* note)+ END_NOTE_GROUP ;
 
 namedChord: NAMED_CHORD ;
 
-// Generates both a tie (same notes) or a slur (differnet notes)
+// Generates both a tie (same notes) or a slur (different notes)
 bind: '(' (bind | note)+ ')' ;
 
 // L E X E R
@@ -141,7 +151,7 @@ COMMON: 'common' ;
 
 CUT: 'cut' ;
 
-// Before NOTE
+// Must be before NOTE
 // No spaces allowed in [brackets]
 NAMED_CHORD:
 	'['
@@ -152,7 +162,7 @@ NAMED_CHORD:
 	']' Articulation? ( Duration Default? )?
 ;
 
-// Before NOTE
+// Must be before NOTE
 LINE: '{'
 	(	('bind' | 'b')
 	|	('crescendo' | 'cre' | 'c')
@@ -186,12 +196,9 @@ BAR: '|' ;
 DOUBLE_BAR: '||' ;
 BEGIN_REPEAT: '|:' ;
 END_REPEAT: ':|' ;
-BEGIN_END_RPEAT: ':|:' ;
-THIN_THICK: '-|' ;
-THICK_THIN: '|-' ;
-DOTTED: '::' ;
-
-SLASH: '/' ;
+BEGIN_END_REPEAT: ':|:' ;
+FINAL: '|||' ;
+REPEAT_FINAL: ':|||' ;
 
 OCTAVE: 'o' ;
 
@@ -239,7 +246,7 @@ fragment OneOrMore: [1-9][0-9]* ;
 
 fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) '.'* ;
 
-fragment Tonic: [A-GRX] ;
+fragment Tonic: [A-GRa-g] ;
 
 fragment Accidental: [#bn] ;
 
@@ -256,6 +263,6 @@ fragment Default: '*' ;
  * G 'x': Mixolyian
  * A 'm', 'a': Aeolian
  * B 'l': Locrian
+ *   'X': Ghost
  */
-fragment Mode: [Mmidpyxal] ;
-
+fragment Mode: [MmX] ;

@@ -12,6 +12,7 @@
 
 	<artifactId>user</artifactId>
 	<version>0.1</version>
+	<name>user</name>
 
 	<packaging>jar</packaging>
 

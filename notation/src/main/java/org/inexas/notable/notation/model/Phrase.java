@@ -12,17 +12,21 @@ import java.util.regex.*;
 
 
 /**
- * A piano has two Phrases, one for each hand
+ * Each Part has at least one Phrase. A piano has two Phrases, one for
+ * each hand.
+ * <p>
+ * During mmiki parsing the stream of events my flip between several
+ * Phrases that make up the score at any time, the Phrase class then plays
+ * an important role remembering the state for for each individual phrase.
  */
 public class Phrase extends Element implements MappedList.Named {
+	private final Timeline timeline;
 	private final Messages messages;
 	private final Score score;
 	public final Part part;
 	public final String name;
-	// Parsing state variables...
 	public final List<Measure> measures = new ArrayList<>();
-	private Measure measure;
-	// To collect Annotations for the current or next Event
+	public Measure measure;
 	public Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
 	/**
 	 * Set by an o8 command
@@ -47,7 +51,14 @@ public class Phrase extends Element implements MappedList.Named {
 		this.part = part;
 		score = part.score;
 		messages = score.messages;
-		newMeasure();
+		timeline = score.timeline;
+
+		// Create the first measure
+		measure = new Measure(this, null);
+		measures.add(measure);
+		venue = measure;
+		timeline.report(measure);
+
 		duration = measure.getEffectiveTimeSignature().getDefaultDuration();
 	}
 
@@ -58,14 +69,6 @@ public class Phrase extends Element implements MappedList.Named {
 
 	public boolean isActive() {
 		return name.length() > 0 || measures.size() > 1 || measure.isActive;
-	}
-
-	private void newMeasure() {
-		final int count = measures.size();
-		final Measure pic = count == 0 ? null : measures.get(count - 1);
-		measure = new Measure(this, pic);
-		measures.add(measure);
-		venue = measure;
 	}
 
 	public int getActiveMeasureCount() {
@@ -190,32 +193,6 @@ public class Phrase extends Element implements MappedList.Named {
 		venue.add(tuplet);
 	}
 
-	public void handle(final Barline barline) {
-		final int clicksSoFar = measure.clicksSoFar;
-		if(clicksSoFar > 0) {   // Ignore barlines at beginning of measure
-			if(!measure.isComplete()) {
-				error("Barline before end of measure");
-			} else {
-				newMeasure();
-			}
-		}
-		//		messages.ctx = ctx;
-//		// Leading barline...
-//		final boolean barAnnotated = annotationMap.containsKey(Barline.class);
-//		if(measure.clicksSoFar == 0) {
-//			// We're at the start of a new measure, make sure it's annotated...
-//			if(!barAnnotated) {
-//				annotate(Barline.bar);
-//			}
-//		} else if(barAnnotated) {
-//			// todo Removing a repeat bar may cause other issues
-//			annotationMap.remove(Barline.class);
-//			warn("Bar annotation not at start of measure; removed.");
-//		}
-//	}
-//
-	}
-
 	/**
 	 * Calculator that given the last note slot and a new tonic, calculates
 	 * the next slot.
@@ -310,10 +287,5 @@ public class Phrase extends Element implements MappedList.Named {
 		}
 
 		return result;
-	}
-
-	@Override
-	public String toString() {
-		return '{' + part.name + '/' + name + '}';
 	}
 }

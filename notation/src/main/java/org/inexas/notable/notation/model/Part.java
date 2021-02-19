@@ -38,21 +38,14 @@ public class Part extends Element implements Visited, MappedList.Named {
 		return result;
 	}
 
-	/**
-	 * Get a Phrase with the given name. If the Phrase does not exist then it will
-	 * be created and added ot the parent Part.
-	 *
-	 * @param name The requested name of the Phrase
-	 * @return Non-null Phrase
-	 */
-	public Phrase getOrCreatePhrase(final String name) {
-		Phrase result;
-		result = phrases.get(name);
-		if(result == null) {
-			result = new Phrase(name, this);
-			phrases.add(result);
-		}
+	public Phrase newPhrase(final String name) {
+		final Phrase result = new Phrase(name, this);
+		phrases.add(result);
 		return result;
+	}
+
+	public Phrase getFirstPhrase() {
+		return phrases.getFirst();
 	}
 
 	@Override
@@ -63,10 +56,6 @@ public class Part extends Element implements Visited, MappedList.Named {
 			phrases.get(i).accept(visitor);
 		}
 		visitor.exit(this);
-	}
-
-	public Phrase getFirstPhrase() {
-		return phrases.getFirst();
 	}
 
 	@Override
@@ -90,14 +79,6 @@ public class Part extends Element implements Visited, MappedList.Named {
 		}
 
 		return result;
-	}
-
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder("Part{");
-		sb.append(name);
-		sb.append('}');
-		return sb.toString();
 	}
 }
 

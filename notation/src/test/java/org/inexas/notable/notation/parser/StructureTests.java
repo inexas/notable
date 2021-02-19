@@ -6,41 +6,8 @@ import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class StructureTests {
-	private Score toScore(final String toTest) {
-		final MikiParser parser = MikiParser.fromString(toTest);
-		final Messages messages = parser.messages;
-		if(messages.hasMessages()) {
-			System.out.println("Test string: " + toTest);
-			System.out.println("Result: " + parser.toString());
-			System.out.println("Messages...");
-			System.out.println(messages);
-			assertFalse(messages.hasMessages());
-		}
-		return parser.score;
-	}
-
-	private String toMiki(final String toTest) {
-		return toScore(toTest).toString();
-	}
-
-	private void errorExpected(final String expected, final String toTest) {
-		final MikiParser parser = MikiParser.fromString(toTest);
-		final Messages messages = parser.messages;
-		boolean found = false;
-		final int count = messages.getErrorCount();
-		for(int i = 0; i < count; i++) {
-			if(messages.getError(i).contains(expected)) {
-				found = true;
-				break;
-			}
-		}
-		if(!found) {
-			System.out.println("Searching for: " + expected);
-			System.out.println(messages);
-			assertTrue(count >= 0); // Force error
-		}
-	}
+public class StructureTests extends ParserTestAbc {
+	private Timeline timeline;
 
 	@Test
 	void testAnonymous() {
@@ -52,8 +19,8 @@ public class StructureTests {
 
 	@Test
 	void test1() {
-		assertEquals("|\n", toMiki("A R R R"));
-		assertEquals("|\n", toMiki("A R R R|"));
+		assertEquals("A R R R |\n", toMiki("A R R R"));
+		assertEquals("A R R R |\n", toMiki("A R R R|"));
 	}
 
 	@Test
@@ -117,8 +84,9 @@ public class StructureTests {
 				""";
 		final Score score = toScore(toTest);
 		assertEquals(Clef.bass, score.defaultClef);
-		assertEquals(KeySignature.get("D"), score.defaultKeySignature);
-		assertEquals(new TimeSignature(3, 4), score.defaultTimeSignature);
+		assertEquals(KeySignature.get("D"), score.getDefaultKeySignature());
+		assertEquals(new TimeSignature(3, 4),
+				timeline.getTimeSignature(0));
 	}
 
 	@Test
@@ -135,7 +103,7 @@ public class StructureTests {
 				""";
 		final Score score = toScore(toTest);
 		assertEquals(Clef.bass, score.defaultClef);
-		assertEquals(KeySignature.get("D"), score.defaultKeySignature);
+		assertEquals(KeySignature.get("D"), score.getDefaultKeySignature());
 
 		Measure measure = score.parts.get("").phrases.get("").measures.get(0);
 		assertEquals(Clef.treble, measure.getClef());
@@ -190,9 +158,27 @@ public class StructureTests {
 		assertTrue(rh.isActive());
 		assertEquals("RH", rh.name);
 
-		final Phrase lh = phrases.get(1);
-		assertEquals(Clef.bass, lh.measures.get(0).getClef());
-		assertTrue(lh.isActive());
-		assertEquals("LH", lh.name);
+//		final Phrase lh = phrases.get(1);
+//		assertEquals(Clef.bass, lh.measures.get(0).getClef());
+//		assertTrue(lh.isActive());
+//		assertEquals("LH", lh.name);
+	}
+
+	@Test
+	void notes() {
+		assertEquals("A B C D |\n", toMiki("A B C D"));
+	}
+
+	@Test
+	void rests() {
+		assertEquals("C R R2 |\n", toMiki("C R R2"));
+		assertEquals("C R R R |\n", toMiki("C RRR"));
+	}
+
+	void stylizers() {
+		assertEquals("C16 R8. R R2 |\n", toMiki("C16"));
+		assertEquals("C16 R8. R R R8. C16 ||n", toMiki("C16 R16 R8 R  R R8 R16 C16"));
+		assertEquals("R2 R R8. C16 |\n", toMiki("RRR R8. C16"));
+		assertEquals("R8. C16 R R2 |\n", toMiki("R8. C16"));
 	}
 }

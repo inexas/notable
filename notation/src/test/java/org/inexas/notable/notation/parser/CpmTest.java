@@ -5,11 +5,7 @@ import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CpmTest {
-	private String toMiki(final String string) {
-		final Score score = MikiParser.fromString(string).score;
-		return score.toString();
-	}
+public class CpmTest extends ParserTestAbc {
 
 	@Test
 	void testFraction() {
@@ -30,6 +26,7 @@ public class CpmTest {
 
 	@Test
 	void testCpmMeasure() {
-		assertEquals("cpm 4\n\n", toMiki("cpm 4"));
+		assertEquals("cpm 16\n" +
+				"C C |\n", toMiki("cpm 16 CC"));
 	}
 }

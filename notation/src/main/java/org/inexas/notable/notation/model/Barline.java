@@ -5,64 +5,41 @@
 package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
+import org.inexas.notable.util.*;
 
-import java.util.*;
+public enum Barline implements Visited {
+	singleBar("|"),
+	doubleBar("||"),
+	beginRepeat("|:"),
+	endRepeat(":|"),
+	beginEndRepeat(":|:"),
+	eos("|||"),
+	eosRepeat(":|||");
 
-public class Barline extends Annotation {
-	private final static Map<String, Barline> lookup = new HashMap<>();
-	// Note simple bars don't get printed at begging on line
-	public final static Barline bar = new Barline(
-			"Bar",
-			"|", "|", "");
-	public final static Barline beginRepeat = new Barline(
-			"Begin repeat",
-			"|:", "|", "|:");
-	public final static Barline endRepeat = new Barline(
-			"End repeat",
-			":|", ":|", "|");
-	@SuppressWarnings("unused")
-	public final static Barline beginEndRepeat = new Barline(
-			"Begin-end repeat",
-			":|:", ":|", "|:");
-	public final static Barline doubleBar = new Barline(
-			"Double",
-			"||", "||", "||");
-	@SuppressWarnings("unused")
-	public final static Barline thinThick = new Barline(
-			"Double",
-			"-|", "-|", "-|");
-	@SuppressWarnings("unused")
-	public final static Barline thickThin = new Barline(
-			"Double",
-			"|-", "|-", "|-");
-	private final String name;
 	public final String miki;
-	public final String endOfLineMiki;
-	public final String beginningOfLineMiki;
 
-	private Barline(
-			final String name,
-			final String miki,
-			final String endOfLineMiki,
-			final String beginningOfLineMiki) {
-		this.name = name;
+	Barline(final String miki) {
 		this.miki = miki;
-		this.endOfLineMiki = endOfLineMiki;
-		this.beginningOfLineMiki = beginningOfLineMiki;
-		lookup.put(miki, this);
 	}
 
-	public static Barline getBarline(final String notation) {
-		return lookup.get(notation);
+	public static Barline get(final String miki) {
+		final Barline result;
+		switch(miki) {
+			case "|" -> result = singleBar;
+			case "||" -> result = doubleBar;
+			case "|:" -> result = beginRepeat;
+			case ":|" -> result = endRepeat;
+			case ":|:" -> result = beginEndRepeat;
+			case "|||" -> result = eos;
+			case ":|||" -> result = eosRepeat;
+			default -> throw new ImplementMeException(miki);
+		}
+
+		return result;
 	}
 
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
-	}
-
-	@Override
-	public String toString() {
-		return miki;
 	}
 }

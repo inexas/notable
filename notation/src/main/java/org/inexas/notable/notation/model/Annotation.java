@@ -9,6 +9,6 @@ import org.inexas.notable.notation.parser.*;
 /**
  * An Annotation is something that can be associated with a Note
  */
-public abstract class Annotation implements Visited {
+public abstract interface Annotation extends Visited {
 	// Marker interface, nothing to do
 }

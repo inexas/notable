@@ -5,8 +5,11 @@ import org.inexas.notable.notation.parser.*;
 import java.util.*;
 
 public class Measure extends Element implements Venue {
+	public final Timeline.Frame frame;
+	public final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
 	private final Messages messages;
 	private final Score score;
+	private final Phrase phrase;
 	/**
 	 * Linked list: previous in chain
 	 */
@@ -36,12 +39,14 @@ public class Measure extends Element implements Venue {
 	 * The list of events in this measure
 	 */
 	public final List<Event> events = new ArrayList<>();
-	boolean isActive = false;
+	public boolean isActive = false;
 
 	Measure(final Phrase phrase, final Measure pic) {
+		this.phrase = phrase;
+		this.pic = pic;
+
 		score = phrase.part.score;
 		messages = score.messages;
-		this.pic = pic;
 		if(pic == null) {
 			// This is the first measure for the parent Phrase
 			ordinal = 0;
@@ -49,9 +54,7 @@ public class Measure extends Element implements Venue {
 			// Non-first
 			ordinal = pic.ordinal + 1;
 		}
-		// Force Score to register the new Measure
-		// todo Dual purpose
-		score.getMeasureSize(0);
+		frame = score.timeline.report(this);
 	}
 
 	@Override
@@ -67,7 +70,7 @@ public class Measure extends Element implements Venue {
 	}
 
 	public int getSize() {
-		return score.getMeasureSize(ordinal);
+		return frame.actualSize;
 	}
 
 	public void setClef(final Clef clef) {
@@ -141,15 +144,15 @@ public class Measure extends Element implements Venue {
 	 * @return The time signature for this measure or null if no time signature
 	 * has been explicitly set
 	 */
-	public TimeSignature getTimeSignature() {
-		return score.getTimeSignature(ordinal);
+	public TimeSignature getAppliedTimeSignature() {
+		return frame.getAppliedTimeSignature();
 	}
 
 	void handle(final TimeSignature timeSignature) {
 		if(clicksSoFar > 0) {
 			error("Time signatures must appear at the beginning of a measure");
 		}
-		score.report(ordinal, timeSignature);
+		frame.report(timeSignature);
 		isActive = true;
 	}
 
@@ -160,21 +163,11 @@ public class Measure extends Element implements Venue {
 		} else if(clicks == getSize()) {
 			warn("CPM does not change measure size?");
 		} else {
-			score.report(ordinal, cpm);
+			frame.report(cpm);
 		}
 		isActive = true;
 	}
 
-	//	private void padToEnd() {
-//		if(clicksSoFar > 0) {
-//			final int padSize = size - clicksSoFar;
-//			final Duration[] durations = Duration.getByClicks(padSize);
-//			for(final Duration duration : durations) {
-//				events.add(new Rest(duration, MikiParser.mtAnnotationMap));
-//			}
-//		}
-//	}
-//
 	public boolean isComplete() {
 		assert clicksSoFar <= getSize();
 		return clicksSoFar == getSize();
@@ -200,6 +193,14 @@ public class Measure extends Element implements Venue {
 	}
 
 	TimeSignature getEffectiveTimeSignature() {
-		return score.getEffectiveTimeSignature(ordinal);
+		return frame.getEffectiveTimeSignature();
+	}
+
+	public void handle(final Barline barline) {
+		if(clicksSoFar < frame.actualSize) {
+			error("Barline before end of measure");
+		} else {
+			frame.report(barline);
+		}
 	}
 }

@@ -9,11 +9,10 @@ import org.inexas.notable.notation.model.*;
 import java.util.*;
 
 public class ToMikiVisitor implements Visitor {
-	private final static int measuresPerLine = 4;
+	public Timeline timeline;
 	private final static char NL = '\n';
 	private final StringBuilder sb = new StringBuilder();
 	private boolean inRepeat;
-	private int measure;
 	private Duration currentDuration = Duration.quarter;
 	private boolean seenEvent;
 	private Duration saveDuration;
@@ -21,6 +20,8 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void enter(final Score score) {
+		timeline = score.timeline;
+
 		writeQuoted("title", score.title);
 		writeQuoted("subtitle", score.subtitle);
 		writeQuoted("composer", score.composer);
@@ -33,12 +34,12 @@ public class ToMikiVisitor implements Visitor {
 		if(clef != null && !Clef.treble.equals(clef)) {
 			visit(clef);
 		}
-		final KeySignature keySignature = score.defaultKeySignature;
+		final KeySignature keySignature = score.getDefaultKeySignature();
 		if(keySignature != null && !KeySignature.C.equals(keySignature)) {
 			visit(keySignature);
 		}
-		final TimeSignature timeSignature = score.defaultTimeSignature;
-		if(!TimeSignature.fourFour.equals(timeSignature)) {
+		final TimeSignature timeSignature = timeline.getFrame(0).getAppliedTimeSignature();
+		if(timeSignature != null) {
 			visit(timeSignature);
 		}
 
@@ -82,7 +83,7 @@ public class ToMikiVisitor implements Visitor {
 			newline();
 		}
 
-		seenEvent = false;
+		seenEvent = false;  // todo This needs to be reset according to the measure
 	}
 
 	@Override
@@ -90,11 +91,10 @@ public class ToMikiVisitor implements Visitor {
 		// End bar of Phrase is implied
 		space();
 		if(inRepeat) {
-			sb.append(Barline.endRepeat.miki);
+			sb.append(Barline.endRepeat.name());
 			inRepeat = false;
 		} else {
 			if(seenEvent) {
-				sb.append(Barline.doubleBar.miki);
 				newline();
 			}
 		}
@@ -255,26 +255,8 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final Barline barline) {
-		if(measure % measuresPerLine == 0) {
-			// At end of line
-			if(measure > 0) {
-				space();
-				add(barline.endOfLineMiki);
-				newline();
-			}
-			add(barline.beginningOfLineMiki);
-		} else {
-			space();
-			add(barline.miki);
-		}
-
-		if(barline == Barline.beginRepeat) {
-			inRepeat = true;
-		} else if(barline == Barline.endRepeat) {
-			inRepeat = false;
-		}
-
-		measure++;
+		space();
+		add(barline.name());
 	}
 
 	@Override
@@ -310,7 +292,16 @@ public class ToMikiVisitor implements Visitor {
 	@Override
 	public void visit(final Measure measure) {
 		space();
-		sb.append('|');
+		final List<Event> events = measure.events;
+		final Cpm cpm = timeline.getFrame(measure.ordinal).cpm;
+		if(cpm != null) {
+			visit(cpm);
+		}
+		for(final Event event : events) {
+			event.accept(this);
+			space();
+		}
+		sb.append(measure.frame.barline.miki);
 	}
 
 	@Override
@@ -400,7 +391,8 @@ public class ToMikiVisitor implements Visitor {
 	 * Write a new line if the last written character was not a newline
 	 */
 	private void newline() {
-		if(honorWhitespace()) {
+		final int length = sb.length();
+		if(length > 0 && sb.charAt(length - 1) != NL) {
 			sb.append(NL);
 		}
 	}
@@ -419,27 +411,17 @@ public class ToMikiVisitor implements Visitor {
 			} else {
 				sb.append("\n\n");
 			}
-		} // else at start of file
+		}
 	}
 
 	private void space() {
-		if(honorWhitespace()) {
-			sb.append(' ');
+		final int length = sb.length();
+		if(length > 0) {
+			final char lastC = sb.charAt(length - 1);
+			if(lastC != NL && lastC != ' ' && lastC != '[' && lastC != '(') {
+				sb.append(' ');
+			}
 		}
-	}
-
-	/**
-	 * @return True if we should honor the request to add whitespace
-	 */
-	private boolean honorWhitespace() {
-		final boolean result;
-		if(sb.length() > 0) {
-			final char c = sb.charAt(sb.length() - 1);
-			result = c != NL && c != '[' && c != '(';
-		} else {
-			result = false;
-		}
-		return result;
 	}
 
 	private void add(final int i) {

@@ -6,7 +6,7 @@ package org.inexas.notable.notation.model;
 
 import org.inexas.notable.notation.parser.*;
 
-public class TextAnnotation extends Annotation {
+public class TextAnnotation implements Annotation {
 	public final String text;
 
 	public TextAnnotation(final String text) {

@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Dynamic extends Annotation {
+public class Dynamic implements Annotation {
 	private final static Map<String, Dynamic> lookup = new HashMap<>();
 
 	@SuppressWarnings("unused")

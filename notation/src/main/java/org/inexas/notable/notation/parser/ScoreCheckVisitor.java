@@ -1,10 +1,11 @@
 package org.inexas.notable.notation.parser;
 
 import org.inexas.notable.notation.model.*;
+import org.inexas.notable.util.*;
 
 public class ScoreCheckVisitor implements Visitor {
+	private Timeline timeline;
 	private final Messages messages;
-	private int[] timeLine;
 	private int measureCount;
 	private String partName, phraseName;
 
@@ -14,17 +15,23 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void enter(final Score score) {
-		// Find number of measures defined...
-		measureCount = 0;
+		timeline = score.timeline;
+
+		// Count how many active measures there are...
+		final int count = timeline.size();
+		boolean lastActive = false; // Until it isn't
 		for(final Part part : score.parts) {
 			for(final Phrase phrase : part.phrases) {
-				final int count = phrase.getActiveMeasureCount();
-				if(count > measureCount) {
-					measureCount = count;
+				if(phrase.measures.get(count - 1).isActive) {
+					lastActive = true;
+					break;
 				}
 			}
+			if(lastActive) {
+				break;
+			}
 		}
-		timeLine = score.getTimeLine(measureCount);
+		measureCount = lastActive ? count : count - 1;
 	}
 
 	@Override
@@ -49,7 +56,7 @@ public class ScoreCheckVisitor implements Visitor {
 
 			for(int i = 0; i < measureCount; i++) {
 				final Measure measure = phrase.measures.get(i);
-				assert measure.getSize() == timeLine[i] : "Coding error";
+				assert measure.getSize() == timeline.getFrame(i).actualSize : "Coding error";
 				if(!measure.isComplete()) {
 					messages.error(partName + '/' + phraseName + '-' + i + ": "
 							+ "Measure not complete");
@@ -194,6 +201,20 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void visit(final Measure measure) {
+		final Timeline.Frame frame = measure.frame;
+		if(frame.isLast()) {
+			final Barline is = frame.barline;
+			final Barline shouldBe = frame.isRepeat() ? Barline.eosRepeat : Barline.eos;
+			if(is == null) {
+				messages.warn("Missing barline at end of measure");
+			} else if(is != shouldBe) {
+				messages.warn("Incorrect barline at end of phrase, should be " + shouldBe.miki);
+				// Todo add measure/phrase to message
+			}
+			frame.barline = shouldBe;
+		} else {
+			throw new ImplementMeException();
+		}
 	}
 
 	@Override

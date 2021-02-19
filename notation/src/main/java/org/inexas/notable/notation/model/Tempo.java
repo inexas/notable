@@ -8,7 +8,7 @@ import org.inexas.notable.notation.parser.*;
 
 import java.util.*;
 
-public class Tempo extends Annotation {
+public class Tempo implements Annotation {
 	private final static Tempo Larghissimo = new Tempo(
 			"Larghissimo", "Very, very slow (24 tempo and under)", 22);
 	private final static Tempo Adagissimo = new Tempo(

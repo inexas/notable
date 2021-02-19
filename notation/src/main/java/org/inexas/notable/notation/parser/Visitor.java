@@ -71,7 +71,7 @@ public interface Visitor {
 
 	void visit(Clef clef);
 
-	void visit(Measure measure);
-
 	void visit(Cpm cpm);
+
+	void visit(Measure measure);
 }

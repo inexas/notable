@@ -6,30 +6,9 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Error and warning handling infrastructure
+ * Error and warning handling class
  */
 public class Messages {
-	private final boolean isFile;
-	private final String source;
-	ParserRuleContext ctx;
-	private final List<Message> messages = new ArrayList<>();
-	private final List<Message> errors = new ArrayList<>();
-	private final List<Message> warnings = new ArrayList<>();
-
-
-	boolean containExcerpt(final String excerpt) {
-		boolean result = false;
-
-		for(final Message message : messages) {
-			if(message.message.contains(excerpt)) {
-				result = true;
-				break;
-			}
-		}
-
-		return result;
-	}
-
 	public static class Message {
 		public enum Type {
 			Error, Warning, Info
@@ -64,13 +43,22 @@ public class Messages {
 		}
 	}
 
+	private final List<Message> messages = new ArrayList<>();
+	private final List<Message> errors = new ArrayList<>();
+	private final List<Message> warnings = new ArrayList<>();
+	private final boolean isFile;
+	private final String source;
+	/**
+	 * This is used to set the current Parser context which can be used
+	 * to point at which miki caused the problem. Note, it may remained
+	 * set well after the context has passed. Set it to null for post
+	 * parsing tracking.
+	 */
+	ParserRuleContext ctx;
+
 	Messages(final boolean isFile, final String source) {
 		this.isFile = isFile;
 		this.source = source;
-	}
-
-	boolean hasMessages() {
-		return messages.size() > 0;
 	}
 
 	public void error(final String text) {
@@ -111,15 +99,34 @@ public class Messages {
 		return sb.toString();
 	}
 
-	public int count() {
-		return messages.size();
+	boolean hasMessages() {
+		return messages.size() > 0;
 	}
 
-	public String getError(final int index) {
+	boolean contains(final String excerpt) {
+		boolean result = false;
+		for(final Message message : messages) {
+			if(message.message.contains(excerpt)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
+	String getError(final int index) {
 		return errors.get(index).message;
 	}
 
-	public int getErrorCount() {
+	String getWarning(final int index) {
+		return warnings.get(index).message;
+	}
+
+	int getErrorCount() {
 		return errors.size();
+	}
+
+	int getWarningCount() {
+		return warnings.size();
 	}
 }

@@ -138,19 +138,6 @@ public class BasicParserTest {
 	}
 
 	@Test
-	void testBarlines() {
-		// More to stop compiler warnings than anything else...
-		assertEquals("|", Barline.bar.miki);
-		assertEquals("|:", Barline.beginRepeat.miki);
-		assertEquals(":|:", Barline.beginEndRepeat.miki);
-		assertEquals(":|", Barline.endRepeat.miki);
-		assertEquals("|-", Barline.thickThin.miki);
-		assertEquals("-|", Barline.thinThick.miki);
-		assertEquals("||", Barline.doubleBar.miki);
-		assertEquals("|- A B C D -| E R R2 ||\n", toMiki("|- A B C D -| E"));
-	}
-
-	@Test
 	void testDynamic() {
 		assertEquals("fff", Dynamic.fff.name);
 		assertEquals("ff", Dynamic.ff.name);
@@ -190,7 +177,7 @@ public class BasicParserTest {
 
 	private void expectMessage(final String string, final String excerpt) {
 		final MikiParser parser = MikiParser.fromString(string);
-		assertTrue(parser.messages.containExcerpt(excerpt));
+		assertTrue(parser.messages.contains(excerpt));
 	}
 
 	@Test

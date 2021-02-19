@@ -10,9 +10,8 @@ import org.inexas.notable.notation.parser.*;
  * The ABC of all elements in the model
  */
 abstract class Element implements Visited {
-
 	@Override
-	public String toString() {
+	public final String toString() {
 		final ToMikiVisitor result = new ToMikiVisitor();
 		accept(result);
 		return result.toString();
