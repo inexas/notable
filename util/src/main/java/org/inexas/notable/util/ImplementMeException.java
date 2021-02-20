@@ -11,12 +11,10 @@ public class ImplementMeException extends RuntimeException {
 	}
 
 	private static String generateMessage(final String... strings) {
-		final StackTraceElement caller = Thread.currentThread().getStackTrace()[3];
 		final StringBuilder sb = new StringBuilder("Implement me: ");
-		sb.append(
-				caller.getClassName()).append('.')
-				.append(caller.getMethodName())
-				.append("()");
+		final String caller = Thread.currentThread().getStackTrace()[3].toString();
+		final int slash = caller.indexOf('/');
+		sb.append(caller.substring(slash + 1));
 		if(strings.length > 0) {
 			for(final String string : strings) {
 				sb.append(' ');

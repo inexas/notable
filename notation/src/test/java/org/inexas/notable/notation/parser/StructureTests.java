@@ -7,20 +7,17 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StructureTests extends ParserTestAbc {
-	private Timeline timeline;
-
 	@Test
 	void testAnonymous() {
 		errorExpected("Measure not complete", "");
 		errorExpected("Measure not ", "A");
-		final MikiParser parser = MikiParser.fromString("C C C C |");
+		final MikiParser parser = MikiParser.fromString("C C C C |||");
 		assertFalse(parser.messages.hasMessages());
 	}
 
 	@Test
 	void test1() {
-		assertEquals("A R R R |\n", toMiki("A R R R"));
-		assertEquals("A R R R |\n", toMiki("A R R R|"));
+		assertEquals("A R R R |||\n", toMiki("A R R R|||"));
 	}
 
 	@Test
@@ -80,13 +77,12 @@ public class StructureTests extends ParserTestAbc {
 				clef bass
 				key D
 				time 3/4
-				C C C C |
+				C C C C |||
 				""";
 		final Score score = toScore(toTest);
 		assertEquals(Clef.bass, score.defaultClef);
 		assertEquals(KeySignature.get("D"), score.getDefaultKeySignature());
-		assertEquals(new TimeSignature(3, 4),
-				timeline.getTimeSignature(0));
+		assertEquals(new TimeSignature(3, 4), score.getDefaultTimeSignature());
 	}
 
 	@Test
@@ -97,9 +93,9 @@ public class StructureTests extends ParserTestAbc {
 				phrase ""
 				key C
 				clef treble
-				C C C C |
+				C C C C |||
 				phrase "Bass"
-				C C C C |
+				C C C C |||
 				""";
 		final Score score = toScore(toTest);
 		assertEquals(Clef.bass, score.defaultClef);
@@ -122,13 +118,13 @@ public class StructureTests extends ParserTestAbc {
 	void structure1() {
 		final String toTest = """
 				phrase "Guitar"
-				C C C C |
+				C C C C |||
 				part "Piano"
 				phrase "RH"
-				C C C C |
+				C C C C |||
 				phrase "LH"
 				clef bass
-				C C C C |
+				C C C C |||
 				""";
 		final Score score = toScore(toTest);
 		final MappedList<Part> parts = score.parts;
@@ -166,19 +162,19 @@ public class StructureTests extends ParserTestAbc {
 
 	@Test
 	void notes() {
-		assertEquals("A B C D |\n", toMiki("A B C D"));
+		assertEquals("A B C D |||\n", toMiki("A B C D|||"));
 	}
 
 	@Test
 	void rests() {
-		assertEquals("C R R2 |\n", toMiki("C R R2"));
-		assertEquals("C R R R |\n", toMiki("C RRR"));
+		assertEquals("C R R2 |||\n", toMiki("C R R2|||"));
+		assertEquals("C R R R |||\n", toMiki("C RRR|||"));
 	}
 
 	void stylizers() {
-		assertEquals("C16 R8. R R2 |\n", toMiki("C16"));
-		assertEquals("C16 R8. R R R8. C16 ||n", toMiki("C16 R16 R8 R  R R8 R16 C16"));
-		assertEquals("R2 R R8. C16 |\n", toMiki("RRR R8. C16"));
-		assertEquals("R8. C16 R R2 |\n", toMiki("R8. C16"));
+		assertEquals("C16 R8. R R2 |||\n", toMiki("C16"));
+		assertEquals("C16 R8. R R R8. C16 |||\n", toMiki("C16 R16 R8 R  R R8 R16 C16"));
+		assertEquals("R2 R R8. C16 |||\n", toMiki("RRR R8. C16"));
+		assertEquals("R8. C16 R R2 |||\n", toMiki("R8. C16"));
 	}
 }

@@ -169,7 +169,6 @@ public class Measure extends Element implements Venue {
 	}
 
 	public boolean isComplete() {
-		assert clicksSoFar <= getSize();
 		return clicksSoFar == getSize();
 	}
 

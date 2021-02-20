@@ -52,7 +52,10 @@ public class Score extends Element implements Visited {
 		if(this.title != null) {
 			warn("Title already set, ignoring redefinition");
 		} else {
-			this.title = StringU.stripQuotesTrim(title);
+			final String string = StringU.stripQuotesTrim(title);
+			if(string.length() > 0) {
+				this.title = string;
+			}
 		}
 	}
 
@@ -64,7 +67,10 @@ public class Score extends Element implements Visited {
 		if(this.subtitle != null) {
 			warn("Subtitle already set, ignoring redefinition");
 		} else {
-			this.subtitle = StringU.stripQuotesTrim(subtitle);
+			final String string = StringU.stripQuotesTrim(subtitle);
+			if(string.length() > 0) {
+				this.subtitle = string;
+			}
 		}
 	}
 
@@ -76,7 +82,10 @@ public class Score extends Element implements Visited {
 		if(this.composer != null) {
 			warn("Composer already set, ignoring redefinition");
 		} else {
-			this.composer = StringU.stripQuotesTrim(composer);
+			final String string = StringU.stripQuotesTrim(composer);
+			if(string.length() > 0) {
+				this.composer = string;
+			}
 		}
 	}
 
@@ -88,7 +97,10 @@ public class Score extends Element implements Visited {
 		if(this.header != null) {
 			warn("Header already set, ignoring redefinition");
 		} else {
-			this.header = StringU.stripQuotesTrim(header);
+			final String string = StringU.stripQuotesTrim(header);
+			if(string.length() > 0) {
+				this.header = string;
+			}
 		}
 	}
 
@@ -100,7 +112,10 @@ public class Score extends Element implements Visited {
 		if(this.copyright != null) {
 			warn("Copyright already set, ignoring redefinition");
 		} else {
-			this.copyright = StringU.stripQuotesTrim(copyright);
+			final String string = StringU.stripQuotesTrim(copyright);
+			if(string.length() > 0) {
+				this.copyright = string;
+			}
 		}
 	}
 
@@ -143,7 +158,7 @@ public class Score extends Element implements Visited {
 		defaultKeySignature = keySignature;
 	}
 
-	TimeSignature getDefaultTimeSignature() {
+	public TimeSignature getDefaultTimeSignature() {
 		return defaultTimeSignature == null ? TimeSignature.fourFour : defaultTimeSignature;
 	}
 

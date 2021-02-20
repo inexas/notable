@@ -164,7 +164,7 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void visit(final Clef clef) {
-		writeUnquoted("clef", clef.type.name());
+		writeUnquoted("clef", clef.name());
 	}
 
 	@Override

@@ -26,7 +26,6 @@ public class CpmTest extends ParserTestAbc {
 
 	@Test
 	void testCpmMeasure() {
-		assertEquals("cpm 16\n" +
-				"C C |\n", toMiki("cpm 16 CC"));
+		assertEquals("cpm 16\nC C |||\n", toMiki("cpm 16 C C |||"));
 	}
 }

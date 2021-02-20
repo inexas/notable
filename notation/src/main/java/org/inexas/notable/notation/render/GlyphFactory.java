@@ -63,7 +63,7 @@ public class GlyphFactory {
 	}
 
 	public Glyph getClef(final Clef clef) {
-		return getGlyph(clef.type.smufl);
+		return getGlyph(clef.smufl);
 	}
 
 	Glyph getGlyph(final String name) {

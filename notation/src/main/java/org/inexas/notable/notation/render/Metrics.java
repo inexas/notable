@@ -364,7 +364,7 @@ public class Metrics {
 		final double[] index = new double[8 * 7 + 1];
 
 		Y(final DMeasure measure) {
-			final int lowNote = measure.getClef().type.lowSlot;
+			final int lowNote = measure.getClef().lowSlot;
 			double y = topMargin
 					+ (measure.slotsAbove() // Notes above the staff
 					+ 8 // Slots in the staff

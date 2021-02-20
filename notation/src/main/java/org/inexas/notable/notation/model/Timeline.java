@@ -132,6 +132,7 @@ public class Timeline {
 	private Frame fic, lic;
 	private boolean seenStartRepeat;
 
+
 	Timeline(final Score score) {
 		this.score = score;
 		messages = score.messages;
@@ -153,11 +154,6 @@ public class Timeline {
 
 	public int size() {
 		return frames.size();
-	}
-
-	public TimeSignature getTimeSignature(final int ordinal) {
-		assert ordinal >= 0 && frames.size() > ordinal;
-		return frames.get(ordinal).timeSignature;
 	}
 
 	private void error(final String message) {

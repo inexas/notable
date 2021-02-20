@@ -188,7 +188,7 @@ public class MikiParser extends MusicBaseListener {
 	public void enterClef(final MusicParser.ClefContext ctx) {
 		messages.ctx = ctx;
 		final String text = ctx.getStop().getText();
-		final Clef clef = new Clef(text);
+		final Clef clef = Clef.valueOf(text);
 		if(settingDefaults) {
 			score.setDefaultClef(clef);
 		} else {
