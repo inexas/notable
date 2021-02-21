@@ -4,20 +4,76 @@ import org.inexas.notable.notation.model.*;
 import org.inexas.notable.util.*;
 import org.junit.jupiter.api.*;
 
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StructureTests extends ParserTestAbc {
 	@Test
-	void testAnonymous() {
-		errorExpected("Measure not complete", "");
-		errorExpected("Measure not ", "A");
-		final MikiParser parser = MikiParser.fromString("C C C C |||");
-		assertFalse(parser.messages.hasMessages());
+	void prune() {
+		assertEquals("", toMiki(""));
+		assertEquals(0, toScore("").parts.size());
+
+		final MappedList<Part> parts = toScore("CCCC|||").parts;
+		assertEquals(1, parts.size());
+		final Part part = parts.get(0);
+		assertEquals("", part.getName());
+
+		final MappedList<Phrase> phrases = part.phrases;
+		assertEquals(1, phrases.size());
+		final Phrase phrase = phrases.get(0);
+		assertEquals("", phrase.getName());
+
+		final List<Measure> measures = phrase.measures;
+		assertEquals(1, measures.size());
 	}
 
 	@Test
-	void test1() {
-		assertEquals("A R R R |||\n", toMiki("A R R R|||"));
+	void prune1() {
+		final MappedList<Part> parts = toScore("phrase \"f\" CCCC|||").parts;
+		assertEquals(1, parts.size());
+		final Part part = parts.get(0);
+		assertEquals("", part.getName());
+
+		final MappedList<Phrase> phrases = part.phrases;
+		assertEquals(1, phrases.size());
+		final Phrase phrase = phrases.get(0);
+		assertEquals("f", phrase.getName());
+
+		final List<Measure> measures = phrase.measures;
+		assertEquals(1, measures.size());
+	}
+
+	@Test
+	void prune2() {
+		final MappedList<Part> parts = toScore("part \"p\" phrase \"\" CCCC|||").parts;
+		assertEquals(1, parts.size());
+		final Part part = parts.get(0);
+		assertEquals("p", part.getName());
+
+		final MappedList<Phrase> phrases = part.phrases;
+		assertEquals(1, phrases.size());
+		final Phrase phrase = phrases.get(0);
+		assertEquals("", phrase.getName());
+
+		final List<Measure> measures = phrase.measures;
+		assertEquals(1, measures.size());
+	}
+
+	@Test
+	void prune3() {
+		final MappedList<Part> parts = toScore("part \"p\" phrase \"f\" CCCC|||").parts;
+		assertEquals(1, parts.size());
+		final Part part = parts.get(0);
+		assertEquals("p", part.getName());
+
+		final MappedList<Phrase> phrases = part.phrases;
+		assertEquals(1, phrases.size());
+		final Phrase phrase = phrases.get(0);
+		assertEquals("f", phrase.getName());
+
+		final List<Measure> measures = phrase.measures;
+		assertEquals(1, measures.size());
 	}
 
 	@Test
@@ -31,7 +87,7 @@ public class StructureTests extends ParserTestAbc {
 	void subtitle() {
 		assertNull(toScore("").subtitle);
 		assertEquals("s", toScore("subtitle \"s\"").subtitle);
-		assertEquals("subtitle \"s\"\n", toMiki("subtitle \"s\""));
+		assertEquals("subtitle \"s\"\n", toMiki("subtitle \"s\" "));
 	}
 
 	@Test
@@ -62,7 +118,8 @@ public class StructureTests extends ParserTestAbc {
 				header "Header"
 				composer "Composer"
 				subtitle "Subtitle"
-				copyright "Copyright" """;
+				copyright "Copyright"
+				""";
 		final Score score = toScore(toTest);
 		assertEquals("Title", score.title);
 		assertEquals("Subtitle", score.subtitle);
@@ -76,9 +133,7 @@ public class StructureTests extends ParserTestAbc {
 		final String toTest = """
 				clef bass
 				key D
-				time 3/4
-				C C C C |||
-				""";
+				time 3/4""";
 		final Score score = toScore(toTest);
 		assertEquals(Clef.bass, score.defaultClef);
 		assertEquals(KeySignature.get("D"), score.getDefaultKeySignature());
@@ -93,9 +148,9 @@ public class StructureTests extends ParserTestAbc {
 				phrase ""
 				key C
 				clef treble
-				C C C C |||
+				CCCC |||
 				phrase "Bass"
-				C C C C |||
+				CCCC |||
 				""";
 		final Score score = toScore(toTest);
 		assertEquals(Clef.bass, score.defaultClef);
@@ -118,13 +173,13 @@ public class StructureTests extends ParserTestAbc {
 	void structure1() {
 		final String toTest = """
 				phrase "Guitar"
-				C C C C |||
+				CCCC |||
 				part "Piano"
 				phrase "RH"
-				C C C C |||
+				CCCC |||
 				phrase "LH"
 				clef bass
-				C C C C |||
+				CCCC |||
 				""";
 		final Score score = toScore(toTest);
 		final MappedList<Part> parts = score.parts;
@@ -132,32 +187,26 @@ public class StructureTests extends ParserTestAbc {
 
 		final Part anonymousPart = parts.getFirst();
 		assertEquals("", anonymousPart.name);
-		assertTrue(anonymousPart.isActive());
-		assertEquals(2, anonymousPart.phrases.size());
+		assertEquals(1, anonymousPart.phrases.size());
 
 		MappedList<Phrase> phrases = anonymousPart.phrases;
 		final Phrase anonymousPhrase = phrases.getFirst();
-		assertFalse(anonymousPhrase.isActive());
 
-		final Phrase guitar = phrases.get(1);
-		assertTrue(guitar.isActive());
+		final Phrase guitar = phrases.get(0);
 		assertEquals("Guitar", guitar.name);
 
 		final Part piano = parts.get(1);
 		assertEquals("Piano", piano.name);
-		assertTrue(piano.isActive());
 
 		phrases = piano.phrases;
 		assertEquals(2, phrases.size());
 
 		final Phrase rh = phrases.get(0);
-		assertTrue(rh.isActive());
 		assertEquals("RH", rh.name);
 
-//		final Phrase lh = phrases.get(1);
-//		assertEquals(Clef.bass, lh.measures.get(0).getClef());
-//		assertTrue(lh.isActive());
-//		assertEquals("LH", lh.name);
+		final Phrase lh = phrases.get(1);
+		assertEquals(Clef.bass, lh.measures.get(0).getClef());
+		assertEquals("LH", lh.name);
 	}
 
 	@Test

@@ -14,7 +14,7 @@ public class Part extends Element implements Visited, MappedList.Named {
 	public final String name;
 	public final Score score;
 	// Preserve the oder
-	public final MappedList<Phrase> phrases = new MappedList<>();
+	public MappedList<Phrase> phrases = new MappedList<>();
 
 	Part(final String name, final Score score) {
 		this.name = name;
@@ -24,18 +24,6 @@ public class Part extends Element implements Visited, MappedList.Named {
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	public boolean isActive() {
-		final boolean result;
-
-		if(name.length() == 0) {
-			result = phrases.size() > 1 || phrases.getFirst().isActive();
-		} else {
-			result = true;
-		}
-
-		return result;
 	}
 
 	public Phrase newPhrase(final String name) {
@@ -78,6 +66,25 @@ public class Part extends Element implements Visited, MappedList.Named {
 			}
 		}
 
+		return result;
+	}
+
+	boolean prune() {
+		final MappedList<Phrase> pruned = new MappedList<>();
+		for(final Phrase phrase : phrases) {
+			if(phrase.prune()) {
+				pruned.add(phrase);
+			}
+		}
+		phrases = pruned;
+		return phrases.size() > 0;
+	}
+
+	int countMeasures(final int currentMaximum) {
+		int result = 0;
+		for(final Phrase phrase : phrases) {
+			result = phrase.countMeasures(result);
+		}
 		return result;
 	}
 }

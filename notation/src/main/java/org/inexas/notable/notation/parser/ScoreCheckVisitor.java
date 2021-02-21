@@ -1,7 +1,6 @@
 package org.inexas.notable.notation.parser;
 
 import org.inexas.notable.notation.model.*;
-import org.inexas.notable.util.*;
 
 public class ScoreCheckVisitor implements Visitor {
 	private Timeline timeline;
@@ -16,22 +15,7 @@ public class ScoreCheckVisitor implements Visitor {
 	@Override
 	public void enter(final Score score) {
 		timeline = score.timeline;
-
-		// Count how many active measures there are...
-		final int count = timeline.size();
-		boolean lastActive = false; // Until it isn't
-		for(final Part part : score.parts) {
-			for(final Phrase phrase : part.phrases) {
-				if(phrase.measures.get(count - 1).isActive) {
-					lastActive = true;
-					break;
-				}
-			}
-			if(lastActive) {
-				break;
-			}
-		}
-		measureCount = lastActive ? count : count - 1;
+		measureCount = timeline.size();
 	}
 
 	@Override
@@ -40,9 +24,7 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void enter(final Part part) {
-		if(part.isActive()) {
-			partName = part.name.length() == 0 ? "(Anonymous)" : part.name;
-		}
+		partName = part.name.length() == 0 ? "(Anonymous)" : part.name;
 	}
 
 	@Override
@@ -51,16 +33,14 @@ public class ScoreCheckVisitor implements Visitor {
 
 	@Override
 	public void enter(final Phrase phrase) {
-		if(phrase.isActive()) {
-			phraseName = phrase.name.length() == 0 ? "(Anonymous)" : phrase.name;
+		phraseName = phrase.name.length() == 0 ? "(Anonymous)" : phrase.name;
 
-			for(int i = 0; i < measureCount; i++) {
-				final Measure measure = phrase.measures.get(i);
-				assert measure.getSize() == timeline.getFrame(i).actualSize : "Coding error";
-				if(!measure.isComplete()) {
-					messages.error(partName + '/' + phraseName + '-' + i + ": "
-							+ "Measure not complete");
-				}
+		for(int i = 0; i < measureCount; i++) {
+			final Measure measure = phrase.measures.get(i);
+			assert measure.getSize() == timeline.getFrame(i).actualSize : "Coding error";
+			if(!measure.isComplete()) {
+				messages.error(partName + '/' + phraseName + '-' + i + ": "
+						+ "Measure not complete");
 			}
 		}
 	}
@@ -206,14 +186,32 @@ public class ScoreCheckVisitor implements Visitor {
 			final Barline is = frame.barline;
 			final Barline shouldBe = frame.isRepeat() ? Barline.eosRepeat : Barline.eos;
 			if(is == null) {
-				messages.warn("Missing barline at end of measure");
+				messages.error("Missing barline at end of measure");
 			} else if(is != shouldBe) {
-				messages.warn("Incorrect barline at end of phrase, should be " + shouldBe.miki);
+				messages.error("Incorrect barline at end of phrase, should be " + shouldBe.miki);
 				// Todo add measure/phrase to message
 			}
 			frame.barline = shouldBe;
 		} else {
-			throw new ImplementMeException();
+			final Barline is = frame.barline;
+			final Barline shouldBe;
+			if(frame.isRepeat()) {
+				shouldBe = frame.nic.isRepeat() ? Barline.beginEndRepeat : Barline.endRepeat;
+			} else {
+				if(frame.nic.isRepeat()) {
+					shouldBe = Barline.beginRepeat;
+				} else {
+					// No repeats
+					if(is == Barline.singleBar || is == Barline.doubleBar) {
+						shouldBe = is;
+					} else {
+						shouldBe = Barline.singleBar;
+					}
+				}
+			}
+			if(is != shouldBe) {
+				messages.error("Barline incorrect at end of phrase, should be " + shouldBe.miki);
+			}
 		}
 	}
 

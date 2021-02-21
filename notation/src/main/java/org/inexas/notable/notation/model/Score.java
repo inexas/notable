@@ -13,7 +13,7 @@ import org.inexas.notable.util.*;
 public class Score extends Element implements Visited {
 	final Messages messages;
 	public final Timeline timeline;
-	public final MappedList<Part> parts = new MappedList<>();
+	public MappedList<Part> parts = new MappedList<>();
 	public String title;
 	public String subtitle;
 	public String composer;
@@ -193,5 +193,22 @@ public class Score extends Element implements Visited {
 			parts.get(i).accept(visitor);
 		}
 		visitor.exit(this);
+	}
+
+	public void prune() {
+		final MappedList<Part> pruned = new MappedList<>();
+		for(final Part part : parts) {
+			if(part.prune()) {
+				pruned.add(part);
+			}
+		}
+		parts = pruned;
+
+		int measureCount = 0;
+		for(final Part part : parts) {
+			measureCount = part.countMeasures(measureCount);
+		}
+
+		timeline.setLength(measureCount);
 	}
 }

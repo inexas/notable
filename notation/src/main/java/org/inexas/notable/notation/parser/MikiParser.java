@@ -37,10 +37,7 @@ public class MikiParser extends MusicBaseListener {
 	 * The current phrase. May be null.
 	 */
 	private Phrase phrase;
-	/**
-	 * The current measure. May be null.
-	 */
-	private Measure measure;
+	private boolean inChord;
 
 	private MikiParser(final String string) {
 		messages = new Messages(false, string);
@@ -67,13 +64,12 @@ public class MikiParser extends MusicBaseListener {
 		score = new Score(messages);
 		part = score.newPart("");
 		phrase = part.newPhrase("");
-		measure = phrase.measure;
 	}
 
 	@Override
 	public void exitScore(final MusicParser.ScoreContext ctx) {
 		messages.ctx = ctx;
-
+		score.prune();
 		final ScoreCheckVisitor scoreCheckVisitor = new ScoreCheckVisitor(messages);
 		score.accept(scoreCheckVisitor);
 		// todo Terminate all the Phrases
@@ -97,7 +93,6 @@ public class MikiParser extends MusicBaseListener {
 				part = score.newPart(name);
 			}
 			phrase = null;
-			measure = null;
 		}
 		settingDefaults = false;
 	}
@@ -117,7 +112,6 @@ public class MikiParser extends MusicBaseListener {
 		if(phrase == null) {
 			phrase = part.newPhrase(name);
 		}
-		measure = phrase.measure;
 		settingDefaults = false;
 	}
 
@@ -126,7 +120,7 @@ public class MikiParser extends MusicBaseListener {
 		messages.ctx = ctx;
 		final String text = ctx.getStop().getText();
 		final Barline barline = Barline.get(text);
-		measure.handle(barline);
+		phrase.handle(barline);
 	}
 
 	// S C O R E   D E T A I L S . . .
@@ -262,9 +256,14 @@ public class MikiParser extends MusicBaseListener {
 		if(group2 == null) {
 			duration = phrase.duration;
 		} else {
-			duration = Duration.getByMiki(group2);
-			if(duration.setDefault) {
-				phrase.duration = duration;
+			if(inChord) {
+				messages.error("Durations are not permitted in chord groups: " + group2);
+				duration = phrase.duration;
+			} else {
+				duration = Duration.getByMiki(group2);
+				if(duration.setDefault) {
+					phrase.duration = duration;
+				}
 			}
 		}
 
@@ -280,10 +279,14 @@ public class MikiParser extends MusicBaseListener {
 		}
 
 		// Group 4: Articulation...
-		final String group5 = matcher.group(4);
-		if(group5 != null) {
-			final Articulation articulation = Articulation.getByMiki(group5);
-			phrase.annotate(articulation);
+		final String group4 = matcher.group(4);
+		if(group4 != null) {
+			if(inChord) {
+				messages.error("Articulations are not permitted in chord groups: " + group4);
+			} else {
+				final Articulation articulation = Articulation.get(group4);
+				phrase.annotate(articulation);
+			}
 		}
 
 		final char c = tonic.charAt(0);
@@ -297,13 +300,21 @@ public class MikiParser extends MusicBaseListener {
 
 		final Event event;
 		if(c == 'R') {
-			event = new Rest(duration, annotations);
+			if(inChord) {
+				messages.error("Rests are not permitted in chord groups: " + group4);
+				event = null;
+			} else {
+				event = new Rest(duration, annotations);
+			}
 		} else {
 			final int number = phrase.next(tonic);
 			event = new Note(number, duration, false, annotations);
 			phrase.lastNote = event.slot;
 		}
-		phrase.handle(event);
+
+		if(event != null) {
+			phrase.handle(event);
+		}
 	}
 
 	@Override
@@ -325,12 +336,14 @@ public class MikiParser extends MusicBaseListener {
 	@Override
 	public void enterChord(final MusicParser.ChordContext ctx) {
 		phrase.startChord();
+		inChord = true;
 	}
 
 	@Override
 	public void exitChord(final MusicParser.ChordContext ctx) {
 		messages.ctx = ctx;
 		phrase.endChord(ctx.stop.getText());
+		inChord = false;
 	}
 
 	@Override

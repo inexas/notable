@@ -25,9 +25,9 @@ public class BarlineTests extends ParserTestAbc {
 
 	@Test
 	void finalBarline() {
-		assertEquals("C C C C |||\n", warningExpected("Missing", "CCCC"));
-		assertEquals("C C C C |||\n", warningExpected("Incorrect", "CCCC|"));
-		assertEquals("C C C C |||\n", warningExpected("Incorrect", "CCCC||"));
+		errorExpected("Missing", "CCCC");
+		errorExpected("Incorrect", "CCCC|");
+		errorExpected("Incorrect", "CCCC||");
 		assertEquals("C C C C |||\n", toMiki("CCCC|||"));
 	}
 }

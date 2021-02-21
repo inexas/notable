@@ -19,7 +19,8 @@ import java.util.*;
  */
 public class Timeline {
 	public class Frame {
-		private Frame pic, nic; // Linked list: Previous/Next In Chain
+		private Frame pic; // Linked list: Previous
+		public Frame nic; // Linked list: Next In Chain
 		private TimeSignature timeSignature;
 		public Cpm cpm;
 		public Barline barline;
@@ -132,7 +133,6 @@ public class Timeline {
 	private Frame fic, lic;
 	private boolean seenStartRepeat;
 
-
 	Timeline(final Score score) {
 		this.score = score;
 		messages = score.messages;
@@ -158,5 +158,18 @@ public class Timeline {
 
 	private void error(final String message) {
 		messages.error(message);
+	}
+
+	public void setLength(final int measureCount) {
+		final int currentSize = frames.size();
+		assert measureCount == currentSize || measureCount == currentSize - 1;
+		if(measureCount < currentSize) {
+			frames.remove(measureCount);
+		}
+	}
+
+	@Override
+	public String toString() {
+		return "Timeline{" + frames.size() + '}';
 	}
 }

@@ -20,8 +20,16 @@ public class Note extends Event {
 		private static final int[] lookup = {0, 1, 2, 3, -3, -2, -1};
 		private int anchor, anchorTonic;
 
-		SearchSpace(final int slot) {
+		SearchSpace(final int slot, final int relativeOctave) {
 			setAnchor(slot);
+
+			if(relativeOctave != 0) {
+				final boolean up = relativeOctave > 0;
+				int distance = up ? relativeOctave : -relativeOctave;
+				final int newAnchor = anchor + (up ? 4 : -5);
+				distance--;
+				setAnchor(newAnchor + (up ? distance * Notes.BASE : distance * -Notes.BASE));
+			}
 		}
 
 		void setAnchor(final int slot) {
@@ -37,21 +45,6 @@ public class Note extends Event {
 
 		int lookup(final int tonic) {
 			return anchor + lookup[(Notes.BASE + tonic - anchorTonic) % Notes.BASE];
-		}
-
-		/**
-		 * Move the SearchSpace up or down by a given amount
-		 *
-		 * @param vector E.g. '++' gives a vector of +2
-		 */
-		void moveAnchor(final int vector) {
-			assert vector != 0;
-
-			final boolean up = vector > 0;
-			int distance = up ? vector : -vector;
-			final int newAnchor = anchor + (up ? 4 : -5);
-			distance--;
-			setAnchor(newAnchor + (up ? distance * Notes.BASE : distance * -Notes.BASE));
 		}
 
 		int getAnchor() {

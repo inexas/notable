@@ -4,18 +4,18 @@
 
 package org.inexas.notable.notation.model;
 
+import org.inexas.notable.notation.model.Note.*;
 import org.inexas.notable.notation.parser.*;
 import org.inexas.notable.util.*;
 
 import java.util.*;
 import java.util.regex.*;
 
-
 /**
  * Each Part has at least one Phrase. A piano has two Phrases, one for
  * each hand.
  * <p>
- * During mmiki parsing the stream of events my flip between several
+ * During miki parsing the stream of events my flip between several
  * Phrases that make up the score at any time, the Phrase class then plays
  * an important role remembering the state for for each individual phrase.
  */
@@ -25,7 +25,7 @@ public class Phrase extends Element implements MappedList.Named {
 	private final Score score;
 	public final Part part;
 	public final String name;
-	public final List<Measure> measures = new ArrayList<>();
+	public List<Measure> measures = new ArrayList<>();
 	public Measure measure;
 	public Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
 	/**
@@ -60,19 +60,12 @@ public class Phrase extends Element implements MappedList.Named {
 		timeline.report(measure);
 
 		duration = measure.getEffectiveTimeSignature().getDefaultDuration();
+		lastNote = score.getDefaultClef().lowSlot + 4;
 	}
 
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	public boolean isActive() {
-		return name.length() > 0 || measures.size() > 1 || measure.isActive;
-	}
-
-	public int getActiveMeasureCount() {
-		return measure.isActive ? measure.ordinal + 1 : measure.ordinal;
 	}
 
 	private void push(final Venue venue) {
@@ -123,10 +116,8 @@ public class Phrase extends Element implements MappedList.Named {
 		// Group 2: Articulation...
 		final String group1 = matcher.group(1);
 		if(group1 != null) {
-			final Articulation articulation = Articulation.getByMiki(group1);
-			if(annotationMap.put(articulation.getClass(), articulation) != null) {
-				warn("Annotation overwrites previous value: " + articulation);
-			}
+			final Articulation articulation = Articulation.get(group1);
+			chord.annotations.put(articulation.getClass(), articulation);
 		}
 
 		// Group 2: Duration...
@@ -142,9 +133,8 @@ public class Phrase extends Element implements MappedList.Named {
 		}
 		chord.duration = duration;
 
-		venue.add(chord);
-
 		pop();
+		venue.add(chord);
 	}
 
 	public void addNamedChord(final String text) {
@@ -211,18 +201,18 @@ public class Phrase extends Element implements MappedList.Named {
 			assert absoluteOctave < 8 || absoluteOctave == 8 && tonic == 0;
 			result = absoluteOctave * Notes.BASE + tonic;
 		} else {
-			final Note.SearchSpace searchSpace = new Note.SearchSpace(lastNote);
-			if(relativeOctave != 0) {
-				searchSpace.moveAnchor(relativeOctave);
-			}
+			final SearchSpace searchSpace = new SearchSpace(lastNote, relativeOctave);
 			result = searchSpace.lookup(tonic);
 		}
+		absoluteOctave = -1;
+		relativeOctave = 0;
 
 		return result;
 	}
 
 	public void handle(final Clef clef) {
 		measure.handle(clef);
+		lastNote = clef.lowSlot + 4;
 	}
 
 	public void handle(final TimeSignature timeSignature) {
@@ -237,6 +227,14 @@ public class Phrase extends Element implements MappedList.Named {
 		measure.setKeySignature(key);
 	}
 
+	public Measure handle(final Barline barline) {
+		venue = measure = measure.handle(barline);
+		if(measure != null) {
+			measures.add(measure);
+		}
+		return measure;
+	}
+
 	public void annotate(final Annotation annotation) {
 		if(annotationMap.put(annotation.getClass(), annotation) != null) {
 			warn("Annotation overwrites previous value: " + annotation);
@@ -247,45 +245,38 @@ public class Phrase extends Element implements MappedList.Named {
 		messages.warn(message);
 	}
 
-	private void error(final String message) {
-		messages.error(message);
-	}
-
 	public void handle(final Event event) {
-		measure.add(event);
+		venue.add(event);
 	}
 
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.enter(this);
 		for(final Measure measure : measures) {
-			if(measure.isActive) {
-				measure.accept(visitor);
-			}
+			measure.accept(visitor);
 		}
 		visitor.exit(this);
 	}
 
-	@Override
-	public int hashCode() {
-		return part.hashCode() ^ name.hashCode();
-	}
-
-	@Override
-	public boolean equals(final Object object) {
-		final boolean result;
-
-		if(this == object) {
-			result = true;
-		} else {
-			if(object == null || getClass() != object.getClass()) {
-				result = false;
-			} else {
-				final Phrase rhs = (Phrase) object;
-				result = part.equals(rhs.part) && name.equals(rhs.name);
+	boolean prune() {
+		final List<Measure> pruned = new ArrayList<>();
+		for(final Measure measure : measures) {
+			if(measure.isActivated()) {
+				pruned.add(measure);
 			}
 		}
+		measures = pruned;
+		return measures.size() > 0;
+	}
 
+	int countMeasures(final int currentMaximum) {
+		int result = currentMaximum;
+		for(int i = currentMaximum; i < measures.size(); i++) {
+			final Measure measure = measures.get(i);
+			if(measure.isActivated()) {
+				result = i + 1;
+			}
+		}
 		return result;
 	}
 }

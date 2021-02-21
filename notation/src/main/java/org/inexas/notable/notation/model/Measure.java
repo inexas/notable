@@ -39,7 +39,6 @@ public class Measure extends Element implements Venue {
 	 * The list of events in this measure
 	 */
 	public final List<Event> events = new ArrayList<>();
-	public boolean isActive = false;
 
 	Measure(final Phrase phrase, final Measure pic) {
 		this.phrase = phrase;
@@ -66,7 +65,6 @@ public class Measure extends Element implements Venue {
 	public void add(final Event event) {
 		events.add(event);
 		clicksSoFar += event.duration.clicks;
-		isActive = true;
 	}
 
 	public int getSize() {
@@ -79,7 +77,6 @@ public class Measure extends Element implements Venue {
 		} else {
 			this.clef = clef;
 		}
-		isActive = true;
 	}
 
 	/**
@@ -116,7 +113,6 @@ public class Measure extends Element implements Venue {
 		} else {
 			this.keySignature = keySignature;
 		}
-		isActive = true;
 	}
 
 	/**
@@ -144,6 +140,7 @@ public class Measure extends Element implements Venue {
 	 * @return The time signature for this measure or null if no time signature
 	 * has been explicitly set
 	 */
+	@SuppressWarnings("unused")
 	public TimeSignature getAppliedTimeSignature() {
 		return frame.getAppliedTimeSignature();
 	}
@@ -153,7 +150,6 @@ public class Measure extends Element implements Venue {
 			error("Time signatures must appear at the beginning of a measure");
 		}
 		frame.report(timeSignature);
-		isActive = true;
 	}
 
 	void handle(final Cpm cpm) {
@@ -165,7 +161,6 @@ public class Measure extends Element implements Venue {
 		} else {
 			frame.report(cpm);
 		}
-		isActive = true;
 	}
 
 	public boolean isComplete() {
@@ -188,18 +183,27 @@ public class Measure extends Element implements Venue {
 		} else {
 			this.clef = clef;
 		}
-		isActive = true;
 	}
 
 	TimeSignature getEffectiveTimeSignature() {
 		return frame.getEffectiveTimeSignature();
 	}
 
-	public void handle(final Barline barline) {
+	Measure handle(final Barline barline) {
+		final Measure result;
 		if(clicksSoFar < frame.actualSize) {
 			error("Barline before end of measure");
 		} else {
+			assert clicksSoFar == frame.actualSize : clicksSoFar + "/" + frame.actualSize;
 			frame.report(barline);
 		}
+		result = barline.terminates ? null : new Measure(phrase, this);
+		return result;
+	}
+
+	boolean isActivated() {
+		return events.size() > 0
+				|| clef != null
+				|| keySignature != null;
 	}
 }

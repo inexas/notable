@@ -8,18 +8,20 @@ import org.inexas.notable.notation.parser.*;
 import org.inexas.notable.util.*;
 
 public enum Barline implements Visited {
-	singleBar("|"),
-	doubleBar("||"),
-	beginRepeat("|:"),
-	endRepeat(":|"),
-	beginEndRepeat(":|:"),
-	eos("|||"),
-	eosRepeat(":|||");
+	singleBar("|", false),
+	doubleBar("||", false),
+	beginRepeat("|:", false),
+	endRepeat(":|", false),
+	beginEndRepeat(":|:", false),
+	eos("|||", true),
+	eosRepeat(":|||", true);
 
 	public final String miki;
+	public final boolean terminates;
 
-	Barline(final String miki) {
+	Barline(final String miki, final boolean terminates) {
 		this.miki = miki;
+		this.terminates = terminates;
 	}
 
 	public static Barline get(final String miki) {

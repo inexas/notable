@@ -38,8 +38,8 @@ public class ToMikiVisitor implements Visitor {
 		if(keySignature != null && !KeySignature.C.equals(keySignature)) {
 			visit(keySignature);
 		}
-		final TimeSignature timeSignature = timeline.getFrame(0).getAppliedTimeSignature();
-		if(timeSignature != null) {
+		final TimeSignature timeSignature = score.getDefaultTimeSignature();
+		if(timeSignature != null && !TimeSignature.fourFour.equals(timeSignature)) {
 			visit(timeSignature);
 		}
 
@@ -88,16 +88,7 @@ public class ToMikiVisitor implements Visitor {
 
 	@Override
 	public void exit(final Phrase phrase) {
-		// End bar of Phrase is implied
-		space();
-		if(inRepeat) {
-			sb.append(Barline.endRepeat.name());
-			inRepeat = false;
-		} else {
-			if(seenEvent) {
-				newline();
-			}
-		}
+		newline();
 	}
 
 	@Override
@@ -312,11 +303,11 @@ public class ToMikiVisitor implements Visitor {
 	private void visitEvent(final Event event) {
 		// Annotations proceed the Event...
 		final Map<Class<? extends Annotation>, Annotation> annotations = event.annotations;
-		final Accidental accidental = (Accidental) event.annotations.remove(Accidental.class);
-		final Articulation articulation = (Articulation) annotations.remove(Articulation.class);
-		for(final Annotation annotation : annotations.values()) {
-			annotation.accept(this);
-		}
+		final Accidental accidental = (Accidental) event.annotations.get(Accidental.class);
+		final Articulation articulation = (Articulation) annotations.get(Articulation.class);
+//		for(final Annotation annotation : annotations.values()) {
+//			annotation.accept(this);
+//		}
 
 		// Now the event itself
 		space();

@@ -157,7 +157,7 @@ public class NamedChord extends Event {
 		// Group 10: Articulation...
 		group = matcher.group(10);
 		if(group != null) {
-			final Articulation articulation = Articulation.getByMiki(group);
+			final Articulation articulation = Articulation.get(group);
 			annotations.put(Articulation.class, articulation);
 		}
 

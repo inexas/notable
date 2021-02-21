@@ -25,9 +25,22 @@ public enum Clef implements Visited {
 	percussion(16, "unpitchedPercussionClef1", 0, 0);
 
 	public final int index;
+	/**
+	 * The SMuFL name
+	 */
 	public final String smufl;
+	/**
+	 * Where should the base of the glyph be located
+	 */
 	public final int staffSlot;
-	public final int lowSlot, highSlot;
+	/**
+	 * Note of the lowest line on the staff
+	 */
+	public final int lowSlot;
+	/**
+	 * Note of the highest line on the staff
+	 */
+	public final int highSlot;
 
 	Clef(
 			final int id,

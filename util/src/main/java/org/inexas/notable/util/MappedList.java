@@ -131,4 +131,37 @@ public class MappedList<V extends MappedList.Named> implements Iterable<V> {
 		System.arraycopy(source, 0, result, 0, source.length);
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		return getClass().getSimpleName().hashCode();
+	}
+
+	@Override
+	public boolean equals(final Object object) {
+		final boolean result;
+
+		if(this == object) {
+			result = true;
+		} else {
+			if(object == null || getClass() != object.getClass()) {
+				result = false;
+			} else {
+				@SuppressWarnings("unchecked") final MappedList<V> rhs = (MappedList<V>) object;
+				if(cursor == rhs.cursor) {
+					result = Arrays.equals(names, rhs.names)
+							&& Arrays.equals(elements, rhs.elements);
+				} else {
+					result = false;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "MappedList{" + cursor + '}';
+	}
 }

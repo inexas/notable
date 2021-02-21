@@ -197,7 +197,7 @@ public class GlyphFactory {
 
 		final Articulation articulation = note.get(Articulation.class);
 		if(articulation != null) {
-			result.articulation = getGlyph(articulation.name);
+			result.articulation = getGlyph(articulation.name());
 		}
 
 		return result;
