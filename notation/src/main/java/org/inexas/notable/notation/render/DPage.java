@@ -3,8 +3,10 @@ package org.inexas.notable.notation.render;
 import javafx.scene.canvas.*;
 import org.inexas.notable.util.*;
 
-class DPage extends Drawable {
+import java.util.*;
 
+class DPage extends Drawable {
+	final List<DPart> parts = new ArrayList<>();
 
 	DPage(final Layout layout) {
 	}

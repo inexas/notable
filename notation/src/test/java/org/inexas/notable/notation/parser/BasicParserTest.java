@@ -74,20 +74,6 @@ public class BasicParserTest extends ParserTestAbc {
 	}
 
 	@Test
-	void testDynamic() {
-		assertEquals("fff", Dynamic.fff.name);
-		assertEquals("ff", Dynamic.ff.name);
-		assertEquals("f", Dynamic.f.name);
-		assertEquals("mf", Dynamic.mf.name);
-		assertEquals("mp", Dynamic.mp.name);
-		assertEquals("p", Dynamic.p.name);
-		assertEquals("pp", Dynamic.pp.name);
-		assertEquals("ppp", Dynamic.ppp.name);
-
-		assertEquals("fff C R R2 |||\n", toMiki("fff C"));
-	}
-
-	@Test
 	void testFingering() {
 		assertEquals("~2 C R R2 |||\n", toMiki("~2 C R R2|||"));
 	}

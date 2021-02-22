@@ -12,9 +12,7 @@ public class ToMikiVisitor implements Visitor {
 	public Timeline timeline;
 	private final static char NL = '\n';
 	private final StringBuilder sb = new StringBuilder();
-	private boolean inRepeat;
 	private Duration currentDuration = Duration.quarter;
-	private boolean seenEvent;
 	private Duration saveDuration;
 	private int beamCount;
 
@@ -82,8 +80,6 @@ public class ToMikiVisitor implements Visitor {
 			appendQuoted(phrase.name);
 			newline();
 		}
-
-		seenEvent = false;  // todo This needs to be reset according to the measure
 	}
 
 	@Override
@@ -303,21 +299,25 @@ public class ToMikiVisitor implements Visitor {
 	private void visitEvent(final Event event) {
 		// Annotations proceed the Event...
 		final Map<Class<? extends Annotation>, Annotation> annotations = event.annotations;
-		final Accidental accidental = (Accidental) event.annotations.get(Accidental.class);
-		final Articulation articulation = (Articulation) annotations.get(Articulation.class);
-//		for(final Annotation annotation : annotations.values()) {
-//			annotation.accept(this);
-//		}
+
+		space();
+		// First any dynamic
+		final Dynamic dynamic = (Dynamic) annotations.get(Dynamic.class);
+		if(dynamic != null) {
+			dynamic.accept(this);
+			space();
+		}
 
 		// Now the event itself
-		space();
 		sb.append(event.getLabel());
+		final Accidental accidental = (Accidental) event.annotations.get(Accidental.class);
 		if(accidental != null) {
 			visit(accidental);
 		}
 		visitDuration(event);
 
 		// Now any Articulation...
+		final Articulation articulation = (Articulation) annotations.get(Articulation.class);
 		if(articulation != null) {
 			articulation.accept(this);
 		}
@@ -328,7 +328,6 @@ public class ToMikiVisitor implements Visitor {
 				sb.append(')');
 			}
 		}
-		seenEvent = true;
 	}
 
 	private void line(final Line line, final String leader) {

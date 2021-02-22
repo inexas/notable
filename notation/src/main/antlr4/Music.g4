@@ -246,7 +246,7 @@ fragment OneOrMore: [1-9][0-9]* ;
 
 fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) '.'* ;
 
-fragment Tonic: [A-GRa-g] ;
+fragment Tonic: [A-GR] ;
 
 fragment Accidental: [#bn] ;
 

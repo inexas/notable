@@ -7,6 +7,7 @@ import java.util.*;
 class DPhrase {
 	private final Layout layout;
 	final List<DMeasure> measures = new ArrayList<>();
+	String name;
 
 	DPhrase(final Layout layout, final Phrase phrase) {
 		this.layout = layout;

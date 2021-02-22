@@ -7,6 +7,7 @@ import java.util.*;
 class DPart {
 	private final Layout layout;
 	final List<DPhrase> phrases = new ArrayList<>();
+	String name;
 
 	DPart(final Layout layout, final Part part) {
 		this.layout = layout;
