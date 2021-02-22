@@ -296,17 +296,22 @@ public class ToMikiVisitor implements Visitor {
 		return sb.toString();
 	}
 
-	private void visitEvent(final Event event) {
-		// Annotations proceed the Event...
-		final Map<Class<? extends Annotation>, Annotation> annotations = event.annotations;
+	private Map<Class<? extends Annotation>, Annotation> annotations;
 
+	private void visitEvent(final Event event) {
 		space();
-		// First any dynamic
-		final Dynamic dynamic = (Dynamic) annotations.get(Dynamic.class);
-		if(dynamic != null) {
-			dynamic.accept(this);
-			space();
-		}
+
+		// Deal with annotations that proceed the Event...
+		annotations = event.annotations;
+		annotate(Dynamic.class);
+		annotate(Bind.class);
+		annotate(Pedal.class);
+		annotate(Octave.class);
+		annotate(Crescendo.class);
+		annotate(Decrescendo.class);
+		annotate(Volta.class);
+		annotate(BarRest.class);
+		annotate(Fingering.class);
 
 		// Now the event itself
 		sb.append(event.getLabel());
@@ -327,6 +332,32 @@ public class ToMikiVisitor implements Visitor {
 			if(--beamCount == 0) {
 				sb.append(')');
 			}
+		}
+	}
+
+	private void annotate(final Class<? extends Annotation> clazz) {
+		final Annotation annotation = annotations.get(clazz);
+		if(annotation != null) {
+			if(Dynamic.class.equals(clazz)) {
+				visit((Dynamic) annotation);
+			} else if(Bind.class.equals(clazz)) {
+				visit((Bind) annotation);
+			} else if(Pedal.class.equals(clazz)) {
+				visit((Pedal) annotation);
+			} else if(Octave.class.equals(clazz)) {
+				visit((Octave) annotation);
+			} else if(Crescendo.class.equals(clazz)) {
+				visit((Crescendo) annotation);
+			} else if(Decrescendo.class.equals(clazz)) {
+				visit((Decrescendo) annotation);
+			} else if(Volta.class.equals(clazz)) {
+				visit((Volta) annotation);
+			} else if(BarRest.class.equals(clazz)) {
+				visit((BarRest) annotation);
+			} else if(Fingering.class.equals(clazz)) {
+				visit((Fingering) annotation);
+			}
+			space();
 		}
 	}
 

@@ -46,19 +46,7 @@ public class BasicParserTest extends ParserTestAbc {
 	@Test
 	void testStructure2() {
 		// Name the children
-		final Score score = toScore("part \"p1\" phrase \"f1\"");
-		assertEquals(1, score.parts.size());
-		final Part part = score.parts.getFirst();
-		assertEquals("p1", part.name);
-		assertEquals(1, part.phrases.size());
-		final Phrase phrase = part.getFirstPhrase();
-		assertEquals("f1", phrase.name);
-	}
-
-	@Test
-	void testStructure3() {
-		// Part:Phrase
-		final Score score = toScore("phrase \"p1:f1\"");
+		final Score score = toScore("part \"p1\" phrase \"f1\" CCCC|||");
 		assertEquals(1, score.parts.size());
 		final Part part = score.parts.getFirst();
 		assertEquals("p1", part.name);
@@ -76,20 +64,6 @@ public class BasicParserTest extends ParserTestAbc {
 	@Test
 	void testFingering() {
 		assertEquals("~2 C R R2 |||\n", toMiki("~2 C R R2|||"));
-	}
-
-	@Test
-	void testLines() {
-		assertEquals("{b 2} C E G R |||\n", toMiki("{b 2} C E G R|||"));
-		assertEquals("{b 2} C E G R |||\n", toMiki("{bind 2} C E G R|||"));
-		assertEquals("{c 1.2} C E G R |||\n", toMiki("{cre 1.2} C E G R|||"));
-		assertEquals("{d 1.2} C E G R |||\n", toMiki("{decrescendo 1.2} C E G R|||"));
-		assertEquals("{o-8 2} C R R2 |||\n", toMiki("{o-8 2} C R R2 |||"));
-		assertEquals("{o8 2} C R R2 |||\n", toMiki("{o8 2} C R R2 |||"));
-		assertEquals("{p 2.2} C D A R |||\n", toMiki("{pedal 2.2} C D A R|||"));
-		assertEquals("{p 2.2} C D A R |||\n", toMiki("{pedal 2.2} C D A R|||"));
-		assertEquals("{r 2} C R R2 |||\n", toMiki("{rest 2} C R R2 |||"));
-		assertEquals("{v1 2} C R R2 |||\n", toMiki("{volta1 2} C R R2 |||"));
 	}
 
 	@Test
