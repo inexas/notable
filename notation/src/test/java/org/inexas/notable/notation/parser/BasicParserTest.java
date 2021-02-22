@@ -71,14 +71,14 @@ public class BasicParserTest extends ParserTestAbc {
 		assertEquals("\"Text\" C R R2 |||\n", toMiki("\"Text\"C R R2|||"));
 	}
 
-	private void expectMessage(final String string, final String excerpt) {
-		final MikiParser parser = MikiParser.fromString(string);
+	private void expectMessage(final String excerpt, final String toTest) {
+		final MikiParser parser = MikiParser.fromString(toTest);
 		assertTrue(parser.messages.contains(excerpt));
 	}
 
 	@Test
 	void testArticulationsNotSupported() {
-		expectMessage("[t A B C].", "articulation");
+		expectMessage("articulation", "[t A B C].");
 	}
 
 	@Test
@@ -89,9 +89,9 @@ public class BasicParserTest extends ParserTestAbc {
 		assertEquals("[t A B C]8 A B C R8 |||\n", toMiki("[t A B C]8 A B C R8|||"));
 	}
 
-
 	@Test
-	void testOverflow() {
-		expectMessage("A B C [t A B C]2", "reduced");
+	void measureFilling() {
+		errorExpected("underflow", "A B C|||");
+		errorExpected("overflow", "A B C D2|||");
 	}
 }

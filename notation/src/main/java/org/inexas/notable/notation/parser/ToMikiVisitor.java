@@ -312,6 +312,7 @@ public class ToMikiVisitor implements Visitor {
 		annotate(Volta.class);
 		annotate(BarRest.class);
 		annotate(Fingering.class);
+		annotate(TextAnnotation.class);
 
 		// Now the event itself
 		sb.append(event.getLabel());
@@ -356,6 +357,8 @@ public class ToMikiVisitor implements Visitor {
 				visit((BarRest) annotation);
 			} else if(Fingering.class.equals(clazz)) {
 				visit((Fingering) annotation);
+			} else if(TextAnnotation.class.equals(clazz)) {
+				visit((TextAnnotation) annotation);
 			}
 			space();
 		}

@@ -191,12 +191,13 @@ public class Measure extends Element implements Venue {
 
 	Measure handle(final Barline barline) {
 		final Measure result;
-		if(clicksSoFar < frame.actualSize) {
-			error("Barline before end of measure");
-		} else {
-			assert clicksSoFar == frame.actualSize : clicksSoFar + "/" + frame.actualSize;
-			frame.report(barline);
+		if(clicksSoFar == frame.actualSize) {
+		} else if(clicksSoFar < frame.actualSize) {
+			error("Measure underflow: measure is not full");
+		} else if(clicksSoFar > frame.actualSize) {
+			error("Measure overflow: " + clicksSoFar + "/" + frame.actualSize);
 		}
+		frame.report(barline);
 		result = barline.terminates ? null : new Measure(phrase, this);
 		return result;
 	}
