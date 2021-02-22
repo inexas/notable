@@ -402,7 +402,6 @@ public class MikiParser extends MusicBaseListener {
 	public void enterBind(final MusicParser.BindContext ctx) {
 		messages.ctx = ctx;
 		// todo There's a stack of work to do here, different types of bind,
-		// how far they can extend, ...
 		final Beam beam = Beam.beams[ctx.getChildCount() - 2];
 		phrase.annotate(beam);
 	}

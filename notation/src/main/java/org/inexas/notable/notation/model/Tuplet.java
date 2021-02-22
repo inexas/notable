@@ -9,7 +9,11 @@ import org.inexas.notable.notation.parser.*;
 import java.util.*;
 
 /**
- * Tuplet, e.g. Triplet
+ * Tuplet, e.g. Triplet.
+ * <p>
+ * Tuplets can be quite complex things. The tuplet occupies an 'outside' duration,
+ * say of one quarter, and the notes within it can be different and are spread
+ * according to their individual durations
  */
 public class Tuplet extends Event implements Venue {
 	public final List<Event> events = new ArrayList();

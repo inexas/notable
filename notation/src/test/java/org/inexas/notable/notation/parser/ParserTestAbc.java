@@ -53,9 +53,9 @@ abstract class ParserTestAbc {
 			}
 		}
 		if(!found) {
-			System.out.println("Searching for: " + expected);
+			System.out.println("Searching for: '" + expected + "' but no natching error message.");
 			System.out.println(messages);
-			assertTrue(count >= 0); // Force error
+			assertTrue(count < 0); // Force error
 		}
 	}
 

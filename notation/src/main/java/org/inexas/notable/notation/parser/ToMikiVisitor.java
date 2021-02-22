@@ -313,6 +313,7 @@ public class ToMikiVisitor implements Visitor {
 		annotate(BarRest.class);
 		annotate(Fingering.class);
 		annotate(TextAnnotation.class);
+		annotate(Beam.class);
 
 		// Now the event itself
 		sb.append(event.getLabel());
@@ -337,9 +338,13 @@ public class ToMikiVisitor implements Visitor {
 	}
 
 	private void annotate(final Class<? extends Annotation> clazz) {
+		boolean space = true;
 		final Annotation annotation = annotations.get(clazz);
 		if(annotation != null) {
-			if(Dynamic.class.equals(clazz)) {
+			if(Beam.class.equals(clazz)) {
+				visit((Beam) annotation);
+				space = false;
+			} else if(Dynamic.class.equals(clazz)) {
 				visit((Dynamic) annotation);
 			} else if(Bind.class.equals(clazz)) {
 				visit((Bind) annotation);
@@ -360,7 +365,9 @@ public class ToMikiVisitor implements Visitor {
 			} else if(TextAnnotation.class.equals(clazz)) {
 				visit((TextAnnotation) annotation);
 			}
-			space();
+			if(space) {
+				space();
+			}
 		}
 	}
 

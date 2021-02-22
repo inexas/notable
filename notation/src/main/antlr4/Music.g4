@@ -105,7 +105,7 @@ tuplet: START_TUPLET (octave* note)+ END_NOTE_GROUP ;
 namedChord: NAMED_CHORD ;
 
 // Generates both a tie (same notes) or a slur (different notes)
-bind: '(' (bind | note)+ ')' ;
+bind: BEAM (bind | note)+ MAEB ;
 
 // L E X E R
 
@@ -150,6 +150,10 @@ CPM: 'cpm' ;
 COMMON: 'common' ;
 
 CUT: 'cut' ;
+
+BEAM: '(' ;
+
+MAEB: ')' ;
 
 // Must be before NOTE
 // No spaces allowed in [brackets]

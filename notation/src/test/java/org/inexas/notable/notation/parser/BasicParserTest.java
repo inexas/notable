@@ -85,8 +85,7 @@ public class BasicParserTest extends ParserTestAbc {
 	void testTuplet() {
 		assertEquals("[t A8* B C] A B R |||\n", toMiki("[t A8* B C] A B R|||"));
 		assertEquals("[t A B C] A B C |||\n", toMiki("[t A B C] A B C|||"));
-		assertEquals("[t A B C]8* A (B C) R2 |||\n", toMiki("[t A B C]8* A B C|||"));
-		assertEquals("[t A B C]8 A B C R8 |||\n", toMiki("[t A B C]8 A B C R8|||"));
+		assertEquals("[t A B C]8 R8 A B C |||\n", toMiki("[t A B C]8 R8 A B C|||"));
 	}
 
 	@Test
