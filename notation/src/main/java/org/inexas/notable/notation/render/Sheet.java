@@ -15,7 +15,7 @@ public class Sheet extends VBox {
 	private final Canvas canvas;
 	private final Score score;
 	private List<Event> events;
-	private Staff staff;
+	//	private Staff staff;
 	private Metrics.Y y;
 	private double xCursor;
 	private GraphicsContext gc;

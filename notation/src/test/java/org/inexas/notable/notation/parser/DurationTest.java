@@ -1,5 +1,6 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
+import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,7 +9,7 @@ class DurationTest {
 
 	@Test
 	void clickCounts() {
-		assertEquals(32, Duration.whole.clicks);
+		Assertions.assertEquals(32, Duration.whole.clicks);
 
 		assertEquals(16, Duration.half.clicks);
 		assertEquals(24, Duration.halfDot.clicks);

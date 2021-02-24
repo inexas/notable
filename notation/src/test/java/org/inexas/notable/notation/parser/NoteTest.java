@@ -1,5 +1,6 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
+import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

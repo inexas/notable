@@ -227,12 +227,11 @@ public class Phrase extends Element implements MappedList.Named {
 		measure.setKeySignature(key);
 	}
 
-	public Measure handle(final Barline barline) {
+	public void handle(final Barline barline) {
 		venue = measure = measure.handle(barline);
 		if(measure != null) {
 			measures.add(measure);
 		}
-		return measure;
 	}
 
 	public void annotate(final Annotation annotation) {

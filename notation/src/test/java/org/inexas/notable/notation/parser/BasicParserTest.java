@@ -55,11 +55,6 @@ public class BasicParserTest extends ParserTestAbc {
 		assertEquals("f1", phrase.name);
 	}
 
-	@Test
-	void testAccidentals() {
-		// [#bn]
-		assertEquals("B Bb A# Bn |||\n", toMiki("B Bb A# Bn |||"));
-	}
 
 	@Test
 	void testFingering() {

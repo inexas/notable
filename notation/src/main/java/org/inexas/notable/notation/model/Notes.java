@@ -10,7 +10,7 @@ public interface Notes {
 	Pattern notePattern = Pattern.compile("" +
 			"([A-GRX])" +       // Tonic, including rest & ghost
 			"([0-9]+.*\\*?)?" + // Duration
-			"([b#n])?" +        // Accidental
+			"([b#n]+)?" +       // Accidental
 			"([._!fg]+)?");     // Articulation
 	Pattern noteGroupEndPattern = Pattern.compile("" +
 			"]" +               // Closing ]

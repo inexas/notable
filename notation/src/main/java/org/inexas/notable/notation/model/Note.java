@@ -16,11 +16,11 @@ import java.util.*;
  */
 public class Note extends Event {
 
-	static class SearchSpace {
+	public static class SearchSpace {
 		private static final int[] lookup = {0, 1, 2, 3, -3, -2, -1};
 		private int anchor, anchorTonic;
 
-		SearchSpace(final int slot, final int relativeOctave) {
+		public SearchSpace(final int slot, final int relativeOctave) {
 			setAnchor(slot);
 
 			if(relativeOctave != 0) {
@@ -32,7 +32,7 @@ public class Note extends Event {
 			}
 		}
 
-		void setAnchor(final int slot) {
+		private void setAnchor(final int slot) {
 			if(slot < 8) {
 				anchor = 8;
 			} else if(slot > 53) {
@@ -43,12 +43,8 @@ public class Note extends Event {
 			anchorTonic = Notes.tonic(anchor);
 		}
 
-		int lookup(final int tonic) {
+		public int lookup(final int tonic) {
 			return anchor + lookup[(Notes.BASE + tonic - anchorTonic) % Notes.BASE];
-		}
-
-		int getAnchor() {
-			return anchor;
 		}
 	}
 

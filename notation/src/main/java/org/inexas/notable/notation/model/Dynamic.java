@@ -11,21 +11,13 @@ import java.util.*;
 public class Dynamic implements Annotation {
 	private final static Map<String, Dynamic> lookup = new HashMap<>();
 
-	@SuppressWarnings("unused")
 	public final static Dynamic fff = new Dynamic("fff");
-	@SuppressWarnings("unused")
 	public final static Dynamic ff = new Dynamic("ff");
-	@SuppressWarnings("unused")
 	public final static Dynamic f = new Dynamic("f");
-	@SuppressWarnings("unused")
 	public final static Dynamic mf = new Dynamic("mf");
-	@SuppressWarnings("unused")
 	public final static Dynamic mp = new Dynamic("mp");
-	@SuppressWarnings("unused")
 	public final static Dynamic p = new Dynamic("p");
-	@SuppressWarnings("unused")
 	public final static Dynamic pp = new Dynamic("pp");
-	@SuppressWarnings("unused")
 	public final static Dynamic ppp = new Dynamic("ppp");
 	public final String name;
 

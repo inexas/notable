@@ -48,6 +48,7 @@ subtitle: SUBTITLE STRING_LITERAL ;
 
 composer: COMPOSER STRING_LITERAL ;
 
+// todo This needs to be wiki markup
 header: HEADER STRING_LITERAL ;
 
 copyright: COPYRIGHT STRING_LITERAL ;
@@ -252,7 +253,7 @@ fragment Duration: ( '1' | '2' | '4' | '8' | '16' | '32' ) '.'* ;
 
 fragment Tonic: [A-GR] ;
 
-fragment Accidental: [#bn] ;
+fragment Accidental: ( 'b' | 'bb' | '#' | '##' | 'n' ) ;
 
 fragment Articulation: [._!fg]+;
 
@@ -267,6 +268,5 @@ fragment Default: '*' ;
  * G 'x': Mixolyian
  * A 'm', 'a': Aeolian
  * B 'l': Locrian
- *   'X': Ghost
  */
-fragment Mode: [MmX] ;
+fragment Mode: [Mm] ;

@@ -1,6 +1,6 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
-import org.inexas.notable.notation.parser.*;
+import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -59,19 +59,7 @@ public class OctaveParsingTest {
 		assertEquals(Notes.E1, ss.lookup(Notes.E));
 		assertEquals(Notes.F1, ss.lookup(Notes.F));
 
-		ss.setAnchor(Notes.A0);
-		assertEquals(Notes.D1, ss.getAnchor());
 		assertEquals(Notes.D1, ss.lookup(Notes.D));
 		assertEquals(Notes.A0, ss.lookup(Notes.A));
-
-		ss.setAnchor(Notes.C8);
-
-		ss.setAnchor(Notes.E1);
-		assertEquals(Notes.E1, ss.getAnchor());
-
-		Note.SearchSpace ss1 = new Note.SearchSpace(Notes.E4, 0);
-		ss1.setAnchor(Notes.E4);
-		ss1 = new Note.SearchSpace(Notes.E1, 2);
-		ss1.setAnchor(Notes.E5);
 	}
 }

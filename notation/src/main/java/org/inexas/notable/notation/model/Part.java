@@ -13,7 +13,7 @@ import org.inexas.notable.util.*;
 public class Part extends Element implements Visited, MappedList.Named {
 	public final String name;
 	public final Score score;
-	// Preserve the oder
+	// Preserve the order
 	public MappedList<Phrase> phrases = new MappedList<>();
 
 	Part(final String name, final Score score) {
@@ -81,7 +81,7 @@ public class Part extends Element implements Visited, MappedList.Named {
 	}
 
 	int countMeasures(final int currentMaximum) {
-		int result = 0;
+		int result = currentMaximum;
 		for(final Phrase phrase : phrases) {
 			result = phrase.countMeasures(result);
 		}

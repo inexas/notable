@@ -17,6 +17,9 @@ public enum Barline implements Visited {
 	eosRepeat(":|||", true);
 
 	public final String miki;
+	/**
+	 * true means that this barline terminates the piece
+	 */
 	public final boolean terminates;
 
 	Barline(final String miki, final boolean terminates) {

@@ -1,5 +1,6 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
+import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -8,7 +9,7 @@ public class ClefTest {
 
 	@Test
 	void countLegerLines1() {
-		assertEquals(Notes.E4, Clef.treble.lowSlot);
+		Assertions.assertEquals(Notes.E4, Clef.treble.lowSlot);
 		assertEquals(Notes.F5, Clef.treble.highSlot);
 		assertEquals(Notes.G2, Clef.bass.lowSlot);
 		assertEquals(Notes.A3, Clef.bass.highSlot);

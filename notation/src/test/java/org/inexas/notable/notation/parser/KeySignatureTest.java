@@ -1,5 +1,6 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
+import org.inexas.notable.notation.model.*;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class KeySignatureTest {
 	@Test
 	void testMap() {
-		assertEquals("C", KeySignature.get("C").name);
+		Assertions.assertEquals("C", KeySignature.get("C").name);
 		assertEquals("Cb", KeySignature.get("Cb").name);
 		assertEquals("C", KeySignature.C.name);
 	}

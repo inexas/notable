@@ -10,25 +10,25 @@ public class Duration {
 	private final static Map<String, Duration> lookupByMiki = new HashMap<>();
 	private final static Map<Integer, Duration> lookupByDenominator = new HashMap<>();
 
-	final static Duration thirtySecond = new Duration("thirtySecond", 32, 0, null);
+	public final static Duration thirtySecond = new Duration("thirtySecond", 32, 0, null);
 
-	final static Duration sixteenth = new Duration("sixteenth", 16, 0, null);
-	final static Duration sixteenthDot = new Duration("sixteenthDot", 16, 1, sixteenth);
+	public final static Duration sixteenth = new Duration("sixteenth", 16, 0, null);
+	public final static Duration sixteenthDot = new Duration("sixteenthDot", 16, 1, sixteenth);
 
 	public final static Duration eighth = new Duration("eighth", 8, 0, null);
 	public final static Duration eighthDot = new Duration("eighthDot", 8, 1, eighth);
-	final static Duration eighthDotDot = new Duration("eighthDotDot", 8, 2, eighth);
+	public final static Duration eighthDotDot = new Duration("eighthDotDot", 8, 2, eighth);
 
 	public final static Duration quarter = new Duration("quarter", 4, 0, null);
-	final static Duration quarterDot = new Duration("quarterDot", 4, 1, quarter);
-	final static Duration quarterDotDot = new Duration("quarterDotDot", 4, 2, quarter);
-	final static Duration quarterDotDotDot = new Duration("quarterDotDotDot", 4, 3, quarter);
+	public final static Duration quarterDot = new Duration("quarterDot", 4, 1, quarter);
+	public final static Duration quarterDotDot = new Duration("quarterDotDot", 4, 2, quarter);
+	public final static Duration quarterDotDotDot = new Duration("quarterDotDotDot", 4, 3, quarter);
 
 	public final static Duration half = new Duration("half", 2, 0, null);
 	public final static Duration halfDot = new Duration("halfDot", 2, 1, half);
-	final static Duration halfDotDot = new Duration("halfDotDot", 2, 2, half);
-	final static Duration halfDotDotDot = new Duration("halfDotDotDot", 2, 3, half);
-	final static Duration halfDotDotDotDot = new Duration("halfDotDotDotDot", 2, 4, half);
+	public final static Duration halfDotDot = new Duration("halfDotDot", 2, 2, half);
+	public final static Duration halfDotDotDot = new Duration("halfDotDotDot", 2, 3, half);
+	public final static Duration halfDotDotDotDot = new Duration("halfDotDotDotDot", 2, 4, half);
 
 	public final static Duration whole = new Duration("whole", 1, 0, null);
 
@@ -86,7 +86,7 @@ public class Duration {
 	/**
 	 * E.g. quarter, half, ...
 	 */
-	final String name;
+	public final String name;
 	/**
 	 * E.g. 2 = half, 4 = quarter, ...
 	 */
@@ -110,7 +110,7 @@ public class Duration {
 	/**
 	 * Points to the non-dotted version, e.g. for "8," the root is "8"
 	 */
-	final Duration root;
+	public final Duration root;
 
 	private Duration(final String name, final int denominator, final int dots, final Duration root) {
 		this.name = name;

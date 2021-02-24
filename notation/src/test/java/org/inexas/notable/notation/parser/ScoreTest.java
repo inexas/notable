@@ -1,4 +1,4 @@
-package org.inexas.notable.notation.model;
+package org.inexas.notable.notation.parser;
 
 class ScoreTest {
 

@@ -270,12 +270,7 @@ public class MikiParser extends MusicBaseListener {
 		// Group 2: Accidental...
 		final String group3 = matcher.group(3);
 		if(group3 != null) {
-			switch(group3.charAt(0)) {
-				case 'b' -> phrase.annotate(Accidental.flat);
-				case 'n' -> phrase.annotate(Accidental.natural);
-				case '#' -> phrase.annotate(Accidental.sharp);
-				default -> throw new RuntimeException("Should never get here");
-			}
+			phrase.annotate(Accidental.get(group3));
 		}
 
 		// Group 4: Articulation...

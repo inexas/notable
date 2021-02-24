@@ -61,7 +61,7 @@ public enum Clef implements Visited {
 	 * @return 0 = no leger lines needed, -ve number of leger lines below and +ve number
 	 * of leger lines above
 	 */
-	int countLedgerLines(final int slot) {
+	public int countLedgerLines(final int slot) {
 		final int result;
 		if(slot > highSlot) {
 			result = (slot - highSlot) / 2;
