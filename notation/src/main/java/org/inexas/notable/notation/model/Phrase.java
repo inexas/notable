@@ -27,7 +27,7 @@ public class Phrase extends Element implements MappedList.Named {
 	public final String name;
 	public List<Measure> measures = new ArrayList<>();
 	public Measure measure;
-	public Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
+	private Map<Class<? extends Annotation>, Annotation> annotationMap = new HashMap<>();
 	/**
 	 * Set by an o8 command
 	 */
@@ -248,11 +248,37 @@ public class Phrase extends Element implements MappedList.Named {
 		venue.add(event);
 	}
 
+	public void handle(final MultimeasureRest multimeasureRest) {
+		if(measure.clicksSoFar > 0) {
+			messages.error("Multimeasure rests must be the only event in a measure");
+		} else if(!(venue instanceof Measure)) {
+			messages.error("Multimeasure rests cannot be members of tuples or chords");
+		} else {
+			boolean first = true;
+			for(int i = 0; i < multimeasureRest.measureCount; i++) {
+				if(first) {
+					first = false;
+				} else {
+					handle(Barline.next);
+				}
+				venue.add(multimeasureRest);
+			}
+		}
+	}
+
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.enter(this);
-		for(final Measure measure : measures) {
+		for(int i = 0; i < measures.size(); ) {
+			final Measure measure = measures.get(i);
+			final Event firstEvent = measure.events.get(0);
 			measure.accept(visitor);
+			if(firstEvent instanceof MultimeasureRest) {
+				final int measureCount = ((MultimeasureRest) firstEvent).measureCount;
+				i += measureCount;
+			} else {
+				i++;
+			}
 		}
 		visitor.exit(this);
 	}
@@ -275,6 +301,17 @@ public class Phrase extends Element implements MappedList.Named {
 			if(measure.isActivated()) {
 				result = i + 1;
 			}
+		}
+		return result;
+	}
+
+	public Map<Class<? extends Annotation>, Annotation> takeAnnotations() {
+		final Map<Class<? extends Annotation>, Annotation> result;
+		if(annotationMap.isEmpty()) {
+			result = Notes.noAnnotations;
+		} else {
+			result = annotationMap;
+			annotationMap = new HashMap<>();
 		}
 		return result;
 	}

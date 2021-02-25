@@ -6,7 +6,7 @@ import java.util.*;
 
 public class Measure extends Element implements Venue {
 	public final Timeline.Frame frame;
-	public final Map<Class<? extends Annotation>, Annotation> annotations = new HashMap<>();
+	public final Map<Class<? extends Annotation>, Annotation> annotations;
 	private final Messages messages;
 	private final Score score;
 	private final Phrase phrase;
@@ -38,9 +38,11 @@ public class Measure extends Element implements Venue {
 	/**
 	 * The list of events in this measure
 	 */
-	public final List<Event> events = new ArrayList<>();
+	public final List<Event> events;
 
 	Measure(final Phrase phrase, final Measure pic) {
+		annotations = new HashMap<>();
+		events = new ArrayList<>();
 		this.phrase = phrase;
 		this.pic = pic;
 
@@ -56,6 +58,21 @@ public class Measure extends Element implements Venue {
 		frame = score.timeline.report(this);
 	}
 
+	Measure(final Measure toCopy, final int measureCount) {
+		annotations = toCopy.annotations;
+		events = toCopy.events;
+		messages = toCopy.messages;
+		score = toCopy.score;
+		phrase = toCopy.phrase;
+		pic = toCopy.pic;
+		ordinal = toCopy.ordinal;
+		clef = toCopy.clef;
+		clicksSoFar = toCopy.clicksSoFar;
+		keySignature = toCopy.keySignature;
+
+		frame = score.timeline.getFrame(toCopy.ordinal + measureCount - 1);
+	}
+
 	@Override
 	public void accept(final Visitor visitor) {
 		visitor.visit(this);
@@ -64,7 +81,11 @@ public class Measure extends Element implements Venue {
 	@Override
 	public void add(final Event event) {
 		events.add(event);
-		clicksSoFar += event.duration.clicks;
+		if(event instanceof MultimeasureRest) {
+			clicksSoFar = frame.actualSize;
+		} else {
+			clicksSoFar += event.duration.clicks;
+		}
 	}
 
 	public int getSize() {

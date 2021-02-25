@@ -95,15 +95,18 @@ event
 	|	namedChord
 	|	chord
 	|	tuplet
+	|	multimeasureRest
 ;
 
 note: NOTE ;
 
 chord: START_CHORD (octave* note)+ END_NOTE_GROUP ;
 
+namedChord: NAMED_CHORD ;
+
 tuplet: START_TUPLET (octave* note)+ END_NOTE_GROUP ;
 
-namedChord: NAMED_CHORD ;
+multimeasureRest: MMR_BEGIN COUNT MMR_END ;
 
 // Generates both a tie (same notes) or a slur (different notes)
 bind: BEAM (bind | note)+ MAEB ;
@@ -167,6 +170,10 @@ NAMED_CHORD:
 	']' Articulation? ( Duration Default? )?
 ;
 
+MMR_BEGIN: ('{rest' | '{r') [ \t]+ ;
+
+MMR_END: '}' ;
+
 // Must be before NOTE
 LINE: '{'
 	(	('bind' | 'b')
@@ -174,7 +181,6 @@ LINE: '{'
 	|	('decrescendo' | 'dec' | 'd')
 	|	(('octave' | 'oct' | 'o') '-'? OneOrMore)
 	|	('pedal' | 'ped' | 'p')
-	|	('rest' | 'r')
 	|	(('volta' | 'vol' | 'v') '-'? OneOrMore)
 	)
 	[ \t]+

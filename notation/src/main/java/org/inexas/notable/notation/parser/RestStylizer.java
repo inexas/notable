@@ -10,7 +10,6 @@ import java.util.*;
 
 public class RestStylizer {
 	private final static int clicksPerQuarter = 8;
-	private final static Map<Class<? extends Annotation>, Annotation> mtAnnotations = Map.of();
 	private final int clicksPerMeasure;
 	private int restClicksSoFar;
 	private int measureClicksSoFar;
@@ -60,7 +59,7 @@ public class RestStylizer {
 				final Duration[] durations = Duration.getByClicks(toNextQuarter);
 				for(final Duration duration : durations) {
 					// todo Are there annotated rests?
-					final Rest rest = new Rest(duration, mtAnnotations);
+					final Rest rest = new Rest(duration, Notes.noAnnotations);
 					eventSink.add(rest);
 					nowAt += duration.clicks;
 				}
@@ -81,7 +80,7 @@ public class RestStylizer {
 					duration = Duration.getByClicks(remaining)[0];
 				}
 
-				final Rest rest = new Rest(duration, mtAnnotations);
+				final Rest rest = new Rest(duration, Notes.noAnnotations);
 				eventSink.add(rest);
 
 				remaining -= duration.clicks;

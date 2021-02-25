@@ -14,7 +14,12 @@ public enum Barline implements Visited {
 	endRepeat(":|", false),
 	beginEndRepeat(":|:", false),
 	eos("|||", true),
-	eosRepeat(":|||", true);
+	eosRepeat(":|||", true),
+	/**
+	 * Used to support multimeasure rests. It means look at the
+	 * last measure in the series' barline when
+	 */
+	next("", false);
 
 	public final String miki;
 	/**

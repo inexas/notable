@@ -140,7 +140,7 @@ public class ScoreCheckVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(final BarRest barRest) {
+	public void visit(final MultimeasureRest multimeasureRest) {
 
 	}
 
@@ -183,7 +183,7 @@ public class ScoreCheckVisitor implements Visitor {
 	public void visit(final Measure measure) {
 		final Timeline.Frame frame = measure.frame;
 		if(frame.isLast()) {
-			final Barline is = frame.barline;
+			final Barline is = frame.getBarline();
 			final Barline shouldBe = frame.isRepeat() ? Barline.eosRepeat : Barline.eos;
 			if(is == null) {
 				messages.error("Missing barline at end of measure");
@@ -191,9 +191,9 @@ public class ScoreCheckVisitor implements Visitor {
 				messages.error("Incorrect barline at end of phrase, should be " + shouldBe.miki);
 				// Todo add measure/phrase to message
 			}
-			frame.barline = shouldBe;
+			frame.setBarline(shouldBe);
 		} else {
-			final Barline is = frame.barline;
+			final Barline is = frame.getBarline();
 			final Barline shouldBe;
 			if(frame.isRepeat()) {
 				shouldBe = frame.nic.isRepeat() ? Barline.beginEndRepeat : Barline.endRepeat;
@@ -210,7 +210,7 @@ public class ScoreCheckVisitor implements Visitor {
 				}
 			}
 			if(is != shouldBe) {
-				messages.error("Barline incorrect at end of phrase, should be " + shouldBe.miki);
+				messages.error("Barline incorrect, should be " + shouldBe.miki);
 			}
 		}
 	}

@@ -60,6 +60,6 @@ public class OctaveParsingTest {
 		assertEquals(Notes.F1, ss.lookup(Notes.F));
 
 		assertEquals(Notes.D1, ss.lookup(Notes.D));
-		assertEquals(Notes.A0, ss.lookup(Notes.A));
+		assertEquals(Notes.A1, ss.lookup(Notes.A));
 	}
 }

@@ -1,5 +1,6 @@
 package org.inexas.notable.notation.model;
 
+import java.util.*;
 import java.util.regex.*;
 
 @SuppressWarnings({"PointlessArithmeticExpression", "unused"})
@@ -7,6 +8,7 @@ public interface Notes {
 	int BASE = 7;
 	int MINIMUM = 5;    // A0
 	int MAXIMUM = 56;   // C8
+	// todo This should go back into Note
 	Pattern notePattern = Pattern.compile("" +
 			"([A-GRX])" +       // Tonic, including rest & ghost
 			"([0-9]+.*\\*?)?" + // Duration
@@ -20,6 +22,8 @@ public interface Notes {
 	static int tonic(final int slot) {
 		return slot % BASE;
 	}
+
+	Map<Class<? extends Annotation>, Annotation> noAnnotations = Map.of();
 
 	/**
 	 * Covert an octave and tonic to a slot

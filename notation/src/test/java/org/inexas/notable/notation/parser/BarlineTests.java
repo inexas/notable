@@ -21,6 +21,7 @@ public class BarlineTests extends ParserTestAbc {
 		assertEquals(":|:", Barline.beginEndRepeat.miki);
 		assertEquals(":|", Barline.endRepeat.miki);
 		assertEquals("|||", Barline.eos.miki);
+		assertEquals("", Barline.next.miki);
 	}
 
 	@Test

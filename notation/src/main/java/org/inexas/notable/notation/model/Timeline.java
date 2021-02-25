@@ -23,7 +23,7 @@ public class Timeline {
 		public Frame nic; // Linked list: Next In Chain
 		private TimeSignature timeSignature;
 		public Cpm cpm;
-		public Barline barline;
+		private Barline barline;
 		public int actualSize = getEffectiveTimeSignature().getMeasureSize();
 
 		Frame() {
@@ -35,6 +35,14 @@ public class Timeline {
 				lic = this;
 			}
 			frames.add(this);
+		}
+
+		public Barline getBarline() {
+			return barline == Barline.next ? nic.getBarline() : barline;
+		}
+
+		public void setBarline(final Barline barline) {
+			this.barline = barline;
 		}
 
 		void report(final Cpm cpm) {
@@ -68,18 +76,18 @@ public class Timeline {
 		}
 
 		void report(final Barline barline) {
-			if(this.barline == null) {
+			if(this.barline == null || this.barline == Barline.next) {
 				this.barline = barline;
 			} else if(this.barline != barline) {
 				// Cannot change
-				error("Barline was " + this.barline + " cannot change to " + barline);
+				error("Barline was '" + this.barline + "', cannot change to '" + barline + '\'');
 			}
 		}
 
 		/**
 		 * @return the time signature for this Frame if one has been set or null
 		 */
-		public TimeSignature getAppliedTimeSignature() {
+		TimeSignature getAppliedTimeSignature() {
 			return timeSignature;
 		}
 
@@ -123,7 +131,9 @@ public class Timeline {
 		}
 
 		public boolean isLast() {
-			return this == lic;
+			//If this measure is part of a multimeasure rest
+			//then we need to look at the last in chain
+			return barline == Barline.next ? nic.isLast() : this == lic;
 		}
 	}
 

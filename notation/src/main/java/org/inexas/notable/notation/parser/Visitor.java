@@ -55,7 +55,7 @@ public interface Visitor {
 
 	void visit(Crescendo crescendo);
 
-	void visit(BarRest barRest);
+	void visit(MultimeasureRest multimeasureRest);
 
 	void visit(Barline barline);
 

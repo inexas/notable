@@ -236,8 +236,11 @@ public class ToMikiVisitor implements Visitor {
 	}
 
 	@Override
-	public void visit(final BarRest barRest) {
-		line(barRest, "{r");
+	public void visit(final MultimeasureRest multimeasureRest) {
+		space();
+		add("{r ");
+		add(multimeasureRest.measureCount);
+		add('}');
 	}
 
 	@Override
@@ -288,7 +291,7 @@ public class ToMikiVisitor implements Visitor {
 			event.accept(this);
 			space();
 		}
-		sb.append(measure.frame.barline.miki);
+		sb.append(measure.frame.getBarline().miki);
 	}
 
 	@Override
@@ -310,7 +313,6 @@ public class ToMikiVisitor implements Visitor {
 		annotate(Crescendo.class);
 		annotate(Decrescendo.class);
 		annotate(Volta.class);
-		annotate(BarRest.class);
 		annotate(Fingering.class);
 		annotate(TextAnnotation.class);
 		annotate(Beam.class);
@@ -358,8 +360,6 @@ public class ToMikiVisitor implements Visitor {
 				visit((Decrescendo) annotation);
 			} else if(Volta.class.equals(clazz)) {
 				visit((Volta) annotation);
-			} else if(BarRest.class.equals(clazz)) {
-				visit((BarRest) annotation);
 			} else if(Fingering.class.equals(clazz)) {
 				visit((Fingering) annotation);
 			} else if(TextAnnotation.class.equals(clazz)) {

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LineTests extends ParserTestAbc {
-	
+
 	@Test
 	void testLines() {
 		assertEquals("{b 2} C E G R |||\n", toMiki("{b 2} C E G R|||"));
@@ -16,7 +16,6 @@ public class LineTests extends ParserTestAbc {
 		assertEquals("{o8 2} C R R2 |||\n", toMiki("{o8 2} C R R2 |||"));
 		assertEquals("{p 2.2} C D A R |||\n", toMiki("{pedal 2.2} C D A R|||"));
 		assertEquals("{p 2.2} C D A R |||\n", toMiki("{pedal 2.2} C D A R|||"));
-		assertEquals("{r 2} C R R2 |||\n", toMiki("{rest 2} C R R2 |||"));
 		assertEquals("{v1 2} C R R2 |||\n", toMiki("{volta1 2} C R R2 |||"));
 	}
 }

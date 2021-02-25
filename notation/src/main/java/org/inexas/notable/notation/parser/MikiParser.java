@@ -23,7 +23,6 @@ public class MikiParser extends MusicBaseListener {
 	@SuppressWarnings("FieldCanBeLocal")
 	private final boolean DEBUG = false;
 	public final Messages messages;
-	private static final Map<Class<? extends Annotation>, Annotation> mtAnnotationMap = Map.of();
 	/**
 	 * This is true until we encounter the first part, phrase or event
 	 */
@@ -284,16 +283,9 @@ public class MikiParser extends MusicBaseListener {
 			}
 		}
 
-		final char c = tonic.charAt(0);
-		final Map<Class<? extends Annotation>, Annotation> annotations;
-		if(phrase.annotationMap.isEmpty()) {
-			annotations = mtAnnotationMap;
-		} else {
-			annotations = phrase.annotationMap;
-			phrase.annotationMap = new HashMap<>();
-		}
-
+		final Map<Class<? extends Annotation>, Annotation> annotations = phrase.takeAnnotations();
 		final Event event;
+		final char c = tonic.charAt(0);
 		if(c == 'R') {
 			if(inChord) {
 				messages.error("Rests are not permitted in chord groups: " + group4);
@@ -357,6 +349,15 @@ public class MikiParser extends MusicBaseListener {
 	public void exitTuplet(final MusicParser.TupletContext ctx) {
 		messages.ctx = ctx;
 		phrase.endTuplet(ctx.getStop().getText());
+	}
+
+	@Override
+	public void enterMultimeasureRest(final MusicParser.MultimeasureRestContext ctx) {
+		messages.ctx = ctx;
+		final MultimeasureRest mmr = new MultimeasureRest(
+				phrase.takeAnnotations(),
+				Integer.parseInt(ctx.getChild(1).getText()));
+		phrase.handle(mmr);
 	}
 
 	// A N N O T A T I O N S . . .

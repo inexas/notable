@@ -43,7 +43,6 @@ class LineParser {
 			case 'd' -> line = new Decrescendo(bars, beats);
 			case 'o' -> line = new Octave(noteCount, bars, beats);
 			case 'p' -> line = new Pedal(bars, beats);
-			case 'r' -> line = new BarRest(bars, beats);
 			case 'v' -> line = new Volta(volta, bars, beats);
 			default -> throw new RuntimeException("Case note handled: " + key);
 		}
